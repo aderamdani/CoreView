@@ -221,7 +221,7 @@ export const Uploader = ({ onFileParsed }) => {
                     <Terminal size={14} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
                     /export file=config-export
                   </div>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.5rem' }}>
                     Ini akan membuat file bernama "config-export.rsc" di sistem file router.
                   </p>
                 </div>

@@ -125,7 +125,7 @@ const HelpPanel = ({ id, onNavigate }) => {
           {/* Impact bullets */}
           {help.impact && (
             <div style={{ marginBottom: '14px' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Dampak &amp; Pertimbangan
               </div>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -142,7 +142,7 @@ const HelpPanel = ({ id, onNavigate }) => {
           {/* Relations – clickable if they have a mapped tab */}
           {help.relations && (
             <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Bagian Terkait
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -186,7 +186,7 @@ const HelpPanel = ({ id, onNavigate }) => {
           {/* Prerequisites */}
           {help.prerequisites && help.prerequisites.length > 0 && (
             <div style={{ marginTop: '14px' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Langkah Sebelumnya (Prerequisites)
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -228,7 +228,7 @@ const HelpPanel = ({ id, onNavigate }) => {
           {/* Next Steps */}
           {help.nextSteps && help.nextSteps.length > 0 && (
             <div style={{ marginTop: '14px' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Langkah Selanjutnya (Next Steps)
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -782,23 +782,23 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
             <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Router Identity</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Router Identity</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.identity || 'MikroTik'}</div>
             </div>
             <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Model</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Model</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.model || 'Unknown Device'}</div>
             </div>
             <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Serial Number</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Serial Number</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.serialNumber || 'N/A'}</div>
             </div>
             <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Software ID</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Software ID</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.softwareId || 'N/A'}</div>
             </div>
             <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Generated At</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Generated At</div>
               <div style={{ fontSize: '1.1rem', fontWeight: 500 }}>{metadata.generatedAt || 'N/A'}</div>
             </div>
           </div>
@@ -812,7 +812,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               INTERFACES
             </div>
             <div className="summary-card-value">
-              {activeInterfaces} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {totalInterfaces} Active</span>
+              {activeInterfaces} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/ {totalInterfaces} Active</span>
             </div>
           </div>
           <div className="glass-panel summary-card card-hover delay-100" onClick={() => setActiveTab('vpn')} style={{cursor: 'pointer'}}>
@@ -844,7 +844,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
             <Activity className="summary-card-icon" />
             <h2 className="section-title">Panduan Konfigurasi Lengkap</h2>
           </div>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
             Berikut adalah panduan step-by-step lengkap mengenai semua konfigurasi yang ada pada perangkat MikroTik ini. 
             Setiap langkah menjelaskan fungsi dan detail konfigurasi. Klik untuk melihat detail lengkap.
           </p>
@@ -989,7 +989,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Activity className="summary-card-icon" />
         <h2 className="section-title">Interface Lists</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         Logical grouping of interfaces for simplified firewall and routing rules.
       </p>
       
