@@ -204,26 +204,26 @@ export const OsiTcpView = ({ config, onNavigate }) => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1.5rem' }}>
             <div>
               <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>🔍 OSI 7-Layer Model</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
                 Model referensi yang dikembangkan oleh ISO untuk memahami bagaimana protokol jaringan berinteraksi.
                 Setiap layer memiliki fungsi spesifik dan berkomunikasi dengan layer di atas dan di bawahnya.
               </p>
               <div style={{ background: 'var(--bg-card)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', marginTop: '0.5rem' }}>
                 <strong style={{ color: 'var(--text-primary)', fontSize: '0.8rem' }}>7 Layer:</strong>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
                   Application → Presentation → Session → Transport → Network → Data Link → Physical
                 </div>
               </div>
             </div>
             <div>
               <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>🌐 TCP/IP Model</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
                 Model praktis yang digunakan oleh internet. Lebih sederhana dari OSI dengan 4 layer utama.
                 TCP/IP adalah dasar dari semua komunikasi internet modern.
               </p>
               <div style={{ background: 'var(--bg-card)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', marginTop: '0.5rem' }}>
                 <strong style={{ color: 'var(--text-primary)', fontSize: '0.8rem' }}>4 Layer:</strong>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
                   Application → Transport → Internet → Network Access
                 </div>
               </div>
@@ -336,7 +336,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
             <h4 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>
               {expandedLayer.replace('tcp-', '')} Layer
             </h4>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+            <p style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
               Penjelasan detail untuk layer TCP/IP ini akan membantu Anda memahami fungsi dan perannya dalam komunikasi jaringan.
             </p>
           </div>
@@ -469,7 +469,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>🔧 Fungsi Utama</h5>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                        <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                           {layerDetail.function}
                         </p>
                       </div>
@@ -494,14 +494,14 @@ export const OsiTcpView = ({ config, onNavigate }) => {
                       
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>💡 Contoh Penggunaan</h5>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                        <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                           {layerDetail.example}
                         </p>
                       </div>
                       
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>🔗 Relasi MikroTik</h5>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                        <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                           {layerDetail.mikrotikRelation}
                         </p>
                       </div>
