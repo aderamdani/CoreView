@@ -27,6 +27,8 @@ export const configHelp = {
       'MAC address dan MTU memengaruhi ARP resolution, fragmentasi paket, dan kompatibilitas PPPoE dengan ISP.',
     ],
     relations: ['IP → Addresses', 'Bridge → Ports', 'Interface Lists', 'DHCP Server', 'Firewall Filter'],
+    prerequisites: [],
+    nextSteps: ['IP → Addresses', 'Bridge'],
   },
 
   'interfaces-lists': {
@@ -50,6 +52,8 @@ export const configHelp = {
       'Menonaktifkan bridge akan memutus seluruh konektivitas LAN untuk semua port anggotanya sekaligus.',
     ],
     relations: ['Bridge → Ports', 'IP → Addresses', 'DHCP Server', 'Firewall Filter'],
+    prerequisites: ['Network Interfaces'],
+    nextSteps: ['Bridge → Ports', 'IP → Addresses'],
   },
 
   'bridge-ports': {
@@ -61,6 +65,8 @@ export const configHelp = {
       'Menonaktifkan sebuah bridge port akan mengisolasi interface fisik tersebut dari segmen LAN bridge.',
     ],
     relations: ['Bridge', 'IP → Addresses', 'Network Interfaces'],
+    prerequisites: ['Bridge', 'Network Interfaces'],
+    nextSteps: ['IP → Addresses'],
   },
 
   'ip-addresses': {
@@ -73,6 +79,8 @@ export const configHelp = {
       'Besar prefix (misalnya /24 vs /28) menentukan jumlah host yang didukung — prefix terlalu kecil menyebabkan kehabisan alamat.',
     ],
     relations: ['Network Interfaces', 'DHCP Server', 'Firewall Filter', 'IP → Routes'],
+    prerequisites: ['Network Interfaces', 'Bridge'],
+    nextSteps: ['DHCP Server', 'IP → Routes', 'Firewall → NAT'],
   },
 
   'ip-dhcp-server': {
@@ -85,6 +93,8 @@ export const configHelp = {
       'Lease time yang terlalu pendek meningkatkan overhead traffic DHCP; terlalu panjang membuat address pool terblokir oleh klien yang sudah tidak aktif.',
     ],
     relations: ['IP → Pools', 'IP → Addresses', 'DNS', 'Network Interfaces'],
+    prerequisites: ['IP → Addresses', 'IP → Pools'],
+    nextSteps: ['Firewall → NAT', 'DNS'],
   },
 
   'ip-dhcp-client': {
@@ -96,6 +106,8 @@ export const configHelp = {
       'Menonaktifkan DHCP client pada interface WAN akan langsung memutus koneksi internet jika tidak ada konfigurasi IP statis sebagai cadangan.',
     ],
     relations: ['IP → Routes', 'DNS', 'Network Interfaces'],
+    prerequisites: ['Network Interfaces'],
+    nextSteps: ['Firewall → NAT'],
   },
 
   'ip-dns': {
@@ -108,6 +120,8 @@ export const configHelp = {
       'DNS server yang tidak bisa dijangkau akan memperlambat semua aktivitas browsing internet untuk seluruh klien LAN.',
     ],
     relations: ['DHCP Server', 'IP → Addresses', 'Firewall Filter'],
+    prerequisites: ['IP → Addresses'],
+    nextSteps: ['DHCP Server'],
   },
 
   'ip-routes': {
@@ -120,6 +134,8 @@ export const configHelp = {
       'Route yang salah atau hilang menyebabkan "black hole" — paket dibuang diam-diam tanpa notifikasi error ke pengirim.',
     ],
     relations: ['Routing Tables', 'Firewall → Mangle', 'Network Interfaces'],
+    prerequisites: ['IP → Addresses', 'Routing Tables'],
+    nextSteps: ['Firewall Filter', 'Firewall → Mangle'],
   },
 
   'ip-pool': {
@@ -131,6 +147,8 @@ export const configHelp = {
       'Beberapa pool bisa dirantai (next-pool) — ketika pool pertama habis, overflow dialihkan ke pool berikutnya secara otomatis.',
     ],
     relations: ['DHCP Server', 'Hotspot', 'VPN'],
+    prerequisites: ['IP → Addresses'],
+    nextSteps: ['DHCP Server', 'VPN', 'Hotspot'],
   },
 
   'ip-cloud': {
@@ -155,6 +173,8 @@ export const configHelp = {
       'Menonaktifkan Hotspot server memberikan akses internet bebas kepada semua klien di interface tersebut.',
     ],
     relations: ['IP → Pools', 'Firewall Filter', 'IP → Addresses', 'DHCP Server'],
+    prerequisites: ['IP → Addresses', 'IP → Pools'],
+    nextSteps: ['Firewall Filter'],
   },
 
   'ip-services': {
@@ -191,6 +211,8 @@ export const configHelp = {
       'Jika tidak ada aturan "accept established,related" sebelum aturan "drop", semua koneksi stateful (termasuk yang sudah terbuka) akan terputus.',
     ],
     relations: ['Interface Lists', 'IP → Addresses', 'Firewall Address Lists', 'Firewall → Mangle'],
+    prerequisites: ['IP → Addresses', 'Interface Lists', 'Firewall Address Lists'],
+    nextSteps: ['Firewall → NAT'],
   },
 
   'firewall-nat': {
@@ -203,6 +225,8 @@ export const configHelp = {
       'Double-NAT (NAT di belakang NAT) sering menyebabkan masalah pada VoIP, gaming online, dan beberapa protokol VPN.',
     ],
     relations: ['Network Interfaces', 'IP → Addresses', 'Firewall Filter'],
+    prerequisites: ['IP → Addresses', 'Interface Lists'],
+    nextSteps: ['Firewall Filter', 'Firewall → Mangle'],
   },
 
   'firewall-mangle': {
@@ -215,6 +239,8 @@ export const configHelp = {
       'Aturan ECMP per-koneksi menggunakan Mangle untuk memastikan semua paket dalam satu sesi keluar lewat WAN link yang sama.',
     ],
     relations: ['Routing Tables', 'Queue Tree', 'IP → Routes', 'Firewall Filter'],
+    prerequisites: ['Firewall Filter', 'Firewall → NAT'],
+    nextSteps: ['Queue Tree', 'Routing Tables'],
   },
 
   'firewall-raw': {
@@ -250,6 +276,8 @@ export const configHelp = {
       'burst-limit/burst-time memungkinkan lonjakan bandwidth sementara di atas batas normal untuk pengalaman browsing yang lebih responsif.',
     ],
     relations: ['Firewall → Mangle', 'Queue Types', 'Network Interfaces'],
+    prerequisites: ['Firewall → Mangle', 'Queue Types'],
+    nextSteps: [],
   },
 
   'queues-types': {
@@ -341,5 +369,7 @@ export const configHelp = {
       'Route VPN yang salah konfigurasi bisa menyebabkan seluruh traffic internet pengguna mengalir lewat VPN (full tunnel) tanpa disengaja.',
     ],
     relations: ['Firewall Filter', 'IP → Routes', 'IP → Addresses', 'Firewall → Mangle'],
+    prerequisites: ['IP → Pools', 'IP → Addresses'],
+    nextSteps: ['Firewall Filter', 'IP → Routes'],
   },
 };

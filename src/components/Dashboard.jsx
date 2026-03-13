@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight,
-  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag
+  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
 import { MindMap } from './MindMap';
@@ -172,6 +172,89 @@ const HelpPanel = ({ id, onNavigate }) => {
                       <Tag size={10} />
                       {rel}
                       {isNavigable && <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>→</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {/* Prerequisites */}
+          {help.prerequisites && help.prerequisites.length > 0 && (
+            <div style={{ marginTop: '14px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                Langkah Sebelumnya (Prerequisites)
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {help.prerequisites.map((rel, i) => {
+                  const tabId = RELATION_TO_TAB[rel];
+                  const isNavigable = !!tabId && !!onNavigate;
+                  return (
+                    <span
+                      key={`prereq-${i}`}
+                      onClick={isNavigable ? () => { onNavigate(tabId); setOpen(false); } : undefined}
+                      title={isNavigable ? `Navigasi ke ${rel}` : rel}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                        padding: '3px 10px', borderRadius: '99px',
+                        fontSize: '0.75rem', fontWeight: 500,
+                        background: 'rgba(234, 179, 8, 0.12)', // Yellowish warning/prereq
+                        color: 'var(--status-warning)',
+                        border: '1px solid rgba(234, 179, 8, 0.3)',
+                        cursor: isNavigable ? 'pointer' : 'default',
+                        transition: 'background 0.15s, border-color 0.15s',
+                        userSelect: 'none',
+                      }}
+                      onMouseEnter={isNavigable ? e => {
+                        e.currentTarget.style.background = 'rgba(234, 179, 8, 0.22)';
+                      } : undefined}
+                      onMouseLeave={isNavigable ? e => {
+                        e.currentTarget.style.background = 'rgba(234, 179, 8, 0.12)';
+                      } : undefined}
+                    >
+                      <ArrowLeft size={10} />
+                      {rel}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Next Steps */}
+          {help.nextSteps && help.nextSteps.length > 0 && (
+            <div style={{ marginTop: '14px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                Langkah Selanjutnya (Next Steps)
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {help.nextSteps.map((rel, i) => {
+                  const tabId = RELATION_TO_TAB[rel];
+                  const isNavigable = !!tabId && !!onNavigate;
+                  return (
+                    <span
+                      key={`next-${i}`}
+                      onClick={isNavigable ? () => { onNavigate(tabId); setOpen(false); } : undefined}
+                      title={isNavigable ? `Navigasi ke ${rel}` : rel}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                        padding: '3px 10px', borderRadius: '99px',
+                        fontSize: '0.75rem', fontWeight: 500,
+                        background: 'rgba(34, 197, 94, 0.12)', // Greenish success/next
+                        color: 'var(--status-success)',
+                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        cursor: isNavigable ? 'pointer' : 'default',
+                        transition: 'background 0.15s, border-color 0.15s',
+                        userSelect: 'none',
+                      }}
+                      onMouseEnter={isNavigable ? e => {
+                        e.currentTarget.style.background = 'rgba(34, 197, 94, 0.22)';
+                      } : undefined}
+                      onMouseLeave={isNavigable ? e => {
+                        e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)';
+                      } : undefined}
+                    >
+                      {rel}
+                      <ArrowRight size={10} />
                     </span>
                   );
                 })}
