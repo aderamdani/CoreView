@@ -1,0 +1,2368 @@
+# 2026-03-13 20:55:00 by RouterOS 7.20.4
+# software id = 7QKY-D3F1
+#
+# model = CCR1009-7G-1C-1S+
+# serial number = 79AE064862FA
+/interface bridge
+add name=Br-LANUser
+add disabled=yes name=bridge1-DHCPClient
+add disabled=yes name=bridge2-testap
+/interface ethernet
+set [ find default-name=ether1 ] name=ether1-Biznet
+set [ find default-name=ether2 ] name=ether2-Fibernet
+set [ find default-name=ether3 ] name="ether3-AP Office"
+set [ find default-name=ether4 ] name="ether4-AP Parkiran"
+set [ find default-name=ether5 ] name="ether5-TP-Link Lantai 2"
+/interface ovpn-client
+add comment=id-10.hostddns.us:56895<->8291 connect-to=id-10.hostddns.us \
+    mac-address=FE:7D:63:7B:73:01 name=asaoffice@mytunnel.id user=\
+    asaoffice@mytunnel.id
+/interface wireguard
+add listen-port=13233 mtu=1420 name=wg-asa
+/interface list
+add name=LB
+add name=WAN
+/ip hotspot profile
+set [ find default=yes ] html-directory=hotspot
+add hotspot-address=192.168.50.1 html-directory=flash/hotspot login-by=\
+    cookie,http-chap,https,http-pap name=landing-page
+add dns-name=hotspot.asakreasi.com hotspot-address=192.168.60.1 \
+    html-directory=flash/hotspot login-by=cookie,http-chap,http-pap name=test
+add dns-name=hotspot.asakreasi.com hotspot-address=192.168.60.1 \
+    html-directory=flash/hotspot name=hsprof1
+/ip pool
+add name=dhcp_pool0 ranges=172.16.10.11-172.16.10.254
+add name=dhcp-mgmt ranges=172.16.10.65-172.16.10.126
+add name=dhcp-lt1 ranges=172.16.10.129-172.16.10.190
+add name=dhcp-lt2 ranges=172.16.10.193-172.16.10.254
+add name=hs-pool-7 ranges=172.16.20.2-172.16.20.254
+add name=dhcp_pool6 ranges=172.16.80.2-172.16.80.254
+add name=OFFICE1 ranges=192.168.100.20-192.168.100.254
+add name=OFFICE2 ranges=192.168.200.20-192.168.200.254
+add name=dhcp_pool9 ranges=192.168.81.2-192.168.81.254
+add name=dhcp_pool10 ranges=192.168.80.2-192.168.80.254
+add name=dhcp_pool11 ranges=192.168.82.2-192.168.82.254
+add name=hs-pool-10 ranges=192.168.50.2-192.168.51.254
+add name=pool-BOD ranges=192.168.50.2-192.168.50.101
+add name=pool-Staff ranges=192.168.50.102-192.168.50.201
+add name=pool-Freelance ranges=192.168.51.46-192.168.51.60
+add name=pool-Intern ranges=192.168.51.61-192.168.51.110
+add name=pool-Creative ranges=192.168.50.202-192.168.50.251
+add name=pool-Developer ranges=192.168.50.252-192.168.51.45
+add name=pool-Guest ranges=192.168.51.111-192.168.51.210
+add name=dhcp_pool34 ranges=192.168.60.2-192.168.60.254
+add name=pool-Devices ranges=192.168.51.211-192.168.51.254
+/ip dhcp-server
+add address-pool=OFFICE1 disabled=yes interface=bridge1-DHCPClient name=\
+    dhcp-LAN
+add address-pool=OFFICE2 disabled=yes interface=bridge2-testap name=dhcp2
+add address-pool=dhcp_pool6 interface=ether6 name=dhcp3
+add address-pool=hs-pool-10 interface=Br-LANUser name=dhcp6
+# DHCP server can not run on slave interface!
+add address-pool=dhcp_pool34 interface=ether7 name=dhcp1
+/ip hotspot
+add address-pool=hs-pool-10 disabled=no idle-timeout=none interface=\
+    Br-LANUser name="hotspot asa" profile=landing-page
+add address-pool=dhcp_pool34 idle-timeout=none interface=ether7 name=hotspot1 \
+    profile=hsprof1
+/ip hotspot user profile
+add address-pool=pool-BOD keepalive-timeout=3h name=BOD shared-users=3
+add address-pool=pool-Developer keepalive-timeout=3h name=Development \
+    shared-users=4
+add address-pool=pool-Creative keepalive-timeout=3h name=Creative \
+    shared-users=3
+add address-pool=pool-Intern keepalive-timeout=1h name=Intern
+add address-pool=pool-Guest keepalive-timeout=3h name=Guest shared-users=50
+add address-pool=pool-Freelance keepalive-timeout=3h name=Freelance
+add address-pool=pool-Staff keepalive-timeout=3h name=Staff
+add address-pool=pool-BOD keepalive-timeout=3h name="BOD VIP" shared-users=5
+add address-pool=hs-pool-10 keepalive-timeout=1h name=Helpdek shared-users=\
+    unlimited
+add address-pool=dhcp_pool34 name=Test shared-users=10
+/port
+set 0 name=serial0
+set 1 name=serial1
+/queue type
+add kind=pcq name=limit-download pcq-classifier=dst-address pcq-limit=100KiB
+add kind=pcq name=limit-upload pcq-classifier=src-address pcq-limit=100KiB
+/queue tree
+add limit-at=1M max-limit=400M name="Total Download" parent=global queue=\
+    default
+add limit-at=1M max-limit=300M name="Total Upload" parent=global queue=\
+    default
+add disabled=yes limit-at=2M max-limit=180M name="Client Browsing User" \
+    packet-mark=Browsing-Download-User parent="Total Download" priority=2 \
+    queue=limit-download
+add disabled=yes limit-at=1M max-limit=100M name="Client Upload User" \
+    packet-mark=Browsing-Upload-User parent="Total Upload" priority=3 queue=\
+    limit-download
+add limit-at=1M max-limit=30M name="Client Download Zoom" packet-mark=\
+    packet-zoom-download parent="Total Download" priority=2 queue=\
+    limit-download
+add limit-at=1M max-limit=30M name="Client Upload Zoom" packet-mark=\
+    packet-zoom-upload parent="Total Upload" priority=3 queue=limit-upload
+add limit-at=1M max-limit=20M name="Client Download Email" packet-mark=\
+    packet-email-incoming parent="Total Download" priority=1 queue=\
+    limit-download
+add limit-at=1M max-limit=20M name="Client Upload Email" packet-mark=\
+    packet-email-outgoing parent="Total Upload" priority=1 queue=limit-upload
+add limit-at=50k max-limit=10M name=RND-Download packet-mark=\
+    packet-RND-Download parent="Total Download" queue=limit-download
+add limit-at=50k max-limit=10M name=RND-Upload packet-mark=packet-RND-Upload \
+    parent="Total Upload" queue=limit-upload
+add limit-at=1M max-limit=200M name="Download BOD" packet-mark=pkt-BOD-down \
+    parent="Total Download" priority=1 queue=limit-download
+add limit-at=1M max-limit=50M name="Upload BOD" packet-mark=pkt-BOD-up \
+    parent="Total Upload" priority=1 queue=limit-upload
+add limit-at=1M max-limit=30M name="Download Creative" packet-mark=\
+    pkt-Creative-down parent="Total Download" queue=limit-download
+add limit-at=1M max-limit=30M name="Upload Creative" packet-mark=\
+    pkt-Creative-up parent="Total Upload" queue=limit-upload
+add limit-at=1M max-limit=30M name="Download Developer" packet-mark=\
+    pkt-Developer-down parent="Total Download" queue=limit-download
+add limit-at=1M max-limit=30M name="Upload Developer" packet-mark=\
+    pkt-Developer-up parent="Total Upload" queue=limit-upload
+add limit-at=1M max-limit=10M name="Download Guest" packet-mark=\
+    pkt-Guest-down parent="Total Download" queue=limit-download
+add limit-at=1M max-limit=10M name="Upload Guest" packet-mark=pkt-Guest-up \
+    parent="Total Upload" queue=limit-upload
+add limit-at=1M max-limit=40M name="Download Staff" packet-mark=\
+    pkt-Staff-down parent="Total Download" queue=limit-download
+add limit-at=1M max-limit=20M name="Upload Staff" packet-mark=pkt-Staff-up \
+    parent="Total Upload" queue=limit-upload
+add limit-at=1M max-limit=30M name="Download Intern" packet-mark=\
+    pkt-Intern-down parent="Total Download" queue=limit-download
+add limit-at=1M max-limit=20M name="Upload Intern" packet-mark=pkt-Intern-up \
+    parent="Total Upload" queue=limit-upload
+/routing table
+add disabled=no fib name=to_isp1
+add disabled=no fib name=to_isp2
+add disabled=no fib name=Routing_To_BIZNET
+add disabled=no fib name=Routing_To_Fibernet
+add disabled=no fib name=Browsing-Domestik-Download
+/system logging action
+set 1 disk-file-name=log
+/interface bridge port
+add bridge=bridge1-DHCPClient disabled=yes interface=\
+    "ether5-TP-Link Lantai 2"
+add bridge=Br-LANUser interface="ether3-AP Office"
+add bridge=Br-LANUser interface="ether4-AP Parkiran"
+add bridge=Br-LANUser interface="ether5-TP-Link Lantai 2"
+add bridge=Br-LANUser interface=ether7
+/interface list member
+add interface=ether1-Biznet list=WAN
+add interface=ether2-Fibernet list=WAN
+add interface="ether3-AP Office" list=LB
+add interface="ether4-AP Parkiran" list=LB
+add interface="ether5-TP-Link Lantai 2" list=LB
+/interface wireguard peers
+add allowed-address=10.87.0.1/32,172.16.20.1/28 endpoint-address=\
+    138.252.136.10 endpoint-port=13233 interface=wg-asa name=p-wg-asa \
+    persistent-keepalive=25s public-key=\
+    "0hhh1Zx5qsKlCtRMOIYHyFQL1JHOmZHdVHEjmqUm3Co="
+/ip address
+add address=192.168.100.1/24 disabled=yes interface=bridge1-DHCPClient \
+    network=192.168.100.0
+add address=10.87.0.2/24 interface=wg-asa network=10.87.0.0
+add address=192.168.200.1/24 disabled=yes interface=bridge2-testap network=\
+    192.168.200.0
+add address=172.16.80.1/24 interface=ether6 network=172.16.80.0
+add address=192.168.82.1/24 disabled=yes interface=*11 network=192.168.82.0
+add address=192.168.81.1/24 disabled=yes interface=*10 network=192.168.81.0
+add address=192.168.50.1/23 interface=Br-LANUser network=192.168.50.0
+add address=192.168.60.1/24 interface=ether7 network=192.168.60.0
+/ip cloud
+set ddns-enabled=yes
+/ip dhcp-client
+add default-route-tables=main interface=ether1-Biznet
+add default-route-tables=main interface=ether2-Fibernet
+/ip dhcp-server
+add address-pool=dhcp_pool9 disabled=yes interface=*10 name=dhcp4
+add address-pool=dhcp_pool11 disabled=yes interface=*11 name=dhcp5
+/ip dhcp-server network
+add address=172.16.80.0/24 gateway=172.16.80.1
+add address=192.168.50.0/23 comment="hotspot network" gateway=\
+    192.168.50.1,192.168.51.1
+add address=192.168.60.0/24 dns-server=27.123.220.221,103.4.164.34,8.8.8.8 \
+    gateway=192.168.60.1
+add address=192.168.70.0/24 dns-none=yes gateway=192.168.70.1
+add address=192.168.80.0/24 gateway=192.168.80.1
+add address=192.168.81.0/24 gateway=192.168.81.1
+add address=192.168.82.0/24 gateway=192.168.82.1
+add address=192.168.100.0/24 dns-server=27.123.220.221,103.4.164.34,8.8.8.8 \
+    gateway=192.168.100.1
+add address=192.168.200.0/24 comment="hotspot network" dns-server=\
+    27.123.220.221,103.4.164.34,8.8.8.8 gateway=192.168.200.1
+/ip dns
+set allow-remote-requests=yes servers=8.8.8.8,27.123.220.221
+/ip firewall address-list
+add address=192.168.100.0/24 list=LAN
+add address=192.168.200.0/24 list=LAN
+add address=13.107.64.0/18 list=MsTeamsList
+add address=52.112.0.0/14 list=MsTeamsList
+add address=52.120.0.0/14 list=MsTeamsList
+add address=52.238.119.141 list=MsTeamsList
+add address=52.244.160.207 list=MsTeamsList
+add address=3.7.35.0/25 list=zoom_ip
+add address=3.21.137.128/25 list=zoom_ip
+add address=3.22.11.0/24 list=zoom_ip
+add address=3.23.93.0/24 list=zoom_ip
+add address=3.25.41.128/25 list=zoom_ip
+add address=3.25.42.0/25 list=zoom_ip
+add address=3.25.49.0/24 list=zoom_ip
+add address=3.80.20.128/25 list=zoom_ip
+add address=3.96.19.0/24 list=zoom_ip
+add address=3.101.32.128/25 list=zoom_ip
+add address=3.101.52.0/25 list=zoom_ip
+add address=3.104.34.128/25 list=zoom_ip
+add address=3.120.121.0/25 list=zoom_ip
+add address=3.127.194.128/25 list=zoom_ip
+add address=3.208.72.0/25 list=zoom_ip
+add address=3.211.241.0/25 list=zoom_ip
+add address=3.235.69.0/25 list=zoom_ip
+add address=3.235.71.128/25 list=zoom_ip
+add address=3.235.72.128/25 list=zoom_ip
+add address=3.235.73.0/25 list=zoom_ip
+add address=3.235.82.0/23 list=zoom_ip
+add address=3.235.96.0/23 list=zoom_ip
+add address=4.34.125.128/25 list=zoom_ip
+add address=4.35.64.128/25 list=zoom_ip
+add address=8.5.128.0/23 list=zoom_ip
+add address=13.52.6.128/25 list=zoom_ip
+add address=13.52.146.0/25 list=zoom_ip
+add address=15.220.80.0/24 list=zoom_ip
+add address=15.220.81.0/25 list=zoom_ip
+add address=18.157.88.0/24 list=zoom_ip
+add address=18.205.93.128/25 list=zoom_ip
+add address=18.254.23.128/25 list=zoom_ip
+add address=18.254.61.0/25 list=zoom_ip
+add address=20.203.158.80/28 list=zoom_ip
+add address=20.203.190.192/26 list=zoom_ip
+add address=50.239.202.0/23 list=zoom_ip
+add address=50.239.204.0/24 list=zoom_ip
+add address=52.61.100.128/25 list=zoom_ip
+add address=52.202.62.192/26 list=zoom_ip
+add address=52.215.168.0/25 list=zoom_ip
+add address=64.125.62.0/24 list=zoom_ip
+add address=64.211.144.0/24 list=zoom_ip
+add address=64.224.32.0/19 list=zoom_ip
+add address=65.39.152.0/24 list=zoom_ip
+add address=69.174.57.0/24 list=zoom_ip
+add address=69.174.108.0/22 list=zoom_ip
+add address=99.79.20.0/25 list=zoom_ip
+add address=101.36.167.0/24 list=zoom_ip
+add address=101.36.170.0/23 list=zoom_ip
+add address=103.122.166.0/23 list=zoom_ip
+add address=111.33.115.0/25 list=zoom_ip
+add address=111.33.181.0/25 list=zoom_ip
+add address=115.110.154.192/26 list=zoom_ip
+add address=115.114.56.192/26 list=zoom_ip
+add address=115.114.115.0/26 list=zoom_ip
+add address=115.114.131.0/26 list=zoom_ip
+add address=120.29.148.0/24 list=zoom_ip
+add address=129.151.1.128/27 list=zoom_ip
+add address=129.151.1.192/27 list=zoom_ip
+add address=129.151.2.0/27 list=zoom_ip
+add address=129.151.3.160/27 list=zoom_ip
+add address=129.151.7.96/27 list=zoom_ip
+add address=129.151.11.64/27 list=zoom_ip
+add address=129.151.11.128/27 list=zoom_ip
+add address=129.151.12.0/27 list=zoom_ip
+add address=129.151.13.64/27 list=zoom_ip
+add address=129.151.15.224/27 list=zoom_ip
+add address=129.151.16.0/27 list=zoom_ip
+add address=129.151.31.224/27 list=zoom_ip
+add address=129.151.40.0/25 list=zoom_ip
+add address=129.151.40.160/27 list=zoom_ip
+add address=129.151.40.192/27 list=zoom_ip
+add address=129.151.41.0/25 list=zoom_ip
+add address=129.151.41.192/26 list=zoom_ip
+add address=129.151.42.0/27 list=zoom_ip
+add address=129.151.42.64/27 list=zoom_ip
+add address=129.151.42.128/26 list=zoom_ip
+add address=129.151.42.224/27 list=zoom_ip
+add address=129.151.43.0/27 list=zoom_ip
+add address=129.151.43.64/26 list=zoom_ip
+add address=129.151.48.0/27 list=zoom_ip
+add address=129.151.48.160/27 list=zoom_ip
+add address=129.151.49.0/26 list=zoom_ip
+add address=129.151.49.96/27 list=zoom_ip
+add address=129.151.49.128/27 list=zoom_ip
+add address=129.151.49.192/26 list=zoom_ip
+add address=129.151.50.0/27 list=zoom_ip
+add address=129.151.50.64/27 list=zoom_ip
+add address=129.151.52.128/26 list=zoom_ip
+add address=129.151.53.32/27 list=zoom_ip
+add address=129.151.53.224/27 list=zoom_ip
+add address=129.151.55.32/27 list=zoom_ip
+add address=129.151.56.32/27 list=zoom_ip
+add address=129.151.57.32/27 list=zoom_ip
+add address=129.151.60.192/27 list=zoom_ip
+add address=129.159.2.32/27 list=zoom_ip
+add address=129.159.2.192/27 list=zoom_ip
+add address=129.159.3.0/24 list=zoom_ip
+add address=129.159.4.0/23 list=zoom_ip
+add address=129.159.6.0/27 list=zoom_ip
+add address=129.159.6.96/27 list=zoom_ip
+add address=129.159.6.128/26 list=zoom_ip
+add address=129.159.6.192/27 list=zoom_ip
+add address=129.159.160.0/26 list=zoom_ip
+add address=129.159.160.64/27 list=zoom_ip
+add address=129.159.163.0/26 list=zoom_ip
+add address=129.159.163.160/27 list=zoom_ip
+add address=129.159.208.0/21 list=zoom_ip
+add address=129.159.216.0/26 list=zoom_ip
+add address=129.159.216.64/27 list=zoom_ip
+add address=129.159.216.128/26 list=zoom_ip
+add address=130.61.164.0/22 list=zoom_ip
+add address=132.226.176.0/25 list=zoom_ip
+add address=132.226.176.128/26 list=zoom_ip
+add address=132.226.177.96/27 list=zoom_ip
+add address=132.226.177.128/25 list=zoom_ip
+add address=132.226.178.0/27 list=zoom_ip
+add address=132.226.178.128/27 list=zoom_ip
+add address=132.226.178.224/27 list=zoom_ip
+add address=132.226.179.0/27 list=zoom_ip
+add address=132.226.179.64/27 list=zoom_ip
+add address=132.226.180.128/27 list=zoom_ip
+add address=132.226.183.160/27 list=zoom_ip
+add address=132.226.185.192/27 list=zoom_ip
+add address=134.224.0.0/16 list=zoom_ip
+add address=140.238.128.0/24 list=zoom_ip
+add address=140.238.232.0/22 list=zoom_ip
+add address=144.195.0.0/16 list=zoom_ip
+add address=147.124.96.0/19 list=zoom_ip
+add address=149.137.0.0/17 list=zoom_ip
+add address=150.230.224.0/25 list=zoom_ip
+add address=150.230.224.128/26 list=zoom_ip
+add address=150.230.224.224/27 list=zoom_ip
+add address=152.67.20.0/24 list=zoom_ip
+add address=152.67.118.0/24 list=zoom_ip
+add address=152.67.168.0/22 list=zoom_ip
+add address=152.67.180.0/24 list=zoom_ip
+add address=152.67.184.32/27 list=zoom_ip
+add address=152.67.240.0/21 list=zoom_ip
+add address=152.70.0.0/25 list=zoom_ip
+add address=152.70.0.128/26 list=zoom_ip
+add address=152.70.0.224/27 list=zoom_ip
+add address=152.70.1.0/25 list=zoom_ip
+add address=152.70.1.128/26 list=zoom_ip
+add address=152.70.1.192/27 list=zoom_ip
+add address=152.70.2.0/26 list=zoom_ip
+add address=152.70.7.192/27 list=zoom_ip
+add address=152.70.10.32/27 list=zoom_ip
+add address=152.70.224.32/27 list=zoom_ip
+add address=152.70.224.64/26 list=zoom_ip
+add address=152.70.224.160/27 list=zoom_ip
+add address=152.70.224.192/27 list=zoom_ip
+add address=152.70.225.0/25 list=zoom_ip
+add address=152.70.225.160/27 list=zoom_ip
+add address=152.70.225.192/27 list=zoom_ip
+add address=152.70.226.0/27 list=zoom_ip
+add address=152.70.227.96/27 list=zoom_ip
+add address=152.70.227.192/27 list=zoom_ip
+add address=152.70.228.0/27 list=zoom_ip
+add address=152.70.228.64/27 list=zoom_ip
+add address=152.70.228.128/27 list=zoom_ip
+add address=156.45.0.0/17 list=zoom_ip
+add address=158.101.64.0/24 list=zoom_ip
+add address=158.101.184.0/23 list=zoom_ip
+add address=158.101.186.0/25 list=zoom_ip
+add address=158.101.186.128/27 list=zoom_ip
+add address=158.101.186.192/26 list=zoom_ip
+add address=158.101.187.0/25 list=zoom_ip
+add address=158.101.187.160/27 list=zoom_ip
+add address=158.101.187.192/26 list=zoom_ip
+add address=159.124.0.0/16 list=zoom_ip
+add address=160.1.56.128/25 list=zoom_ip
+add address=161.199.136.0/22 list=zoom_ip
+add address=162.12.232.0/22 list=zoom_ip
+add address=162.255.36.0/22 list=zoom_ip
+add address=165.254.88.0/23 list=zoom_ip
+add address=166.108.64.0/18 list=zoom_ip
+add address=168.138.16.0/22 list=zoom_ip
+add address=168.138.48.0/24 list=zoom_ip
+add address=168.138.56.0/21 list=zoom_ip
+add address=168.138.72.0/24 list=zoom_ip
+add address=168.138.74.0/25 list=zoom_ip
+add address=168.138.80.0/25 list=zoom_ip
+add address=168.138.80.128/26 list=zoom_ip
+add address=168.138.80.224/27 list=zoom_ip
+add address=168.138.81.0/24 list=zoom_ip
+add address=168.138.82.0/23 list=zoom_ip
+add address=168.138.84.0/25 list=zoom_ip
+add address=168.138.84.128/27 list=zoom_ip
+add address=168.138.84.192/26 list=zoom_ip
+add address=168.138.85.0/24 list=zoom_ip
+add address=168.138.86.0/23 list=zoom_ip
+add address=168.138.96.0/22 list=zoom_ip
+add address=168.138.116.0/27 list=zoom_ip
+add address=168.138.116.64/27 list=zoom_ip
+add address=168.138.116.128/27 list=zoom_ip
+add address=168.138.116.224/27 list=zoom_ip
+add address=168.138.117.0/27 list=zoom_ip
+add address=168.138.117.96/27 list=zoom_ip
+add address=168.138.117.128/27 list=zoom_ip
+add address=168.138.118.0/27 list=zoom_ip
+add address=168.138.118.160/27 list=zoom_ip
+add address=168.138.118.224/27 list=zoom_ip
+add address=168.138.119.0/27 list=zoom_ip
+add address=168.138.119.128/27 list=zoom_ip
+add address=168.138.244.0/24 list=zoom_ip
+add address=170.114.0.0/16 list=zoom_ip
+add address=173.231.80.0/20 list=zoom_ip
+add address=192.204.12.0/22 list=zoom_ip
+add address=193.122.16.0/25 list=zoom_ip
+add address=193.122.16.192/27 list=zoom_ip
+add address=193.122.17.0/26 list=zoom_ip
+add address=193.122.17.64/27 list=zoom_ip
+add address=193.122.17.224/27 list=zoom_ip
+add address=193.122.18.32/27 list=zoom_ip
+add address=193.122.18.64/26 list=zoom_ip
+add address=193.122.18.160/27 list=zoom_ip
+add address=193.122.18.192/27 list=zoom_ip
+add address=193.122.19.0/27 list=zoom_ip
+add address=193.122.19.160/27 list=zoom_ip
+add address=193.122.19.192/27 list=zoom_ip
+add address=193.122.20.224/27 list=zoom_ip
+add address=193.122.21.96/27 list=zoom_ip
+add address=193.122.32.0/21 list=zoom_ip
+add address=193.122.40.0/22 list=zoom_ip
+add address=193.122.44.0/24 list=zoom_ip
+add address=193.122.45.32/27 list=zoom_ip
+add address=193.122.45.64/26 list=zoom_ip
+add address=193.122.45.128/25 list=zoom_ip
+add address=193.122.46.0/23 list=zoom_ip
+add address=193.122.208.96/27 list=zoom_ip
+add address=193.122.216.32/27 list=zoom_ip
+add address=193.122.222.0/27 list=zoom_ip
+add address=193.122.223.128/27 list=zoom_ip
+add address=193.122.226.160/27 list=zoom_ip
+add address=193.122.231.192/27 list=zoom_ip
+add address=193.122.232.160/27 list=zoom_ip
+add address=193.122.237.64/27 list=zoom_ip
+add address=193.122.244.160/27 list=zoom_ip
+add address=193.122.244.224/27 list=zoom_ip
+add address=193.122.245.0/27 list=zoom_ip
+add address=193.122.247.96/27 list=zoom_ip
+add address=193.122.252.192/27 list=zoom_ip
+add address=193.123.0.0/19 list=zoom_ip
+add address=193.123.40.0/21 list=zoom_ip
+add address=193.123.128.0/19 list=zoom_ip
+add address=193.123.168.0/21 list=zoom_ip
+add address=193.123.192.224/27 list=zoom_ip
+add address=193.123.193.0/27 list=zoom_ip
+add address=193.123.193.96/27 list=zoom_ip
+add address=193.123.194.96/27 list=zoom_ip
+add address=193.123.194.128/27 list=zoom_ip
+add address=193.123.194.224/27 list=zoom_ip
+add address=193.123.195.0/27 list=zoom_ip
+add address=193.123.196.0/27 list=zoom_ip
+add address=193.123.196.192/27 list=zoom_ip
+add address=193.123.197.0/27 list=zoom_ip
+add address=193.123.197.64/27 list=zoom_ip
+add address=193.123.198.64/27 list=zoom_ip
+add address=193.123.198.160/27 list=zoom_ip
+add address=193.123.199.64/27 list=zoom_ip
+add address=193.123.200.128/27 list=zoom_ip
+add address=193.123.201.32/27 list=zoom_ip
+add address=193.123.201.224/27 list=zoom_ip
+add address=193.123.202.64/27 list=zoom_ip
+add address=193.123.202.128/26 list=zoom_ip
+add address=193.123.203.0/27 list=zoom_ip
+add address=193.123.203.160/27 list=zoom_ip
+add address=193.123.203.192/27 list=zoom_ip
+add address=193.123.204.0/27 list=zoom_ip
+add address=193.123.204.64/27 list=zoom_ip
+add address=193.123.205.64/26 list=zoom_ip
+add address=193.123.205.128/27 list=zoom_ip
+add address=193.123.206.32/27 list=zoom_ip
+add address=193.123.206.128/27 list=zoom_ip
+add address=193.123.207.32/27 list=zoom_ip
+add address=193.123.208.160/27 list=zoom_ip
+add address=193.123.209.0/27 list=zoom_ip
+add address=193.123.209.96/27 list=zoom_ip
+add address=193.123.210.64/27 list=zoom_ip
+add address=193.123.211.224/27 list=zoom_ip
+add address=193.123.212.128/27 list=zoom_ip
+add address=193.123.215.192/26 list=zoom_ip
+add address=193.123.216.64/27 list=zoom_ip
+add address=193.123.216.128/27 list=zoom_ip
+add address=193.123.217.160/27 list=zoom_ip
+add address=193.123.219.64/27 list=zoom_ip
+add address=193.123.220.224/27 list=zoom_ip
+add address=193.123.222.64/27 list=zoom_ip
+add address=193.123.222.224/27 list=zoom_ip
+add address=198.251.128.0/17 list=zoom_ip
+add address=202.177.207.128/27 list=zoom_ip
+add address=204.80.104.0/21 list=zoom_ip
+add address=204.141.28.0/22 list=zoom_ip
+add address=206.247.0.0/16 list=zoom_ip
+add address=207.226.132.0/24 list=zoom_ip
+add address=209.9.211.0/24 list=zoom_ip
+add address=209.9.215.0/24 list=zoom_ip
+add address=213.19.144.0/24 list=zoom_ip
+add address=213.19.153.0/24 list=zoom_ip
+add address=213.244.140.0/24 list=zoom_ip
+add address=221.122.63.0/24 list=zoom_ip
+add address=221.122.64.0/24 list=zoom_ip
+add address=221.122.88.64/27 list=zoom_ip
+add address=221.122.88.128/25 list=zoom_ip
+add address=221.122.89.128/25 list=zoom_ip
+add address=221.123.139.192/27 list=zoom_ip
+add address=192.168.50.2-192.168.50.101 comment="Pool BOD" list=pool-BOD
+add address=192.168.50.202-192.168.50.251 comment="Pool Creative" list=\
+    pool-Creative
+add address=192.168.50.252-192.168.51.45 comment="Pool Developer" list=\
+    pool-Developer
+add address=192.168.51.111-192.168.51.210 list=pool-Guest
+add address=192.168.51.46-192.168.51.60 list=pool-Freelance
+add address=192.168.50.97-192.168.50.126 list=pool-Intern
+add address=192.168.50.161-192.168.50.190 list=pool-ProDev
+add address=192.168.50.102-192.168.50.201 list=pool-Staff
+add address=192.168.50.0/23 list=LAN
+add address=31.13.24.0/21 comment="Facebook Ireland" list=sosmed
+add address=31.13.64.0/18 comment="Facebook Ireland" list=sosmed
+add address=31.13.64.0/19 comment="Facebook Ireland" list=sosmed
+add address=31.13.64.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.65.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.66.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.67.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.68.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.69.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.70.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.71.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.72.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.73.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.74.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.75.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.76.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.78.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.80.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.81.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.82.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.83.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.84.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.85.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.86.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.87.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.90.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.91.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.92.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.94.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.95.0/24 comment="Facebook Ireland" list=sosmed
+add address=31.13.96.0/19 comment="Facebook Ireland" list=sosmed
+add address=45.64.40.0/22 comment="Facebook Singapore Pte Ltd. Singapore" \
+    list=sosmed
+add address=66.220.144.0/20 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=66.220.144.0/21 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=66.220.152.0/21 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=69.63.176.0/20 comment="Facebook, Inc. United States" list=sosmed
+add address=69.63.176.0/21 comment="Facebook, Inc. United States" list=sosmed
+add address=69.63.184.0/21 comment="Facebook, Inc. United States" list=sosmed
+add address=69.171.224.0/19 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=69.171.224.0/20 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=69.171.239.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=69.171.240.0/20 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=69.171.255.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=74.119.76.0/22 comment="Facebook, Inc. United States" list=sosmed
+add address=103.4.96.0/22 comment=" Temasek Avenue Singapore" list=sosmed
+add address=157.240.0.0/17 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.1.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.2.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.3.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.6.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.7.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.8.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.9.0/24 comment="Facebook, Inc. United States" list=sosmed
+add address=157.240.10.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.11.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.12.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.13.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.14.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.15.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.16.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.18.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.20.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.21.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=157.240.22.0/24 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=173.252.64.0/19 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=173.252.88.0/21 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=173.252.96.0/19 comment="Facebook, Inc. United States" list=\
+    sosmed
+add address=179.60.192.0/22 comment="Edge Network Services Ltd United States" \
+    list=sosmed
+add address=179.60.192.0/24 comment="Edge Network Services Ltd United States" \
+    list=sosmed
+add address=179.60.193.0/24 comment="Edge Network Services Ltd United States" \
+    list=sosmed
+add address=179.60.195.0/24 comment="Edge Network Services Ltd United States" \
+    list=sosmed
+add address=185.60.216.0/22 comment="Facebook Ireland" list=sosmed
+add address=185.60.216.0/24 comment="Facebook Ireland" list=sosmed
+add address=185.60.218.0/24 comment="Facebook Ireland" list=sosmed
+add address=185.60.219.0/24 comment="Facebook Ireland" list=sosmed
+add address=204.15.20.0/22 comment="Facebook, Inc. United States" list=sosmed
+add address=64.63.0.0/18 comment="MoPub, Inc. United States" list=sosmed
+add address=69.195.160.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.162.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.163.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.164.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.165.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.166.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.168.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.169.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.171.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.172.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.173.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.175.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.176.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.177.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.178.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.179.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.180.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.181.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.182.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.184.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.185.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.186.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.187.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.188.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.189.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.190.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=69.195.191.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=103.252.112.0/23 comment=\
+    "60 Robinson Road, #11-02 BEA Building, Singapore 068892. Singapore" \
+    list=sosmed
+add address=103.252.114.0/23 comment=\
+    "60 Robinson Road, #11-02 BEA Building, Singapore 068892. Singapore" \
+    list=sosmed
+add address=104.244.40.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.41.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.42.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.43.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.44.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.45.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.46.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=104.244.47.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=185.45.5.0/24 comment="Twitter International Company Ireland" \
+    list=sosmed
+add address=185.45.6.0/23 comment="Twitter International Company Ireland" \
+    list=sosmed
+add address=188.64.224.0/24 comment="Heron SAS France" list=sosmed
+add address=188.64.225.0/24 comment="Heron SAS France" list=sosmed
+add address=188.64.226.0/23 comment="Heron SAS France" list=sosmed
+add address=188.64.226.0/24 comment="Heron SAS France" list=sosmed
+add address=188.64.227.0/24 comment="Heron SAS France" list=sosmed
+add address=188.64.228.0/24 comment="Heron SAS France" list=sosmed
+add address=188.64.229.0/24 comment="Heron SAS France" list=sosmed
+add address=192.44.69.0/24 comment="Crashlytics, Inc United States" list=\
+    sosmed
+add address=192.133.76.0/22 comment="Twitter Inc. United States" list=sosmed
+add address=192.133.76.0/23 comment="Twitter Inc. United States" list=sosmed
+add address=199.16.156.0/22 comment="Twitter Inc. United States" list=sosmed
+add address=199.16.156.0/23 comment="Twitter Inc. United States" list=sosmed
+add address=199.59.148.0/22 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.56.0/23 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.56.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.57.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.58.0/23 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.60.0/23 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.60.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.61.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=199.96.62.0/23 comment="Twitter Inc. United States" list=sosmed
+add address=202.160.128.0/24 comment=\
+    "Twitter Asia Pacific Pte. Ltd. Singapore" list=sosmed
+add address=202.160.129.0/24 comment=\
+    "Twitter Asia Pacific Pte. Ltd. Singapore" list=sosmed
+add address=202.160.130.0/24 comment=\
+    "Twitter Asia Pacific Pte. Ltd. Singapore" list=sosmed
+add address=202.160.131.0/24 comment=\
+    "Twitter Asia Pacific Pte. Ltd. Singapore" list=sosmed
+add address=209.237.192.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.193.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.194.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.195.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.196.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.197.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.198.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.199.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.200.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.201.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.204.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.205.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.206.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.207.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.208.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.209.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.210.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.211.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.212.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.213.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.214.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.215.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.216.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.217.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.218.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.219.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.220.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.221.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.222.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=209.237.223.0/24 comment="Twitter Inc. United States" list=sosmed
+add address=91.108.56.0/24 comment=TELEGRAM list=sosmed
+add address=149.154.164.0/22 comment="Telegram Messenger Network GB" list=\
+    sosmed
+add address=31.13.93.0/24 comment=" Facebook " list=sosmed
+add address=199.201.67.0/24 comment=" Facebook Inc " list=sosmed
+add address=199.201.66.0/24 comment=" Facebook Inc " list=sosmed
+add address=199.201.65.0/24 comment=" Facebook Inc " list=sosmed
+add address=199.201.64.0/24 comment=" Facebook Inc " list=sosmed
+add address=199.201.64.0/22 comment=" Facebook Inc " list=sosmed
+add address=157.240.192.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.191.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.190.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.19.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.189.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.188.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.187.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.186.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.185.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.184.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.183.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.182.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.178.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.168.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.167.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.166.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.165.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.164.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.163.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.162.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.161.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.148.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.146.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.145.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.144.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.143.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.142.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.140.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.139.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.138.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.137.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.136.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.135.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.134.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.133.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.132.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.131.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.130.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=157.240.129.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=146.88.59.0/24 comment=" Facebook, Inc. " list=sosmed
+add address=129.134.0.0/17 comment=" Facebook, Inc." list=sosmed
+add address=157.240.192.0/18 comment=" Facebook, Inc. " list=sosmed
+add address=36.91.0.0/16 comment="telkom indonesia - bgp" list=sosmed
+add address=23.0.162.0/24 comment=akamai list=sosmed
+add address=23.52.171.0/24 comment=akamai list=sosmed
+add address=23.49.60.0/24 comment=akamai list=sosmed
+add address=23.67.57.0/24 comment=akamai list=sosmed
+add address=23.45.116.0/24 comment=akamai list=sosmed
+add address=23.67.0.0/16 comment=akamai list=sosmed
+add address=23.44.0.0/14 comment=akamai list=sosmed
+add address=23.49.240.0/20 comment=akamai list=sosmed
+add address=118.98.106.0/24 list=youtube
+add address=199.223.232.0/21 list=youtube
+add address=207.223.160.0/20 list=youtube
+add address=208.65.152.0/22 list=youtube
+add address=208.117.224.0/19 list=youtube
+add address=209.85.128.0/17 list=youtube
+add address=216.58.192.0/19 list=youtube
+add address=216.239.32.0/19 list=youtube
+add address=118.98.111.0/24 list=youtube
+add address=74.125.0.0/16 list=youtube
+add address=199.223.232.0/24 list=youtube
+add address=74.125.206.0/24 list=youtube
+add address=64.233.167.0/24 list=youtube
+add address=199.223.233.0/24 list=youtube
+add address=199.223.234.0/24 list=youtube
+add address=199.223.235.0/24 list=youtube
+add address=199.223.236.0/24 list=youtube
+add address=199.223.237.0/24 list=youtube
+add address=199.223.238.0/24 list=youtube
+add address=199.223.239.0/24 list=youtube
+add address=207.223.160.0/24 list=youtube
+add address=207.223.161.0/24 list=youtube
+add address=207.223.162.0/24 list=youtube
+add address=207.223.163.0/24 list=youtube
+add address=207.223.164.0/24 list=youtube
+add address=207.223.165.0/24 list=youtube
+add address=207.223.166.0/24 list=youtube
+add address=207.223.167.0/24 list=youtube
+add address=207.223.168.0/24 list=youtube
+add address=207.223.169.0/24 list=youtube
+add address=207.223.170.0/24 list=youtube
+add address=207.223.171.0/24 list=youtube
+add address=207.223.172.0/24 list=youtube
+add address=207.223.173.0/24 list=youtube
+add address=207.223.174.0/24 list=youtube
+add address=207.223.175.0/24 list=youtube
+add address=208.65.152.0/24 list=youtube
+add address=208.65.153.0/24 list=youtube
+add address=208.65.154.0/24 list=youtube
+add address=208.65.155.0/24 list=youtube
+add address=208.117.224.0/24 list=youtube
+add address=208.117.225.0/24 list=youtube
+add address=208.117.226.0/24 list=youtube
+add address=208.117.227.0/24 list=youtube
+add address=208.117.228.0/24 list=youtube
+add address=208.117.229.0/24 list=youtube
+add address=208.117.230.0/24 list=youtube
+add address=208.117.231.0/24 list=youtube
+add address=208.117.232.0/24 list=youtube
+add address=208.117.233.0/24 list=youtube
+add address=208.117.234.0/24 list=youtube
+add address=208.117.235.0/24 list=youtube
+add address=208.117.236.0/24 list=youtube
+add address=208.117.237.0/24 list=youtube
+add address=208.117.238.0/24 list=youtube
+add address=208.117.239.0/24 list=youtube
+add address=208.117.240.0/24 list=youtube
+add address=208.117.241.0/24 list=youtube
+add address=208.117.242.0/24 list=youtube
+add address=208.117.243.0/24 list=youtube
+add address=208.117.244.0/24 list=youtube
+add address=208.117.245.0/24 list=youtube
+add address=208.117.246.0/24 list=youtube
+add address=208.117.247.0/24 list=youtube
+add address=208.117.248.0/24 list=youtube
+add address=208.117.249.0/24 list=youtube
+add address=208.117.250.0/24 list=youtube
+add address=208.117.251.0/24 list=youtube
+add address=208.117.252.0/24 list=youtube
+add address=208.117.253.0/24 list=youtube
+add address=208.117.254.0/24 list=youtube
+add address=208.117.255.0/24 list=youtube
+add address=209.85.128.0/24 list=youtube
+add address=209.85.129.0/24 list=youtube
+add address=209.85.130.0/24 list=youtube
+add address=209.85.131.0/24 list=youtube
+add address=209.85.132.0/24 list=youtube
+add address=209.85.133.0/24 list=youtube
+add address=209.85.134.0/24 list=youtube
+add address=209.85.135.0/24 list=youtube
+add address=209.85.136.0/24 list=youtube
+add address=209.85.137.0/24 list=youtube
+add address=209.85.138.0/24 list=youtube
+add address=209.85.139.0/24 list=youtube
+add address=209.85.140.0/24 list=youtube
+add address=209.85.141.0/24 list=youtube
+add address=209.85.142.0/24 list=youtube
+add address=209.85.143.0/24 list=youtube
+add address=209.85.144.0/24 list=youtube
+add address=209.85.145.0/24 list=youtube
+add address=209.85.146.0/24 list=youtube
+add address=209.85.147.0/24 list=youtube
+add address=209.85.148.0/24 list=youtube
+add address=209.85.149.0/24 list=youtube
+add address=209.85.150.0/24 list=youtube
+add address=209.85.151.0/24 list=youtube
+add address=209.85.152.0/24 list=youtube
+add address=209.85.153.0/24 list=youtube
+add address=209.85.154.0/24 list=youtube
+add address=209.85.155.0/24 list=youtube
+add address=209.85.156.0/24 list=youtube
+add address=209.85.157.0/24 list=youtube
+add address=209.85.158.0/24 list=youtube
+add address=209.85.159.0/24 list=youtube
+add address=209.85.160.0/24 list=youtube
+add address=209.85.161.0/24 list=youtube
+add address=209.85.162.0/24 list=youtube
+add address=209.85.163.0/24 list=youtube
+add address=209.85.164.0/24 list=youtube
+add address=209.85.165.0/24 list=youtube
+add address=209.85.166.0/24 list=youtube
+add address=209.85.167.0/24 list=youtube
+add address=209.85.168.0/24 list=youtube
+add address=209.85.169.0/24 list=youtube
+add address=209.85.170.0/24 list=youtube
+add address=209.85.171.0/24 list=youtube
+add address=209.85.172.0/24 list=youtube
+add address=209.85.173.0/24 list=youtube
+add address=209.85.174.0/24 list=youtube
+add address=209.85.175.0/24 list=youtube
+add address=209.85.176.0/24 list=youtube
+add address=209.85.177.0/24 list=youtube
+add address=209.85.178.0/24 list=youtube
+add address=209.85.179.0/24 list=youtube
+add address=209.85.180.0/24 list=youtube
+add address=209.85.181.0/24 list=youtube
+add address=209.85.182.0/24 list=youtube
+add address=209.85.183.0/24 list=youtube
+add address=209.85.184.0/24 list=youtube
+add address=209.85.185.0/24 list=youtube
+add address=209.85.186.0/24 list=youtube
+add address=209.85.187.0/24 list=youtube
+add address=209.85.188.0/24 list=youtube
+add address=209.85.189.0/24 list=youtube
+add address=209.85.190.0/24 list=youtube
+add address=209.85.191.0/24 list=youtube
+add address=209.85.192.0/24 list=youtube
+add address=209.85.193.0/24 list=youtube
+add address=209.85.194.0/24 list=youtube
+add address=209.85.195.0/24 list=youtube
+add address=209.85.196.0/24 list=youtube
+add address=209.85.197.0/24 list=youtube
+add address=209.85.198.0/24 list=youtube
+add address=209.85.199.0/24 list=youtube
+add address=209.85.200.0/24 list=youtube
+add address=209.85.201.0/24 list=youtube
+add address=209.85.202.0/24 list=youtube
+add address=209.85.203.0/24 list=youtube
+add address=209.85.204.0/24 list=youtube
+add address=209.85.205.0/24 list=youtube
+add address=209.85.206.0/24 list=youtube
+add address=209.85.207.0/24 list=youtube
+add address=209.85.208.0/24 list=youtube
+add address=209.85.209.0/24 list=youtube
+add address=209.85.210.0/24 list=youtube
+add address=209.85.211.0/24 list=youtube
+add address=209.85.212.0/24 list=youtube
+add address=209.85.213.0/24 list=youtube
+add address=209.85.214.0/24 list=youtube
+add address=209.85.215.0/24 list=youtube
+add address=209.85.216.0/24 list=youtube
+add address=209.85.217.0/24 list=youtube
+add address=209.85.218.0/24 list=youtube
+add address=209.85.219.0/24 list=youtube
+add address=209.85.220.0/24 list=youtube
+add address=209.85.221.0/24 list=youtube
+add address=209.85.222.0/24 list=youtube
+add address=209.85.223.0/24 list=youtube
+add address=209.85.224.0/24 list=youtube
+add address=209.85.225.0/24 list=youtube
+add address=209.85.226.0/24 list=youtube
+add address=209.85.227.0/24 list=youtube
+add address=209.85.228.0/24 list=youtube
+add address=209.85.229.0/24 list=youtube
+add address=209.85.230.0/24 list=youtube
+add address=209.85.231.0/24 list=youtube
+add address=209.85.232.0/24 list=youtube
+add address=209.85.233.0/24 list=youtube
+add address=209.85.234.0/24 list=youtube
+add address=209.85.235.0/24 list=youtube
+add address=209.85.236.0/24 list=youtube
+add address=209.85.237.0/24 list=youtube
+add address=209.85.238.0/24 list=youtube
+add address=209.85.239.0/24 list=youtube
+add address=209.85.240.0/24 list=youtube
+add address=209.85.241.0/24 list=youtube
+add address=209.85.242.0/24 list=youtube
+add address=209.85.243.0/24 list=youtube
+add address=209.85.244.0/24 list=youtube
+add address=209.85.245.0/24 list=youtube
+add address=209.85.246.0/24 list=youtube
+add address=209.85.247.0/24 list=youtube
+add address=209.85.248.0/24 list=youtube
+add address=209.85.249.0/24 list=youtube
+add address=209.85.250.0/24 list=youtube
+add address=209.85.251.0/24 list=youtube
+add address=209.85.252.0/24 list=youtube
+add address=209.85.253.0/24 list=youtube
+add address=209.85.254.0/24 list=youtube
+add address=209.85.255.0/24 list=youtube
+add address=216.58.192.0/24 list=youtube
+add address=216.58.193.0/24 list=youtube
+add address=216.58.194.0/24 list=youtube
+add address=216.58.195.0/24 list=youtube
+add address=216.58.196.0/24 list=youtube
+add address=216.58.197.0/24 list=youtube
+add address=216.58.198.0/24 list=youtube
+add address=216.58.199.0/24 list=youtube
+add address=216.58.200.0/24 list=youtube
+add address=216.58.201.0/24 list=youtube
+add address=216.58.202.0/24 list=youtube
+add address=216.58.203.0/24 list=youtube
+add address=216.58.204.0/24 list=youtube
+add address=216.58.205.0/24 list=youtube
+add address=216.58.206.0/24 list=youtube
+add address=216.58.207.0/24 list=youtube
+add address=216.58.208.0/24 list=youtube
+add address=216.58.209.0/24 list=youtube
+add address=216.58.219.0/24 list=youtube
+add address=216.58.218.0/24 list=youtube
+add address=216.58.217.0/24 list=youtube
+add address=216.58.216.0/24 list=youtube
+add address=216.58.215.0/24 list=youtube
+add address=216.58.214.0/24 list=youtube
+add address=216.58.213.0/24 list=youtube
+add address=216.58.212.0/24 list=youtube
+add address=216.58.211.0/24 list=youtube
+add address=216.58.210.0/24 list=youtube
+add address=216.58.220.0/24 list=youtube
+add address=216.58.221.0/24 list=youtube
+add address=216.58.222.0/24 list=youtube
+add address=216.58.223.0/24 list=youtube
+add address=216.239.57.0/24 list=youtube
+add address=216.239.56.0/24 list=youtube
+add address=216.239.55.0/24 list=youtube
+add address=216.239.54.0/24 list=youtube
+add address=216.239.36.0/24 list=youtube
+add address=216.239.37.0/24 list=youtube
+add address=216.239.38.0/24 list=youtube
+add address=216.239.39.0/24 list=youtube
+add address=216.239.40.0/24 list=youtube
+add address=216.239.41.0/24 list=youtube
+add address=216.239.42.0/24 list=youtube
+add address=216.239.43.0/24 list=youtube
+add address=216.239.46.0/24 list=youtube
+add address=216.239.47.0/24 list=youtube
+add address=216.239.48.0/24 list=youtube
+add address=216.239.49.0/24 list=youtube
+add address=216.239.51.0/24 list=youtube
+add address=216.239.50.0/24 list=youtube
+add address=216.239.35.0/24 list=youtube
+add address=216.239.34.0/24 list=youtube
+add address=216.239.52.0/24 list=youtube
+add address=216.239.33.0/24 list=youtube
+add address=216.239.32.0/24 list=youtube
+add address=216.239.59.0/24 list=youtube
+add address=216.239.58.0/24 list=youtube
+add address=216.239.60.0/24 list=youtube
+add address=216.239.61.0/24 list=youtube
+add address=216.239.53.0/24 list=youtube
+add address=216.239.63.0/24 list=youtube
+add address=216.239.62.0/24 list=youtube
+add address=169.56.64.0/18 comment=SoftLayer list=game
+add address=169.44.0.0/17 comment=SoftLayer list=game
+add address=124.202.128.0/20 comment=\
+    "Beijing in the interactive technology Development Co.,Ltd." list=game
+add address=45.124.252.0/22 comment="Zenlayer (Singapore) PTE. LTD" list=game
+add address=122.11.128.0/18 comment="StarHub Internet Pte Ltd" list=game
+add address=47.75.0.0/16 comment=ALICLOUD-HK list=game
+add address=121.46.20.0/22 comment="Guangdong Aofei Data Technology." list=\
+    game
+add address=169.56.128.0/19 comment=SoftLayer list=game
+add address=47.254.192.0/18 comment=ALICLOUD-MYS list=game
+add address=125.88.0.0/13 comment="CHINANET Guangdong province network\r\
+    \n" list=game
+add address=120.192.0.0/10 comment="Microsoft Corporation" list=game
+add address=47.52.0.0/16 comment=ALICLOUD-HK list=game
+add address=107.155.21.0/24 comment="Zenlayer Inc\r\
+    \n / Hago" list=game
+add address=45.40.48.0/22 comment="Zenlayer Inc" list=game
+add address=161.202.32.0/19 comment=SoftLayer list=game
+add address=161.202.224.0/19 comment=SoftLayer list=game
+add address=121.46.28.0/22 comment="Guangdong Aofei Data Technology." list=\
+    game
+add address=47.244.0.0/16 comment=ALICLOUD-HK list=game
+add address=47.91.128.0/17 comment=ALICLOUD-HK list=game
+add address=45.43.50.0/24 comment="Zenlayer Inc" list=game
+add address=45.43.51.0/24 comment="Zenlayer Inc" list=game
+add address=128.14.0.0/16 comment="Zenlayer Inc" list=game
+add address=156.236.0.0/16 comment="Cloud Innovation Ltd\r\
+    \n" list=game
+add address=45.43.32.0/22 comment="Zenlayer Inc" list=game
+add address=47.88.128.0/17 comment=ALICLOUD-SG list=game
+add address=159.253.128.0/19 comment="SoftLayer Dutch" list=game
+add address=203.205.219.0/24 comment="Shenzhen Tencent / PUBG" list=game
+add address=161.202.192.0/19 comment="SoftLayer Technologies" list=game
+add address=119.81.64.0/18 comment="SoftLayer Dutch" list=game
+add address=129.227.64.0/19 comment="Zenlayer Singapore network" list=game
+add address=129.227.32.0/20 comment="Zenlayer Singapore network" list=game
+add address=103.16.136.0/24 comment="PT DEWATA TELEMATIKA / PUBG" list=game
+add address=149.129.192.0/18 comment="Ciputra World 1 / Hago" list=game
+add address=124.158.134.0/23 comment="PT Garena Indonesia" list=game
+add address=47.246.14.0/24 comment="AL-3 / Hago" list=game
+add address=128.1.97.0/24 comment="Zenlayer Inc / Hago" list=game
+add address=143.92.120.0/24 comment="SHOPEE SINGAPORE" list=game
+add address=143.92.123.0/24 comment="SHOPEE SINGAPORE" list=game
+add address=103.247.205.0/24 comment="18 Murray Street" list=game
+add address=103.247.207.0/24 comment="18 Murray Street" list=game
+add address=103.247.206.0/24 comment="18 Murray Street" list=game
+add address=143.92.121.0/24 comment="SHOPEE SINGAPORE" list=game
+add address=211.152.128.0/23 comment="Shenzhen Tencent" list=game
+add address=101.32.136.0/21 comment="ACEVILLE PTE.LTD" list=game
+add address=23.248.160.0/19 comment="Zenlayer / Hago" list=game
+add address=202.81.99.0/24 comment="18 Murray Street" list=game
+add address=169.46.128.0/17 comment="SoftLayer Technologies" list=game
+add address=45.43.46.0/23 comment="Zenlayer Inc" list=game
+add address=119.81.0.0/18 comment=SoftLayer list=game
+add address=169.57.128.0/17 comment="SoftLayer Technologie" list=game
+add address=119.81.192.0/19 comment="SoftLayer Dutch" list=game
+add address=47.94.0.0/15 comment="Aliyun Computing" list=game
+add address=129.227.120.0/21 comment=Zenlayer list=game
+add address=43.252.184.0/24 comment="PT Garena Indonesia" list=game
+add address=43.252.185.0/24 comment="PT Garena Indonesia" list=game
+add address=43.252.186.0/24 comment="PT Garena Indonesia" list=game
+add address=43.252.187.0/24 comment="PT Garena Indonesia" list=game
+add address=103.248.56.0/22 comment="PT Garena Indonesia" list=game
+add address=103.248.59.0/24 comment="PT Garena Indonesia" list=game
+add address=124.158.133.0/24 comment="PT Garena Indonesia" list=game
+add address=124.158.142.0/23 comment="PT Garena Indonesia" list=game
+add address=101.32.112.0/23 comment="ACEVILLE PTE.LTD" list=game
+add address=113.59.232.0/24 comment="PT Rabik Bangun Nusantara  / PUBG" list=\
+    game
+add address=120.88.56.0/23 comment="NTT Ltd Japan Corporation / PUBG" list=\
+    game
+add address=45.40.216.0/22 comment="Tencent Cloud Computing" list=game
+add address=45.40.220.0/22 comment="Tencent Cloud Computing" list=game
+add address=45.113.68.0/22 comment="Oriental Power Holdings" list=game
+add address=49.51.0.0/19 comment="Tencent cloud computing" list=game
+add address=49.51.32.0/20 comment="Tencent cloud computing" list=game
+add address=49.51.48.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.52.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.54.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.62.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.64.0/21 comment="Tencent cloud computing" list=game
+add address=49.51.72.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.76.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.80.0/21 comment="Tencent cloud computing" list=game
+add address=49.51.88.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.92.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.96.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.100.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.104.0/22 comment="Tencent cloud computing" list=game
+add address=49.51.108.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.128.0/20 comment="Tencent cloud computing" list=game
+add address=49.51.144.0/20 comment="Tencent cloud computing" list=game
+add address=49.51.160.0/20 comment="Tencent cloud computing" list=game
+add address=49.51.176.0/20 comment="Tencent cloud computing" list=game
+add address=49.51.192.0/20 comment="Tencent cloud computing" list=game
+add address=49.51.224.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.228.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.230.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.232.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.234.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.236.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.238.0/23 comment="Tencent cloud computing" list=game
+add address=49.51.240.0/20 comment="Tencent cloud computing" list=game
+add address=103.7.28.0/22 comment="Tencent Building" list=game
+add address=103.52.216.0/22 comment="Oriental Power Holdings" list=game
+add address=103.238.16.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=119.28.0.0/18 comment="Tencent cloud computing" list=game
+add address=119.28.64.0/19 comment="Tencent cloud computing" list=game
+add address=119.28.96.0/19 comment="Tencent cloud computing" list=game
+add address=119.28.128.0/20 comment="Tencent cloud computing" list=game
+add address=119.28.144.0/20 comment="Tencent cloud computing" list=game
+add address=119.28.160.0/22 comment="Tencent cloud computing" list=game
+add address=119.28.164.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.166.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.168.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.170.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.172.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.174.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.176.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.178.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.180.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.182.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.184.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.186.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.188.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.190.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.192.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.194.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.196.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.198.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.200.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.202.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.204.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.206.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.208.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.210.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.212.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.214.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.216.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.218.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.220.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.222.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.224.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.226.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.228.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.230.0/23 comment="Tencent cloud computing" list=game
+add address=119.28.232.0/21 comment="Tencent cloud computing" list=game
+add address=119.28.240.0/20 comment="Tencent cloud computing" list=game
+add address=119.29.29.0/24 comment="Tencent cloud computing" list=game
+add address=162.14.0.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.4.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.8.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.12.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.16.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.20.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.24.0/22 comment="Shenzhen Tencent Computer" list=game
+add address=162.14.28.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.32.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.36.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.40.0/22 comment="Shenzhen Tencent Computer" list=game
+add address=162.14.44.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.48.0/22 comment="Tencent Cloud Computing" list=game
+add address=162.14.52.0/22 comment="Shenzhen Tencent Computer" list=game
+add address=162.14.56.0/22 comment="Shenzhen Tencent Computer" list=game
+add address=162.14.60.0/22 comment="Tencent Cloud Computing" list=game
+add address=182.254.116.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=182.254.118.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.128.0/19 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.176.0/22 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.176.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.177.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.178.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.179.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.188.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.191.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.193.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.194.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.196.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.218.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.220.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.222.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.224.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.232.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.234.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.236.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.238.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.240.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.242.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.244.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.245.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.248.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.250.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.252.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=203.205.254.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.130.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.132.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.136.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.138.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.144.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.146.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.148.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.152.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.154.0/23 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.156.0/24 comment="Shenzhen Tencent Computer" list=game
+add address=211.152.158.0/23 comment="Development Research of The State" \
+    list=game
+add address=101.32.0.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.32.16.0/20 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.32.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.32.48.0/20 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.64.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.32.80.0/20 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.96.0/20 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.104.0/21 comment="16 COLLYER QUAY" list=game
+add address=101.32.114.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.32.116.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.118.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.120.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.122.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.124.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.126.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.128.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.130.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.32.132.0/22 comment="16 COLLYER QUAY" list=game
+add address=101.32.144.0/20 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.160.0/20 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.176.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.32.192.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.32.208.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.32.228.0/22 comment="16 COLLYER QUAY" list=game
+add address=101.32.232.0/22 comment="16 COLLYER QUAY" list=game
+add address=101.32.236.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.32.238.0/23 comment="ACEVILLE PTE.LTD." list=game
+add address=101.32.240.0/20 comment="16 COLLYER QUAY" list=game
+add address=101.33.0.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.33.2.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.33.6.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.33.10.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.33.18.0/23 comment="16 COLLYER QUAY" list=game
+add address=101.33.64.0/19 comment="ACEVILLE PTE.LTD." list=game
+add address=101.33.96.0/22 comment="16 COLLYER QUAY" list=game
+add address=124.156.0.0/16 comment="16 COLLYER QUAY" list=game
+add address=129.226.0.0/16 comment="16 COLLYER QUAY" list=game
+add address=150.109.0.0/16 comment="16 COLLYER QUAY" list=game
+add address=162.62.0.0/16 comment="16 COLLYER QUAY" list=game
+add address=170.106.0.0/16 comment="16 COLLYER QUAY" list=game
+add address=161.202.0.0/19 comment=SoftLayer list=game
+add address=161.117.0.0/16 comment=Alibaba list=game
+add address=103.245.121.0/24 comment="Solaris Dutama" list=game
+add address=129.227.128.0/17 comment="Zenlayer / Hago" list=game
+add address=45.255.126.0/24 comment="AMERICA TOWER" list=game
+add address=43.249.208.0/24 comment="PT. INTERLINK TECHNOLOGY / PB" list=game
+add address=169.55.192.0/18 comment=SoftLayer list=game
+add address=103.136.8.0/24 comment="PT Melon Indonesia" list=game
+add address=147.139.128.0/17 comment=ALICLOUD-ID list=game
+add address=50.7.0.0/16 comment=FDCservers list=game
+add address=112.124.0.0/16 comment="Aliyun Computing Co., LTD" list=game
+add address=39.104.0.0/14 comment="Aliyun Computing Co., LTD" list=game
+add address=210.22.192.0/18 comment="China Unicom IP network" list=game
+add address=119.28.0.0/16 comment="Tencent cloud computing." list=game
+add address=140.207.0.0/16 comment="CHINA UNICOM Shanghai city network" list=\
+    game
+add address=103.38.254.0/23 comment=\
+    "Dual Cloud Information Technology (Shanghai) Ltd." list=game
+add address=210.14.152.0/21 comment="Beijing ShuJuJia Technology." list=game
+add address=204.11.56.0/23 comment="Confluence Networks Inc" list=game
+add address=169.48.192.0/18 comment=SoftLayer list=game
+add address=37.48.64.0/18 comment="LeaseWeb Netherlands B.V." list=game
+add address=180.87.165.0/24 comment="CAPITAL ONLINE DATA SERVICE" list=game
+add address=169.56.160.0/19 comment=SoftLayer list=game
+add address=103.211.231.0/24 comment=\
+    "AOFEI DATA INTERNATIONAL COMPANY LIMITED" list=game
+add address=183.232.0.0/16 comment="China Mobile Communications Corporation" \
+    list=game
+add address=101.200.0.0/15 comment="Aliyun Computing" list=game
+add address=103.98.18.0/24 comment="Enjoyvc Cloud Group Limited." list=game
+add address=175.25.50.0/23 comment="Beijing SHUJUJIA" list=game
+add address=47.110.0.0/15 comment="Aliyun Computing" list=game
+add address=183.179.192.0/18 comment="Hong Kong Broadband Network Ltd" list=\
+    game
+add address=14.208.0.0/12 comment="CHINANET Guangdong province network" list=\
+    game
+add address=169.45.128.0/18 comment=SoftLayer list=game
+add address=118.178.0.0/16 comment="Aliyun Computing" list=game
+add address=5.10.64.0/19 comment="SoftLayer Dutch Holdings BV" list=game
+add address=123.56.0.0/15 comment="Aliyun Computing" list=game
+add address=45.40.192.0/18 comment="Tencent Cloud Computing / PUBG" list=game
+add address=42.56.0.0/14 comment="UNICOM Liaoning Province Network" list=game
+add address=117.121.48.0/22 comment="CNLink Network Technology Ltd." list=\
+    game
+add address=123.150.0.0/15 comment="CHINANET TIANJIN PROVINCE NETWORK" list=\
+    game
+add address=103.193.127.0/24 comment="C3 Networks Inc - Hosting Customers" \
+    list=game
+add address=123.59.32.0/19 comment=CloudVsp.Inc list=game
+add address=103.240.150.0/24 comment=\
+    "RM 1302 13/F CRE BLDG 303 HENNESSY RD WANCHAI HONG KONG" list=game
+add address=117.111.3.0/24 comment=DACOM-PUBNETPLUS list=game
+add address=103.249.160.0/22 comment="2F-36 No 163 Nanjing West Road" list=\
+    game
+add address=121.51.0.0/16 comment="Shenzhen Tencent" list=game
+add address=60.176.0.0/12 comment="CHINANET Zhejiang province network" list=\
+    game
+add address=43.247.88.0/22 comment=\
+    "Guangdong LITONG Network Technology Limited" list=game
+add address=47.254.128.0/18 comment="AliCloud (Germany) GmbH" list=game
+add address=111.30.131.0/24 comment="China Mobile Communications Corporation" \
+    list=game
+add address=125.36.0.0/14 comment="China Unicom Tianjin province network" \
+    list=game
+add address=27.184.0.0/13 comment="CHINANET hebei province network" list=game
+add address=107.176.0.0/15 comment=FDCservers.net list=game
+add address=158.177.192.0/18 comment=SoftLayer list=game
+add address=106.75.16.0/20 comment=\
+    "Shanghai UCloud Information Technology Company Limited" list=game
+add address=161.202.128.0/19 comment=SoftLayer list=game
+add address=161.202.160.0/19 comment=SoftLayer list=game
+add address=121.46.24.0/22 comment="Guangdong Aofei Data Technology." list=\
+    game
+add address=183.253.0.0/16 comment="China Mobile Communications Corporation" \
+    list=game
+add address=47.56.0.0/16 comment=ALICLOUD-HK list=game
+add address=49.232.0.0/14 comment="Tencent cloud computing." list=game
+add address=203.205.211.0/24 comment="Shenzhen Tencent" list=game
+add address=169.53.0.0/18 comment=SoftLayer list=game
+add address=169.53.192.0/18 comment=SoftLayer list=game
+add address=169.54.192.0/18 comment=SoftLayer list=game
+add address=8.23.192.0/23 comment="Zenlayer Inc" list=game
+add address=8.23.195.0/24 comment="Zenlayer Inc" list=game
+add address=23.91.102.0/23 comment="Zenlayer Inc" list=game
+add address=23.91.104.0/23 comment="Zenlayer Inc" list=game
+add address=23.91.108.0/24 comment="Zenlayer Inc" list=game
+add address=23.91.109.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.96.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.97.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.99.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.100.0/23 comment="Zenlayer Inc" list=game
+add address=23.236.102.0/23 comment="Zenlayer Inc" list=game
+add address=23.236.104.0/23 comment="Zenlayer Inc" list=game
+add address=23.236.106.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.107.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.109.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.110.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.111.0/24 comment="Zenlayer Inc" list=game
+add address=23.236.112.0/20 comment="Zenlayer Inc" list=game
+add address=23.236.112.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.19.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.20.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.21.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.24.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.25.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.26.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.27.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.28.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.29.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.30.0/24 comment="Zenlayer Inc" list=game
+add address=23.249.31.0/24 comment="Zenlayer Inc" list=game
+add address=27.50.2.0/24 comment="Zenlayer Inc" list=game
+add address=37.230.168.0/24 comment="Zenlayer Inc" list=game
+add address=37.230.172.0/24 comment="Zenlayer Inc" list=game
+add address=37.230.185.0/24 comment="Zenlayer Inc" list=game
+add address=37.230.188.0/24 comment="Zenlayer Inc" list=game
+add address=37.230.204.0/24 comment="Zenlayer Inc" list=game
+add address=43.225.95.0/24 comment="Zenlayer Inc" list=game
+add address=45.40.52.0/22 comment="Zenlayer Inc" list=game
+add address=45.40.55.0/24 comment="Zenlayer Inc" list=game
+add address=45.40.58.0/24 comment="Zenlayer Inc" list=game
+add address=45.40.60.0/22 comment="Zenlayer Inc" list=game
+add address=45.43.38.0/23 comment="Zenlayer Inc" list=game
+add address=45.43.40.0/22 comment="Zenlayer Inc" list=game
+add address=45.43.44.0/22 comment="Zenlayer Inc" list=game
+add address=45.43.48.0/23 comment="Zenlayer Inc" list=game
+add address=45.43.59.0/24 comment="Zenlayer Inc" list=game
+add address=46.243.219.0/24 comment="Zenlayer Inc" list=game
+add address=58.68.168.0/21 comment="Zenlayer Inc" list=game
+add address=58.68.173.0/24 comment="Zenlayer Inc" list=game
+add address=58.68.176.0/20 comment="Zenlayer Inc" list=game
+add address=58.68.192.0/21 comment="Zenlayer Inc" list=game
+add address=61.91.194.0/24 comment="Zenlayer Inc" list=game
+add address=65.255.32.0/20 comment="Zenlayer Inc" list=game
+add address=69.28.54.0/24 comment="Zenlayer Inc" list=game
+add address=69.28.57.0/24 comment="Zenlayer Inc" list=game
+add address=69.28.59.0/24 comment="Zenlayer Inc" list=game
+add address=85.208.32.0/23 comment="Zenlayer Inc" list=game
+add address=93.93.247.0/24 comment="Zenlayer Inc" list=game
+add address=103.71.152.0/24 comment="Zenlayer Inc" list=game
+add address=103.86.71.0/24 comment="Zenlayer Inc" list=game
+add address=103.91.219.0/24 comment="Zenlayer Inc" list=game
+add address=103.99.78.0/24 comment="Zenlayer Inc" list=game
+add address=103.115.20.0/24 comment="Zenlayer Inc" list=game
+add address=103.116.148.0/24 comment="Zenlayer Inc" list=game
+add address=103.116.149.0/24 comment="Zenlayer Inc" list=game
+add address=103.118.42.0/24 comment="Zenlayer Inc" list=game
+add address=103.118.43.0/24 comment="Zenlayer Inc" list=game
+add address=103.135.102.0/24 comment="Zenlayer Inc" list=game
+add address=103.193.124.0/24 comment="Zenlayer Inc" list=game
+add address=103.193.126.0/24 comment="Zenlayer Inc" list=game
+add address=103.206.20.0/22 comment="Zenlayer Inc" list=game
+add address=103.211.164.0/24 comment="Zenlayer Inc" list=game
+add address=103.211.166.0/24 comment="Zenlayer Inc" list=game
+add address=103.212.228.0/23 comment="Zenlayer Inc" list=game
+add address=103.219.194.0/24 comment="Zenlayer Inc" list=game
+add address=103.249.105.0/24 comment="Zenlayer Inc" list=game
+add address=104.143.32.0/24 comment="Zenlayer Inc" list=game
+add address=104.143.34.0/24 comment="Zenlayer Inc" list=game
+add address=104.143.35.0/24 comment="Zenlayer Inc" list=game
+add address=104.143.40.0/24 comment="Zenlayer Inc" list=game
+add address=104.143.42.0/24 comment="Zenlayer Inc" list=game
+add address=104.143.44.0/23 comment="Zenlayer Inc" list=game
+add address=104.143.46.0/24 comment="Zenlayer Inc" list=game
+add address=104.218.160.0/21 comment="Zenlayer Inc" list=game
+add address=104.245.13.0/24 comment="Zenlayer Inc" list=game
+add address=104.251.230.0/24 comment="Zenlayer Inc" list=game
+add address=104.251.232.0/24 comment="Zenlayer Inc" list=game
+add address=104.251.233.0/24 comment="Zenlayer Inc" list=game
+add address=104.251.236.0/24 comment="Zenlayer Inc" list=game
+add address=104.251.237.0/24 comment="Zenlayer Inc" list=game
+add address=104.251.238.0/24 comment="Zenlayer Inc" list=game
+add address=107.150.96.0/20 comment="Zenlayer Inc" list=game
+add address=107.151.128.0/18 comment="Zenlayer Inc" list=game
+add address=107.151.160.0/24 comment="Zenlayer Inc" list=game
+add address=141.101.147.0/24 comment="Zenlayer Inc" list=game
+add address=154.65.96.0/19 comment="Zenlayer Inc" list=game
+add address=154.83.8.0/22 comment="Zenlayer Inc" list=game
+add address=154.83.19.0/24 comment="Zenlayer Inc" list=game
+add address=154.84.32.0/19 comment="Zenlayer Inc" list=game
+add address=156.236.8.0/22 comment="Zenlayer Inc" list=game
+add address=156.236.22.0/23 comment="Zenlayer Inc" list=game
+add address=156.236.24.0/23 comment="Zenlayer Inc" list=game
+add address=156.237.6.0/24 comment="Zenlayer Inc" list=game
+add address=156.237.8.0/23 comment="Zenlayer Inc" list=game
+add address=156.237.10.0/24 comment="Zenlayer Inc" list=game
+add address=156.238.4.0/24 comment="Zenlayer Inc" list=game
+add address=156.238.8.0/24 comment="Zenlayer Inc" list=game
+add address=156.238.9.0/24 comment="Zenlayer Inc" list=game
+add address=156.238.28.0/23 comment="Zenlayer Inc" list=game
+add address=161.129.34.0/24 comment="Zenlayer Inc" list=game
+add address=161.129.38.0/24 comment="Zenlayer Inc" list=game
+add address=161.129.45.0/24 comment="Zenlayer Inc" list=game
+add address=162.221.4.0/22 comment="Zenlayer Inc" list=game
+add address=162.221.192.0/21 comment="Zenlayer Inc" list=game
+add address=169.197.96.0/22 comment="Zenlayer Inc" list=game
+add address=169.197.100.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.102.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.103.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.104.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.105.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.106.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.108.0/24 comment="Zenlayer Inc" list=game
+add address=169.197.112.0/22 comment="Zenlayer Inc" list=game
+add address=169.197.116.0/22 comment="Zenlayer Inc" list=game
+add address=172.81.96.0/24 comment="Zenlayer Inc" list=game
+add address=172.81.98.0/24 comment="Zenlayer Inc" list=game
+add address=172.81.101.0/24 comment="Zenlayer Inc" list=game
+add address=172.81.103.0/24 comment="Zenlayer Inc" list=game
+add address=172.81.108.0/24 comment="Zenlayer Inc" list=game
+add address=172.81.110.0/24 comment="Zenlayer Inc" list=game
+add address=172.87.24.0/21 comment="Zenlayer Inc" list=game
+add address=172.94.4.0/24 comment="Zenlayer Inc" list=game
+add address=172.94.56.0/24 comment="Zenlayer Inc" list=game
+add address=172.94.94.0/24 comment="Zenlayer Inc" list=game
+add address=172.96.114.0/24 comment="Zenlayer Inc" list=game
+add address=172.96.116.0/23 comment="Zenlayer Inc" list=game
+add address=172.96.118.0/24 comment="Zenlayer Inc" list=game
+add address=172.96.119.0/24 comment="Zenlayer Inc" list=game
+add address=172.96.125.0/24 comment="Zenlayer Inc" list=game
+add address=172.111.168.0/24 comment="Zenlayer Inc" list=game
+add address=172.111.172.0/24 comment="Zenlayer Inc" list=game
+add address=172.111.241.0/24 comment="Zenlayer Inc" list=game
+add address=172.111.251.0/24 comment="Zenlayer Inc" list=game
+add address=172.247.32.0/24 comment="Zenlayer Inc" list=game
+add address=172.247.35.0/24 comment="Zenlayer Inc" list=game
+add address=172.247.38.0/24 comment="Zenlayer Inc" list=game
+add address=172.247.39.0/24 comment="Zenlayer Inc" list=game
+add address=180.210.224.0/22 comment="Zenlayer Inc" list=game
+add address=180.210.240.0/20 comment="Zenlayer Inc" list=game
+add address=182.161.36.0/22 comment="Zenlayer Inc" list=game
+add address=183.182.72.0/24 comment="Zenlayer Inc" list=game
+add address=185.207.112.0/22 comment="Zenlayer Inc" list=game
+add address=185.225.14.0/24 comment="Zenlayer Inc" list=game
+add address=192.253.251.0/24 comment="Zenlayer Inc" list=game
+add address=192.254.80.0/20 comment="Zenlayer Inc" list=game
+add address=193.118.32.0/19 comment="Zenlayer Inc" list=game
+add address=199.190.44.0/24 comment="Zenlayer Inc" list=game
+add address=199.190.45.0/24 comment="Zenlayer Inc" list=game
+add address=199.190.46.0/23 comment="Zenlayer Inc" list=game
+add address=199.245.56.0/23 comment="Zenlayer Inc" list=game
+add address=199.245.58.0/24 comment="Zenlayer Inc" list=game
+add address=199.245.60.0/23 comment="Zenlayer Inc" list=game
+add address=202.58.107.0/24 comment="Zenlayer Inc" list=game
+add address=206.55.196.0/23 comment="Zenlayer Inc" list=game
+add address=206.123.139.0/24 comment="Zenlayer Inc" list=game
+add address=206.126.236.0/22 comment="Zenlayer Inc" list=game
+add address=208.81.200.0/22 comment="Zenlayer Inc" list=game
+add address=209.177.80.0/20 comment="Zenlayer Inc" list=game
+add address=210.171.224.0/23 comment="Zenlayer Inc" list=game
+add address=218.98.111.0/24 comment="Zenlayer Inc" list=game
+add address=218.100.6.0/23 comment="Zenlayer Inc" list=game
+add address=223.31.200.0/24 comment="Zenlayer Inc" list=game
+add address=45.113.68.0/23 comment="Tencent Cloud Computing" list=game
+add address=45.113.70.0/23 comment="Tencent Cloud Computing" list=game
+add address=49.51.0.0/16 comment="Tencent Cloud Computing" list=game
+add address=103.7.28.0/24 comment="Tencent Cloud Computing" list=game
+add address=103.7.29.0/24 comment="Tencent Cloud Computing" list=game
+add address=103.7.30.0/24 comment="Tencent Cloud Computing" list=game
+add address=103.7.31.0/24 comment="Tencent Cloud Computing" list=game
+add address=103.52.216.0/23 comment="Tencent Cloud Computing" list=game
+add address=103.52.218.0/23 comment="Tencent Cloud Computing" list=game
+add address=119.29.0.0/16 comment="Tencent Cloud Computing" list=game
+add address=162.14.0.0/16 comment="Tencent Cloud Computing / PUBG" list=game
+add address=203.205.134.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.135.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.136.0/23 comment="Tencent Cloud Computing" list=game
+add address=203.205.140.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.141.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.142.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.143.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.144.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.145.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.146.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.147.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.148.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.149.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.150.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.151.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.152.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.156.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.157.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.187.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.190.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.208.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.209.0/24 comment="Tencent Cloud Computing" list=game
+add address=203.205.210.0/24 comment="Tencent Cloud Computing" list=game
+add address=27.115.0.0/17 comment="CHINA UNICOM" list=game
+add address=43.240.124.0/24 comment="CHINA UNICOM" list=game
+add address=43.240.125.0/24 comment="CHINA UNICOM" list=game
+add address=43.240.126.0/23 comment="CHINA UNICOM" list=game
+add address=43.240.128.0/23 comment="CHINA UNICOM" list=game
+add address=43.240.130.0/23 comment="CHINA UNICOM" list=game
+add address=43.240.192.0/22 comment="CHINA UNICOM" list=game
+add address=43.240.196.0/22 comment="CHINA UNICOM" list=game
+add address=43.243.148.0/22 comment="CHINA UNICOM" list=game
+add address=43.250.144.0/22 comment="CHINA UNICOM" list=game
+add address=43.254.44.0/22 comment="CHINA UNICOM" list=game
+add address=43.254.104.0/23 comment="CHINA UNICOM" list=game
+add address=43.254.106.0/24 comment="CHINA UNICOM" list=game
+add address=43.254.144.0/22 comment="CHINA UNICOM" list=game
+add address=43.254.148.0/22 comment="CHINA UNICOM" list=game
+add address=43.254.220.0/22 comment="CHINA UNICOM" list=game
+add address=43.254.224.0/22 comment="CHINA UNICOM" list=game
+add address=45.115.144.0/22 comment="CHINA UNICOM" list=game
+add address=45.253.24.0/23 comment="CHINA UNICOM" list=game
+add address=45.253.26.0/24 comment="CHINA UNICOM" list=game
+add address=45.253.27.0/24 comment="CHINA UNICOM" list=game
+add address=58.246.0.0/16 comment="CHINA UNICOM" list=game
+add address=58.247.0.0/16 comment="CHINA UNICOM" list=game
+add address=59.81.64.0/23 comment="CHINA UNICOM" list=game
+add address=59.81.106.0/23 comment="CHINA UNICOM" list=game
+add address=103.6.222.0/23 comment="CHINA UNICOM" list=game
+add address=103.20.248.0/23 comment="CHINA UNICOM" list=game
+add address=103.36.132.0/22 comment="CHINA UNICOM" list=game
+add address=103.36.174.0/23 comment="CHINA UNICOM" list=game
+add address=103.38.232.0/22 comment="CHINA UNICOM" list=game
+add address=103.55.172.0/22 comment="CHINA UNICOM" list=game
+add address=103.98.220.0/22 comment="CHINA UNICOM" list=game
+add address=103.108.244.0/24 comment="CHINA UNICOM" list=game
+add address=103.111.64.0/24 comment="CHINA UNICOM" list=game
+add address=103.116.76.0/24 comment="CHINA UNICOM" list=game
+add address=103.116.77.0/24 comment="CHINA UNICOM" list=game
+add address=103.192.212.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.92.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.96.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.100.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.104.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.108.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.112.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.120.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.124.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.128.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.132.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.136.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.140.0/22 comment="CHINA UNICOM" list=game
+add address=103.202.144.0/22 comment="CHINA UNICOM" list=game
+add address=103.211.44.0/22 comment="CHINA UNICOM" list=game
+add address=103.220.164.0/22 comment="CHINA UNICOM" list=game
+add address=103.222.40.0/24 comment="CHINA UNICOM" list=game
+add address=103.222.41.0/24 comment="CHINA UNICOM" list=game
+add address=103.222.42.0/24 comment="CHINA UNICOM" list=game
+add address=103.222.43.0/24 comment="CHINA UNICOM" list=game
+add address=103.228.228.0/24 comment="CHINA UNICOM" list=game
+add address=103.228.229.0/24 comment="CHINA UNICOM" list=game
+add address=103.228.230.0/24 comment="CHINA UNICOM" list=game
+add address=103.228.231.0/24 comment="CHINA UNICOM" list=game
+add address=103.231.16.0/24 comment="CHINA UNICOM" list=game
+add address=103.243.252.0/23 comment="CHINA UNICOM" list=game
+add address=103.243.254.0/23 comment="CHINA UNICOM" list=game
+add address=103.250.192.0/22 comment="CHINA UNICOM" list=game
+add address=106.75.208.0/20 comment="CHINA UNICOM" list=game
+add address=106.75.224.0/20 comment="CHINA UNICOM" list=game
+add address=106.75.240.0/20 comment="CHINA UNICOM" list=game
+add address=110.43.128.0/21 comment="CHINA UNICOM" list=game
+add address=110.43.136.0/21 comment="CHINA UNICOM" list=game
+add address=110.43.144.0/21 comment="CHINA UNICOM" list=game
+add address=110.43.152.0/21 comment="CHINA UNICOM" list=game
+add address=112.64.0.0/16 comment="CHINA UNICOM" list=game
+add address=112.65.0.0/16 comment="CHINA UNICOM" list=game
+add address=113.31.96.0/20 comment="CHINA UNICOM" list=game
+add address=113.31.112.0/20 comment="CHINA UNICOM" list=game
+add address=113.31.144.0/20 comment="CHINA UNICOM" list=game
+add address=114.28.248.0/24 comment="CHINA UNICOM" list=game
+add address=114.67.64.0/18 comment="CHINA UNICOM" list=game
+add address=116.66.48.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.49.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.50.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.51.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.52.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.53.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.54.0/24 comment="CHINA UNICOM" list=game
+add address=116.66.55.0/24 comment="CHINA UNICOM" list=game
+add address=116.128.128.0/18 comment="CHINA UNICOM" list=game
+add address=116.128.200.0/21 comment="CHINA UNICOM" list=game
+add address=116.128.208.0/20 comment="CHINA UNICOM" list=game
+add address=119.148.160.0/24 comment="CHINA UNICOM" list=game
+add address=119.148.161.0/24 comment="CHINA UNICOM" list=game
+add address=119.148.162.0/24 comment="CHINA UNICOM" list=game
+add address=120.92.128.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.136.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.144.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.152.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.160.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.168.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.176.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.184.0/21 comment="CHINA UNICOM" list=game
+add address=120.92.224.0/20 comment="CHINA UNICOM" list=game
+add address=120.133.224.0/22 comment="CHINA UNICOM" list=game
+add address=120.133.236.0/24 comment="CHINA UNICOM" list=game
+add address=120.133.237.0/24 comment="CHINA UNICOM" list=game
+add address=120.133.238.0/24 comment="CHINA UNICOM" list=game
+add address=120.133.239.0/24 comment="CHINA UNICOM" list=game
+add address=120.136.176.0/22 comment="CHINA UNICOM" list=game
+add address=120.136.176.0/24 comment="CHINA UNICOM" list=game
+add address=120.136.177.0/24 comment="CHINA UNICOM" list=game
+add address=120.136.178.0/24 comment="CHINA UNICOM" list=game
+add address=120.136.179.0/24 comment="CHINA UNICOM" list=game
+add address=122.144.128.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.130.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.132.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.134.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.136.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.138.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.142.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.152.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.166.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.168.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.172.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.192.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.194.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.196.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.198.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.200.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.202.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.204.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.206.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.208.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.210.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.212.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.214.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.216.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.218.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.220.0/23 comment="CHINA UNICOM" list=game
+add address=122.144.222.0/23 comment="CHINA UNICOM" list=game
+add address=125.215.0.0/20 comment="CHINA UNICOM" list=game
+add address=125.215.16.0/20 comment="CHINA UNICOM" list=game
+add address=125.215.32.0/19 comment="CHINA UNICOM" list=game
+add address=125.215.36.0/23 comment="CHINA UNICOM" list=game
+add address=125.215.44.0/23 comment="CHINA UNICOM" list=game
+add address=125.215.52.0/23 comment="CHINA UNICOM" list=game
+add address=139.226.0.0/16 comment="CHINA UNICOM" list=game
+add address=139.226.32.0/19 comment="CHINA UNICOM" list=game
+add address=139.226.96.0/19 comment="CHINA UNICOM" list=game
+add address=139.227.0.0/16 comment="CHINA UNICOM" list=game
+add address=140.206.0.0/16 comment="CHINA UNICOM" list=game
+add address=146.196.56.0/22 comment="CHINA UNICOM" list=game
+add address=150.129.192.0/22 comment="CHINA UNICOM" list=game
+add address=163.47.4.0/22 comment="CHINA UNICOM" list=game
+add address=163.53.88.0/21 comment="CHINA UNICOM" list=game
+add address=168.159.144.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.145.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.146.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.147.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.148.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.149.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.150.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.151.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.152.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.153.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.154.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.155.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.156.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.157.0/24 comment="CHINA UNICOM" list=game
+add address=168.159.158.0/24 comment="CHINA UNICOM" list=game
+add address=175.102.16.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.18.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.20.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.22.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.24.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.26.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.28.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.30.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.132.0/23 comment="CHINA UNICOM" list=game
+add address=175.102.134.0/23 comment="CHINA UNICOM" list=game
+add address=182.175.224.0/24 comment="CHINA UNICOM" list=game
+add address=182.175.240.0/24 comment="CHINA UNICOM" list=game
+add address=182.175.241.0/24 comment="CHINA UNICOM" list=game
+add address=182.175.242.0/24 comment="CHINA UNICOM" list=game
+add address=182.175.243.0/24 comment="CHINA UNICOM" list=game
+add address=194.138.203.0/24 comment="CHINA UNICOM" list=game
+add address=203.76.208.0/22 comment="CHINA UNICOM" list=game
+add address=203.76.212.0/22 comment="CHINA UNICOM" list=game
+add address=203.76.216.0/22 comment="CHINA UNICOM" list=game
+add address=203.95.0.0/22 comment="CHINA UNICOM" list=game
+add address=203.95.4.0/22 comment="CHINA UNICOM" list=game
+add address=203.166.160.0/21 comment="CHINA UNICOM" list=game
+add address=203.166.168.0/22 comment="CHINA UNICOM" list=game
+add address=203.166.172.0/22 comment="CHINA UNICOM" list=game
+add address=203.166.176.0/22 comment="CHINA UNICOM" list=game
+add address=203.166.180.0/23 comment="CHINA UNICOM" list=game
+add address=203.166.182.0/23 comment="CHINA UNICOM" list=game
+add address=203.166.184.0/23 comment="CHINA UNICOM" list=game
+add address=203.166.186.0/23 comment="CHINA UNICOM" list=game
+add address=203.166.188.0/22 comment="CHINA UNICOM" list=game
+add address=210.14.64.0/20 comment="CHINA UNICOM" list=game
+add address=210.14.80.0/20 comment="CHINA UNICOM" list=game
+add address=210.22.64.0/18 comment="CHINA UNICOM" list=game
+add address=210.22.128.0/18 comment="CHINA UNICOM" list=game
+add address=210.51.20.0/22 comment="CHINA UNICOM" list=game
+add address=210.51.24.0/21 comment="CHINA UNICOM" list=game
+add address=210.51.28.0/24 comment="CHINA UNICOM" list=game
+add address=210.51.30.0/24 comment="CHINA UNICOM" list=game
+add address=210.51.31.0/24 comment="CHINA UNICOM" list=game
+add address=210.51.32.0/19 comment="CHINA UNICOM" list=game
+add address=210.52.212.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.213.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.214.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.215.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.216.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.217.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.218.0/23 comment="CHINA UNICOM" list=game
+add address=210.52.220.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.222.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.223.0/24 comment="CHINA UNICOM" list=game
+add address=210.52.224.0/24 comment="CHINA UNICOM" list=game
+add address=211.95.0.0/17 comment="CHINA UNICOM" list=game
+add address=211.144.96.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.100.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.104.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.106.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.108.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.112.0/20 comment="CHINA UNICOM" list=game
+add address=211.144.124.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.192.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.194.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.196.0/22 comment="CHINA UNICOM" list=game
+add address=211.144.196.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.198.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.200.0/24 comment="CHINA UNICOM" list=game
+add address=211.144.201.0/24 comment="CHINA UNICOM" list=game
+add address=211.144.202.0/23 comment="CHINA UNICOM" list=game
+add address=211.144.203.0/24 comment="CHINA UNICOM" list=game
+add address=211.144.205.0/24 comment="CHINA UNICOM" list=game
+add address=211.144.206.0/23 comment="CHINA UNICOM" list=game
+add address=211.152.57.0/24 comment="CHINA UNICOM" list=game
+add address=211.152.58.0/24 comment="CHINA UNICOM" list=game
+add address=219.235.6.0/24 comment="CHINA UNICOM" list=game
+add address=219.235.7.0/24 comment="CHINA UNICOM" list=game
+add address=219.235.8.0/24 comment="CHINA UNICOM" list=game
+add address=220.196.0.0/17 comment="CHINA UNICOM" list=game
+add address=220.196.128.0/17 comment="CHINA UNICOM" list=game
+add address=220.248.0.0/18 comment="CHINA UNICOM" list=game
+add address=220.248.39.0/24 comment="CHINA UNICOM" list=game
+add address=220.248.42.0/23 comment="CHINA UNICOM" list=game
+add address=220.248.64.0/18 comment="CHINA UNICOM" list=game
+add address=220.248.79.0/24 comment="CHINA UNICOM" list=game
+add address=220.248.117.0/24 comment="CHINA UNICOM" list=game
+add address=223.166.0.0/16 comment="CHINA UNICOM" list=game
+add address=223.167.0.0/16 comment="CHINA UNICOM" list=game
+add address=45.121.184.0/23 comment="Valve Corporation" list=game
+add address=45.121.186.0/23 comment="Valve Corporation" list=game
+add address=103.10.125.0/24 comment="Valve Corporation" list=game
+add address=103.28.54.0/23 comment="Valve Corporation" list=game
+add address=146.66.152.0/23 comment="Valve Corporation" list=game
+add address=146.66.154.0/24 comment="Valve Corporation" list=game
+add address=146.66.155.0/24 comment="Valve Corporation" list=game
+add address=146.66.156.0/23 comment="Valve Corporation" list=game
+add address=146.66.158.0/23 comment="Valve Corporation" list=game
+add address=153.254.86.0/24 comment="Valve Corporation" list=game
+add address=155.133.224.0/23 comment="Valve Corporation" list=game
+add address=155.133.227.0/24 comment="Valve Corporation" list=game
+add address=155.133.228.0/23 comment="Valve Corporation" list=game
+add address=155.133.230.0/23 comment="Valve Corporation" list=game
+add address=155.133.232.0/24 comment="Valve Corporation" list=game
+add address=155.133.233.0/24 comment="Valve Corporation" list=game
+add address=155.133.234.0/24 comment="Valve Corporation" list=game
+add address=155.133.235.0/24 comment="Valve Corporation" list=game
+add address=155.133.236.0/23 comment="Valve Corporation" list=game
+add address=155.133.238.0/24 comment="Valve Corporation" list=game
+add address=155.133.239.0/24 comment="Valve Corporation" list=game
+add address=155.133.240.0/23 comment="Valve Corporation" list=game
+add address=155.133.242.0/23 comment="Valve Corporation" list=game
+add address=155.133.244.0/24 comment="Valve Corporation" list=game
+add address=155.133.245.0/24 comment="Valve Corporation" list=game
+add address=155.133.246.0/23 comment="Valve Corporation" list=game
+add address=155.133.248.0/24 comment="Valve Corporation" list=game
+add address=155.133.249.0/24 comment="Valve Corporation" list=game
+add address=155.133.250.0/24 comment="Valve Corporation" list=game
+add address=155.133.252.0/24 comment="Valve Corporation" list=game
+add address=155.133.253.0/24 comment="Valve Corporation" list=game
+add address=155.133.254.0/24 comment="Valve Corporation" list=game
+add address=155.133.255.0/24 comment="Valve Corporation" list=game
+add address=185.25.180.0/23 comment="Valve Corporation" list=game
+add address=185.25.182.0/24 comment="Valve Corporation" list=game
+add address=185.25.183.0/24 comment="Valve Corporation" list=game
+add address=190.216.121.0/24 comment="Valve Corporation" list=game
+add address=190.217.33.0/24 comment="Valve Corporation" list=game
+add address=192.69.96.0/23 comment="Valve Corporation" list=game
+add address=205.185.194.0/24 comment="Valve Corporation" list=game
+add address=205.196.6.0/24 comment="Valve Corporation" list=game
+add address=208.64.200.0/24 comment="Valve Corporation" list=game
+add address=208.64.201.0/24 comment="Valve Corporation" list=game
+add address=208.64.202.0/24 comment="Valve Corporation" list=game
+add address=208.64.203.0/24 comment="Valve Corporation" list=game
+add address=208.78.164.0/23 comment="Valve Corporation" list=game
+add address=208.78.166.0/24 comment="Valve Corporation" list=game
+add address=208.78.167.0/24 comment="Valve Corporation" list=game
+add address=8.37.239.0/24 comment="Level 3 Parent, LLC" list=game
+add address=14.116.128.0/19 comment="CHINANET Guangdong province network" \
+    list=game
+add address=174.132.0.0/15 comment="SoftLayer Technologies Inc. / ML" list=\
+    game
+add address=182.239.114.0/24 comment=\
+    "China Mobile Peoples Telephone Company Limited" list=game
+add address=52.200.0.0/13 comment="Amazon Technologies Inc." list=game
+add address=54.183.128.0/17 comment="Amazon Technologies Inc." list=game
+add address=96.17.72.0/23 comment="Akamai / PUBG" list=game
+add address=103.247.204.0/22 comment="18 Murray Street / FF Load Login" list=\
+    game
+add address=143.92.125.0/24 comment="Garena Online Pte Ltd" list=game
+add address=143.92.126.0/24 comment="Garena Online Pte Ltd" list=game
+add address=143.92.127.0/24 comment="Garena Online Pte Ltd" list=game
+add address=157.255.0.0/16 comment="China Unicom Guangdong province network" \
+    list=game
+add address=113.96.0.0/12 comment="CHINANET Guangdong province network" list=\
+    game
+add address=202.181.136.0/24 comment=HKCIX list=game
+add address=103.69.177.0/24 comment="PT Komunika Jaya Nusantara" list=game
+add address=103.104.168.0/24 comment=CYIT-HK list=game
+add address=103.69.178.0/24 comment="PT Komunika Jaya Nusantara" list=game
+add address=124.158.132.0/24 comment="PT Garena Indonesia" list=game
+add address=103.69.179.0/24 comment="PT Komunika Jaya Nusantara" list=game
+add address=103.69.176.0/24 comment="PT Komunika Jaya Nusantara" list=game
+add address=109.206.160.0/19 comment="Serverel Inc." list=game
+add address=137.116.0.0/15 comment="Various Registries (Maintained by ARIN)" \
+    list=game
+add address=210.210.128.0/18 comment="PT. Cyberindo Aditama" list=game
+add address=150.109.90.0/23 comment="16 COLLYER QUAY / Updater PUBG" list=\
+    game
+add address=199.91.72.0/22 comment="Zenlayer Inc" list=game
+add address=124.158.128.0/23 comment="PT Garena Indonesia" list=game
+add address=14.128.0.0/24 comment="CDNetworks Japan (ML)" list=game
+add address=128.1.0.0/16 comment="Zenlayer Inc / ML" list=game
+add address=143.92.120.0/22 comment="SHOPEE SINGAPORE PRIVATE LIMITED" list=\
+    game
+add address=119.81.0.0/16 comment=ML list=game
+add address=141.193.3.0/24 comment=Roblox list=game
+add address=205.201.62.0/24 comment=Roblox list=game
+add address=209.206.40.0/21 comment=Roblox list=game
+add address=103.140.28.0/23 comment=Roblox list=game
+add address=148.153.0.0/16 comment="Capitalonline Data Service / FF" list=\
+    game
+add address=163.181.26.0/24 comment=Alibaba list=game
+add address=163.181.18.0/24 comment=Alibaba list=game
+add address=192.169.112.0/22 comment=Zenlayer list=game
+add address=101.33.104.0/21 comment=ACEVILLE list=game
+add address=202.81.100.0/22 comment="18 Murray Street" list=game
+add address=150.158.0.0/16 comment=Tencent list=game
+add address=170.33.8.0/24 comment=Aliyun list=game
+add address=103.235.44.0/22 comment="Rooms 2201-03" list=game
+add address=115.159.0.0/16 comment="Tencent cloud computing" list=game
+add address=47.241.0.0/16 comment=ALICLOUD-SG list=game
+add address=202.81.118.0/24 comment="18 Murray Street" list=game
+add address=202.81.116.0/23 comment="18 Murray Street" list=game
+add address=202.181.80.0/21 comment="PT Garena Indonesia" list=game
+add address=43.129.32.0/19 comment=Tencent list=game
+add address=103.16.137.0/24 comment=Makassar list=game
+add address=156.59.160.0/22 comment=Zenlayer list=game
+add address=148.153.100.0/23 comment="CDS Global Cloud" list=game
+add address=164.52.0.0/17 comment="CDS Global Cloud" list=game
+add address=192.168.51.211-192.168.51.254 comment="Pool Bypass" list=\
+    pool-Devices
+/ip firewall filter
+add action=accept chain=input comment="Allow WG Handshake" dst-port=13233 \
+    protocol=udp
+add action=accept chain=input comment="Allow WireGuard Handshake" dst-port=\
+    13233 protocol=udp
+add action=accept chain=input comment="Allow WireGuard Handshake" dst-port=\
+    13233 protocol=udp
+add action=drop chain=forward disabled=yes dst-address-list=LAN protocol=tcp \
+    src-address=172.16.80.0/24
+add action=drop chain=forward disabled=yes dst-address=172.16.80.0/24 \
+    protocol=tcp src-address-list=LAN
+add action=drop chain=forward disabled=yes dst-address-list=LAN protocol=icmp \
+    src-address=172.16.80.0/24
+add action=drop chain=forward disabled=yes dst-address=172.16.80.0/24 \
+    protocol=icmp src-address-list=LAN
+add action=drop chain=forward disabled=yes dst-address-list=LAN protocol=tcp \
+    src-address=172.16.80.0/24
+add action=drop chain=forward disabled=yes dst-address=172.16.80.0/24 \
+    protocol=udp src-address-list=LAN
+add action=accept chain=input comment="ALLOW WG inbound from CCR" dst-port=\
+    13233 protocol=udp src-address=138.252.136.10
+add action=accept chain=input comment="Allow ping WG IP" in-interface=wg-asa \
+    protocol=icmp
+add action=accept chain=forward comment="WG forward in" in-interface=wg-asa
+add action=accept chain=forward comment="WG forward out" out-interface=wg-asa
+add action=accept chain=forward protocol=tcp src-address=172.16.10.0/24
+add action=accept chain=input comment="allow established" connection-state=\
+    established,related
+add action=accept chain=input comment="WG ASA" disabled=yes protocol=udp
+add action=passthrough chain=unused-hs-chain comment=\
+    "place hotspot rules here" disabled=yes
+add action=drop chain=forward disabled=yes dst-address-list=youtube \
+    src-address-list=pool-Intern time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=game \
+    src-address-list=pool-Intern time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=sosmed \
+    src-address-list=pool-Intern time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=youtube \
+    src-address-list=pool-Staff time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=game \
+    src-address-list=pool-Staff time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=sosmed \
+    src-address-list=pool-Staff time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=sosmed \
+    src-address-list=pool-Developer time=8h-16h,mon,tue,wed,thu,fri
+add action=drop chain=forward disabled=yes dst-address-list=game \
+    src-address-list=pool-Developer time=8h-16h,mon,tue,wed,thu,fri,sat
+add action=drop chain=forward disabled=yes dst-address-list=youtube \
+    src-address-list=pool-Developer time=8h-16h,mon,tue,wed,thu,fri,sat
+add action=accept chain=forward comment="Input from Eth6 - Download" \
+    in-interface=ether6 out-interface-list=WAN
+add action=accept chain=forward comment="Input from Eth6 Upload" \
+    in-interface-list=WAN out-interface=ether6
+/ip firewall mangle
+add action=mark-connection chain=output comment="WG to Core - mark conn" \
+    dst-address=103.159.113.58 dst-port=13233 new-connection-mark=\
+    conn-wg-core protocol=udp
+add action=mark-routing chain=output comment="WG to Core - force WAN1" \
+    connection-mark=conn-wg-core new-routing-mark=Routing_To_Fibernet \
+    passthrough=no
+add action=mark-connection chain=input comment="Marking Koneksi ISP Biznet" \
+    in-interface=ether1-Biznet new-connection-mark=ISP_Biznet
+add action=mark-routing chain=output connection-mark=ISP_Biznet \
+    new-routing-mark=Routing_To_BIZNET
+add action=mark-connection chain=prerouting in-interface-list=LB \
+    new-connection-mark=ISP_Biznet per-connection-classifier=\
+    both-addresses-and-ports:2/0
+add action=mark-routing chain=prerouting connection-mark=ISP_Biznet \
+    in-interface-list=LB new-routing-mark=Routing_To_BIZNET passthrough=no
+add action=mark-connection chain=input comment="Marking Koneksi ISP Fibernet" \
+    in-interface=ether2-Fibernet new-connection-mark=ISP_Fibernet
+add action=mark-routing chain=output connection-mark=ISP_Fibernet \
+    new-routing-mark=Routing_To_Fibernet
+add action=mark-connection chain=prerouting in-interface-list=LB \
+    new-connection-mark=ISP_Fibernet per-connection-classifier=\
+    both-addresses-and-ports:2/1
+add action=mark-routing chain=prerouting connection-mark=ISP_Fibernet \
+    in-interface-list=LB new-routing-mark=Routing_To_Fibernet passthrough=no \
+    per-connection-classifier=both-addresses-and-ports:2/1
+add action=mark-connection chain=forward comment=\
+    "Koneksi Download Load Balance" dst-address-list=LAN in-interface-list=\
+    WAN new-connection-mark=koneksi-browsing-download protocol=tcp src-port=\
+    80,443,8080
+add action=mark-packet chain=forward comment="Browsing Download User" \
+    connection-mark=koneksi-browsing-download dst-address-list=LAN \
+    new-packet-mark=Browsing-Download-User passthrough=no
+add action=mark-connection chain=forward comment=\
+    "Koneksi Upload Load Balance" dst-port=80,443,8080 new-connection-mark=\
+    koneksi-browsing-upload protocol=tcp src-address-list=LAN
+add action=mark-packet chain=forward comment="Browsing Upload User" \
+    connection-mark=koneksi-browsing-upload new-packet-mark=\
+    Browsing-Upload-User passthrough=no src-address-list=LAN
+add action=mark-connection chain=forward comment="Zoom Upload" dst-port=\
+    3478,3479,5090,5091,8801-8810 new-connection-mark=koneksi-zoom-upload \
+    protocol=udp src-address-list=LAN
+add action=mark-connection chain=forward dst-port=\
+    3478,3479,5090,5091,8801-8810 new-connection-mark=koneksi-zoom-upload \
+    protocol=tcp src-address-list=LAN
+add action=mark-connection chain=forward dst-address-list=zoom_ip dst-port=\
+    80,443 new-connection-mark=koneksi-zoom-upload protocol=tcp \
+    src-address-list=LAN
+add action=mark-packet chain=forward connection-mark=koneksi-zoom-upload \
+    new-packet-mark=packet-zoom-upload passthrough=no
+add action=mark-connection chain=forward comment="Zoom Upload" \
+    dst-address-list=LAN new-connection-mark=koneksi-zoom-download protocol=\
+    udp src-port=3478,3479,5090,5091,8801-8810
+add action=mark-connection chain=forward dst-address-list=LAN \
+    new-connection-mark=koneksi-zoom-download protocol=tcp src-port=\
+    3478,3479,5090,5091,8801-8810
+add action=mark-connection chain=forward dst-address-list=LAN \
+    new-connection-mark=koneksi-zoom-download protocol=tcp src-address-list=\
+    zoom_ip src-port=80,443
+add action=mark-packet chain=forward connection-mark=koneksi-zoom-download \
+    new-packet-mark=packet-zoom-download passthrough=no
+add action=mark-connection chain=forward comment="Koneksi Email Outgoing" \
+    dst-port=25,143,110,587 new-connection-mark=Koneksi-Email-Outgoing \
+    protocol=tcp src-address-list=LAN
+add action=mark-packet chain=forward connection-mark=Koneksi-Email-Outgoing \
+    new-packet-mark=packet-email-outgoing
+add action=mark-connection chain=forward comment="Koneksi Email Incoming" \
+    dst-address-list=LAN new-connection-mark=Koneksi-Email-Incoming protocol=\
+    tcp src-port=25,143,110,587
+add action=mark-packet chain=forward connection-mark=Koneksi-Email-Incoming \
+    new-packet-mark=packet-email-incoming
+add action=mark-connection chain=forward comment="Koneksi RND Upload" \
+    in-interface-list=WAN new-connection-mark=koneksi-RND-upload \
+    out-interface=ether6
+add action=mark-packet chain=forward comment="Koneksi RND Upload" \
+    connection-mark=koneksi-RND-upload new-packet-mark=packet-RND-Upload
+add action=mark-connection chain=forward comment="Koneksi RND Download" \
+    in-interface=ether6 new-connection-mark=koneksi-RND-download \
+    out-interface-list=WAN
+add action=mark-packet chain=forward comment="Koneksi RND Download" \
+    connection-mark=koneksi-RND-download new-packet-mark=packet-RND-Download
+add action=mark-connection chain=forward comment=BOD new-connection-mark=\
+    conn-BOD src-address-list=pool-BOD
+add action=mark-connection chain=forward comment=BOD dst-address-list=\
+    pool-BOD new-connection-mark=conn-BOD
+add action=mark-packet chain=forward comment="Upload BOD" connection-mark=\
+    conn-BOD new-packet-mark=pkt-BOD-up passthrough=no src-address-list=\
+    pool-BOD
+add action=mark-packet chain=forward comment="Download BOD" connection-mark=\
+    conn-BOD dst-address-list=pool-BOD new-packet-mark=pkt-BOD-down \
+    passthrough=no
+add action=mark-connection chain=forward comment=Creative \
+    new-connection-mark=conn-Creative src-address-list=pool-Creative
+add action=mark-connection chain=forward comment=Creative dst-address-list=\
+    pool-Creative new-connection-mark=conn-Creative
+add action=mark-packet chain=forward comment="Upload Creative" \
+    connection-mark=conn-Creative new-packet-mark=pkt-Creative-up \
+    passthrough=no src-address-list=pool-Creative
+add action=mark-packet chain=forward comment="Download Creative" \
+    connection-mark=conn-Creative dst-address-list=pool-Creative \
+    new-packet-mark=pkt-Creative-down passthrough=no
+add action=mark-connection chain=forward comment=Developer \
+    new-connection-mark=conn-Developer src-address-list=pool-Developer
+add action=mark-connection chain=forward comment=Developer dst-address-list=\
+    pool-Developer new-connection-mark=conn-Developer
+add action=mark-packet chain=forward comment="Upload Developer" \
+    connection-mark=conn-Developer new-packet-mark=pkt-Developer-up \
+    passthrough=no src-address-list=pool-Developer
+add action=mark-packet chain=forward comment="Download Developer" \
+    connection-mark=conn-Developer dst-address-list=pool-Developer \
+    new-packet-mark=pkt-Developer-down passthrough=no
+add action=mark-connection chain=forward comment=Staff new-connection-mark=\
+    conn-Staff src-address-list=pool-Staff
+add action=mark-connection chain=forward comment=Staff dst-address-list=\
+    pool-Staff new-connection-mark=conn-Staff
+add action=mark-packet chain=forward comment="Upload Staff" connection-mark=\
+    conn-Staff new-packet-mark=pkt-Staff-up passthrough=no src-address-list=\
+    pool-Staff
+add action=mark-packet chain=forward comment="Download Staff" \
+    connection-mark=conn-Staff dst-address-list=pool-Staff new-packet-mark=\
+    pkt-Staff-down passthrough=no
+add action=mark-connection chain=forward comment=Guest new-connection-mark=\
+    conn-Guest src-address-list=pool-Guest
+add action=mark-connection chain=forward comment=Guest dst-address-list=\
+    pool-Guest new-connection-mark=conn-Guest
+add action=mark-packet chain=forward comment="Upload Guest" connection-mark=\
+    conn-Guest new-packet-mark=pkt-Guest-up passthrough=no src-address-list=\
+    pool-Guest
+add action=mark-packet chain=forward comment="Download Guest" \
+    connection-mark=conn-Guest dst-address-list=pool-Guest new-packet-mark=\
+    pkt-Guest-down passthrough=no
+add action=mark-connection chain=forward comment=Intern new-connection-mark=\
+    conn_Intern src-address-list=pool-Intern
+add action=mark-connection chain=forward comment=Intern dst-address-list=\
+    pool-Intern new-connection-mark=conn-Intern
+add action=mark-packet chain=forward comment="Upload Intern" connection-mark=\
+    conn-Intern new-packet-mark=pkt-Intern-up src-address-list=pool-Intern
+add action=mark-packet chain=forward comment="Download Intern" \
+    connection-mark=conn-Intern dst-address-list=pool-Intern new-packet-mark=\
+    pkt-Intern-down
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes in-interface=bridge1-DHCPClient new-connection-mark=conn_isp1 \
+    per-connection-classifier=both-addresses:2/0 src-address-list=LAN
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes in-interface=bridge1-DHCPClient new-connection-mark=conn_isp2 \
+    per-connection-classifier=both-addresses:2/1 src-address-list=LAN
+add action=mark-routing chain=prerouting connection-mark=conn_isp1 disabled=\
+    yes in-interface=bridge1-DHCPClient new-routing-mark=to_isp1 passthrough=\
+    no
+add action=mark-routing chain=prerouting connection-mark=conn_isp2 disabled=\
+    yes in-interface=bridge1-DHCPClient new-routing-mark=to_isp2 passthrough=\
+    no
+add action=mark-routing chain=output connection-mark=conn_isp1 disabled=yes \
+    new-routing-mark=to_isp1 passthrough=no
+add action=mark-routing chain=output connection-mark=conn_isp2 disabled=yes \
+    new-routing-mark=to_isp2 passthrough=no
+add action=accept chain=prerouting disabled=yes dst-address=192.168.18.0/24 \
+    in-interface=ether6
+add action=accept chain=prerouting disabled=yes dst-address=192.168.10.0/24 \
+    in-interface=ether6
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes in-interface=ether1-Biznet new-connection-mark=ISP1_conn
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes in-interface=ether2-Fibernet new-connection-mark=ISP1_conn
+add action=accept chain=prerouting connection-mark=no-mark disabled=yes \
+    dst-address-type=!local in-interface=ether6
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes dst-address-type=!local in-interface=ether6 new-connection-mark=\
+    ISP1_conn per-connection-classifier=both-addresses:3/0
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes dst-address-type=!local in-interface=ether6 new-connection-mark=\
+    ISP1_conn per-connection-classifier=both-addresses:3/1
+add action=mark-connection chain=prerouting connection-mark=no-mark disabled=\
+    yes dst-address-type=!local in-interface=ether6 new-connection-mark=\
+    ISP2_conn per-connection-classifier=both-addresses:3/2
+add action=mark-routing chain=prerouting connection-mark=ISP1_conn disabled=\
+    yes in-interface=ether6 new-routing-mark=main
+add action=mark-routing chain=prerouting connection-mark=ISP2_conn disabled=\
+    yes in-interface=ether6 new-routing-mark=main
+add action=mark-routing chain=output connection-mark=ISP1_conn disabled=yes \
+    new-routing-mark=main
+add action=mark-routing chain=output connection-mark=ISP2_conn disabled=yes \
+    new-routing-mark=main
+add action=mark-connection chain=prerouting disabled=yes new-connection-mark=\
+    ""
+/ip firewall nat
+add action=accept chain=srcnat comment="NO NAT to WG" out-interface=wg-asa
+add action=passthrough chain=unused-hs-chain comment=\
+    "place hotspot rules here" disabled=yes
+add action=masquerade chain=srcnat comment=nat-isp1 out-interface=\
+    ether1-Biznet
+add action=masquerade chain=srcnat comment=nat-isp2 out-interface=\
+    ether2-Fibernet
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=172.16.10.0/24
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=172.16.20.0/24
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=172.16.20.0/24
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=192.168.50.0/24
+add action=masquerade chain=srcnat comment="masquerade hotspot network" \
+    src-address=192.168.60.0/24
+/ip hotspot ip-binding
+add address=192.168.51.211 comment=Xbox mac-address=20:16:42:02:CB:25 type=\
+    bypassed
+add address=192.168.51.212 comment="TV Ruang Meeting Belakang" mac-address=\
+    14:7F:67:E8:76:52 type=bypassed
+add address=192.168.51.213 comment="TV Ruang Meeting Depan" mac-address=\
+    18:93:7F:5C:CE:C2 server="hotspot asa" type=bypassed
+add address=192.168.51.214 comment="IP Phone" mac-address=24:9A:D8:23:05:13 \
+    type=bypassed
+add address=192.168.50.2 comment=Reo mac-address=D6:D8:BA:31:AF:D4 type=\
+    bypassed
+add address=192.168.50.78 disabled=yes mac-address=1A:45:E1:17:4E:7E server=\
+    "hotspot asa" to-address=192.168.50.78
+/ip hotspot service-port
+set ftp disabled=yes
+/ip hotspot user
+add name=admin
+add comment=Tamu name=guest profile=Guest
+add comment="Bayu Baragama Sutrisno" name=2002 profile=Intern
+add comment="Kafka Ramadityo" name=2006 profile=Intern
+add comment="Muhammad Rafii Al-Ghaffary" name=2007 profile=Intern
+add comment="Muhammad Faris Hafizh" name=2008 profile=Intern
+add comment="Nathan Rahmavanya Pradhana" name=2011 profile=Intern
+add comment="Muhamad Satrio" name=2013 profile=Intern
+add comment="Joshua Nathanael Zega" name=2014 profile=Intern
+add comment="Revo Rahmat" name=2015 profile=Intern
+add comment="Muhammad Ilfanza Mustafavi" name=2016 profile=Intern
+add comment="Muhammad Farras Thohari Ramadhan" name=2017 profile=Intern
+add comment="Arvin Wira Samudra" name=2019 profile=Intern
+add comment="Faadhil Riwa Muzakki Muniif" name=2020 profile=Intern
+add comment="Akmal Yusra Adamma" name=2021 profile=Intern
+add comment="Faizah Nur Sabila" name=2022 profile=Intern
+add comment="Mufqi Atqiya" name=2023 profile=Intern
+add comment="Naufal Fadhelah Akbar" name=2024 profile=Intern
+add comment="Faraa Zashika" name=2025 profile=Intern
+add comment="Nabila Dwi Amalia" name=2026 profile=Intern
+add comment="Sashikirana Prasbaswara" name=2027 profile=Intern
+add comment="Alsya Rosaly Putri Hadianti" name=2028 profile=Intern
+add comment="Matthew Sebastian Kurniawan" name=2029 profile=Intern
+add comment="Muhammad Adam Mirza" name=2030 profile=Intern
+add comment="Princessfa Azzahra Alvin" name=2031 profile=Intern
+add comment="Pradygta Nabel" name=2032 profile=Intern
+add comment=Rostini name=3001 profile=Freelance
+add comment=Riyanti name=3002 profile=Freelance
+add comment="Muhammad Dival Rudi Prasetyo" name=3003 profile=Freelance
+add comment="Eri Sugiyanto" name=3004 profile=Freelance
+add comment="Muhamad Rahul Deva" name=3005 profile=Freelance
+add comment="R Jimmy Yogaswara" name=4001 profile=BOD
+add comment="Ginanjar Tri Bayu Aji" name=5001 profile=BOD
+add comment="Gadis Bunga Hartomo" name=5002 profile=Staff
+add comment="Annisa Ira Listyaningrum" name=5003 profile=Staff
+add comment="Yogi Arjan" name=6003 profile=BOD
+add comment="Jul Teguh Ariansyah" name=6007 profile=Staff
+add comment="Indra Lingga Saputra" name=6008 profile=Staff
+add comment="Purnama Shiddiq Mangunsingawijaya" name=6009 profile=Staff
+add comment="Reza Adhim Mahesa" name=7001 profile=BOD
+add comment="Adji Kusetia Djati" name=7002 profile=BOD
+add comment=Herman name=7003 profile=Staff
+add comment="Jim Jeffery Chinedu Uwakwe" name=7004 profile=Staff
+add comment="Aris Munandar" name=7005 profile=Staff
+add comment=Marlina name=8001 profile="BOD VIP"
+add comment="Agus Said Ramadlon" name=8003 profile="BOD VIP"
+add comment="Benny Dhermawan" name=8004 profile=BOD
+add comment="Muhamad Mikael Alghifari" name=8005 profile=BOD
+add comment="Alif Hidayadi" name=8006 profile=BOD
+add comment="Vidya Shahisah" name=8007 profile=Staff
+add comment="Muhammad Reiki Sri Pahlevi" name=8008 profile=Staff
+add comment="Tiara Gitta Pramesti" name=8009 profile=Staff
+add comment="Teguh Margi Febrianto" name=8010 profile=Staff
+add comment="Galuh Agoestina" name=8011 profile=Staff
+add comment="Abdul Rozak" name=8014 profile=Staff
+add comment="Rani Arizah Rabbani" name=8015 profile=Staff
+add comment="Agatha Ratri Kirana" name=8016 profile=Staff
+add comment="Endita Oktamuria" name=8017 profile=Staff
+add comment="Adhika Wimbardi" name=8019 profile=Staff
+add comment="Joko Pambudi" name=8020 profile=Staff
+add comment="Cut Meviantira Nanda" name=8023 profile=Staff
+add comment="Mikael Alvian Rizky" name=8025 profile=Staff
+add comment="Anugrah Agung Hadyan Sabry" name=8027 profile=Staff
+add comment="Mohamad Awaluddin" name=8030 profile=Staff
+add comment="Luthfa Arisyi Senapi" name=8032 profile=Staff
+add comment="Bagas Erwin Prasetyo" name=8033 profile=Staff
+add comment="Yudhi Pratama" name=8035 profile=Staff
+add comment=Arko name=Arko profile="BOD VIP"
+add comment=Tata name=Tata profile="BOD VIP"
+add comment="Production Development" name=Prod profile=Development
+add comment="Ade Ramdani" name=aderamdani profile=Staff
+add comment="Dafa Yudit" name=yudit profile=Staff
+add comment="Rr. Fitri Supriyantiwi" name=tiwi profile=Staff
+add comment="M. Raflie Erdianysah" name=7010 profile=Staff
+add disabled=yes name=tools profile=BOD
+add comment=TV name=tv profile=Helpdek
+add comment="Ayu Indriani" name=8037 profile=Staff
+add comment=User name=user profile=Test
+add comment=Reo name=8002 profile="BOD VIP"
+add comment="Guest VIP" name=guest-vip profile=BOD
+add comment="Guest VIP" name=user1 profile=BOD server="hotspot asa"
+add comment="Ade Ramdani" name=ade profile=Helpdek
+/ip hotspot walled-garden
+add comment="place hotspot rules here" disabled=yes
+add dst-host="www.apple.com`"
+/ip hotspot walled-garden ip
+add action=accept disabled=no !dst-address !dst-address-list dst-port=53 \
+    protocol=tcp !src-address !src-address-list
+add action=accept disabled=no !dst-address !dst-address-list dst-port=53 \
+    protocol=udp !src-address !src-address-list
+/ip route
+add check-gateway=ping comment="Routing Biznet" disabled=no distance=1 \
+    dst-address=0.0.0.0/0 gateway=192.168.18.1 routing-table=\
+    Routing_To_BIZNET scope=20 suppress-hw-offload=no target-scope=10
+add disabled=no dst-address=0.0.0.0/0 gateway=192.168.10.1 routing-table=main \
+    suppress-hw-offload=no
+add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.18.1 routing-table=main suppress-hw-offload=no
+add check-gateway=ping comment="Routing Fibernet" disabled=no distance=2 \
+    dst-address=0.0.0.0/0 gateway=192.168.10.1 routing-table=\
+    Routing_To_Fibernet scope=30 suppress-hw-offload=no target-scope=10
+add disabled=no dst-address=0.0.0.0/0 gateway=192.168.68.0 routing-table=main \
+    suppress-hw-offload=no
+add disabled=no dst-address=0.0.0.0/0 gateway=172.16.10.0 routing-table=main \
+    suppress-hw-offload=no
+add check-gateway=ping disabled=yes distance=1 dst-address=0.0.0.0/0 gateway=\
+    192.168.18.1 routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=10
+add check-gateway=ping comment="Recursive Fibernet" disabled=no distance=1 \
+    dst-address=0.0.0.0/0 gateway=8.8.8.8 routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=30
+add check-gateway=ping comment="Recursive Fibernet" disabled=no distance=1 \
+    dst-address=8.8.8.8/32 gateway=192.168.10.1 routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=10
+add disabled=yes distance=1 dst-address=172.120.20.0/24 gateway="" \
+    routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+add comment="WG CCR APJII" disabled=no distance=1 dst-address=10.87.0.1/32 \
+    gateway=wg-asa routing-table=main scope=30 suppress-hw-offload=no \
+    target-scope=10
+add disabled=no distance=1 dst-address=172.16.20.0/24 gateway=wg-asa \
+    routing-table=main scope=30 suppress-hw-offload=no target-scope=10
+add comment="Force WG to Core via WAN1" disabled=no distance=1 dst-address=\
+    103.159.113.58/32 gateway=192.168.18.1 routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=10
+add comment="Force WG to Core via WAN1" disabled=yes distance=2 dst-address=\
+    103.159.113.58/32 gateway=192.168.10.1 routing-table=main scope=30 \
+    suppress-hw-offload=no target-scope=10
+/ip service
+set www disabled=yes
+set ssh port=2232
+set telnet port=2332
+set api disabled=yes
+set api-ssl disabled=yes
+/snmp
+set enabled=yes
+/system clock
+set time-zone-name=Asia/Jakarta
+/system identity
+set name=R.ASA.OFFICE
+/tool graphing interface
+add interface=ether1-Biznet
+add interface=ether2-Fibernet
