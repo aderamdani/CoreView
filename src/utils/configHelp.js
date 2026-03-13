@@ -372,4 +372,547 @@ export const configHelp = {
     prerequisites: ['IP → Pools', 'IP → Addresses'],
     nextSteps: ['Firewall Filter', 'IP → Routes'],
   },
+
+  'system-ntp-client': {
+    title: 'NTP Client',
+    summary: 'Sinkronisasi waktu router ke server NTP eksternal agar jam sistem akurat.',
+    impact: [
+      'Waktu akurat penting untuk log, sertifikat TLS, dan scheduler.',
+      'NTP client pada WAN yang diblokir firewall akan gagal sinkron.',
+    ],
+    relations: ['System → Clock', 'System → Logging'],
+  },
+  'system-ntp-server': {
+    title: 'NTP Server',
+    summary: 'Menyediakan layanan NTP dari router ke klien LAN internal.',
+    impact: [
+      'Klien LAN bisa memakai router sebagai sumber waktu terpusat.',
+      'Perlu pembatasan akses agar tidak terbuka ke internet.',
+    ],
+    relations: ['System → Clock', 'Firewall Filter'],
+  },
+  'system-log': {
+    title: 'System Log',
+    summary: 'Riwayat kejadian sistem untuk troubleshooting dan audit.',
+    impact: [
+      'Log membantu analisis gangguan jaringan dan keamanan.',
+      'Retensi log pendek berisiko kehilangan jejak kejadian penting.',
+    ],
+    relations: ['System → Logging', 'System → Clock'],
+  },
+  'system-history': {
+    title: 'System History',
+    summary: 'Pencatatan perubahan konfigurasi untuk jejak administrasi.',
+    impact: [
+      'Memudahkan audit perubahan oleh admin.',
+      'Membantu rollback manual saat terjadi salah konfigurasi.',
+    ],
+    relations: ['System → Logging', 'System → Identity'],
+  },
+  'system-users': {
+    title: 'System Users',
+    summary: 'Daftar akun pengguna yang memiliki akses manajemen router.',
+    impact: [
+      'Hak akses harus dibatasi sesuai peran.',
+      'Akun default tanpa hardening meningkatkan risiko keamanan.',
+    ],
+    relations: ['System → Identity', 'IP → Services'],
+  },
+  'system-groups': {
+    title: 'System Groups',
+    summary: 'Pengelompokan privilege pengguna untuk kontrol akses granular.',
+    impact: [
+      'Group menentukan perintah/menu yang boleh diakses user.',
+      'Salah set privilege dapat membuka akses berlebih.',
+    ],
+    relations: ['System → Identity', 'IP → Services'],
+  },
+  'system-passwords': {
+    title: 'System Passwords',
+    summary: 'Kebijakan kredensial dan penguatan autentikasi akun admin/user.',
+    impact: [
+      'Password lemah rentan brute-force, terutama pada layanan publik.',
+      'Rotasi password berkala mengurangi risiko kompromi jangka panjang.',
+    ],
+    relations: ['System Users', 'IP → Services'],
+  },
+  'system-ssh': {
+    title: 'SSH',
+    summary: 'Akses manajemen CLI terenkripsi melalui protokol SSH.',
+    impact: [
+      'Batasi source address untuk hardening.',
+      'Kunci publik lebih aman dibanding password-only login.',
+    ],
+    relations: ['IP → Services', 'Firewall Filter'],
+  },
+  'system-telnet': {
+    title: 'Telnet',
+    summary: 'Akses manajemen CLI tanpa enkripsi (legacy).',
+    impact: [
+      'Kredensial dikirim plaintext, berisiko disadap.',
+      'Disarankan nonaktif di jaringan modern.',
+    ],
+    relations: ['IP → Services', 'Firewall Filter'],
+  },
+  'system-www': {
+    title: 'WebFig',
+    summary: 'Akses manajemen berbasis web ke router MikroTik.',
+    impact: [
+      'Gunakan HTTPS untuk mengurangi risiko penyadapan.',
+      'Batasi akses berdasarkan IP tepercaya.',
+    ],
+    relations: ['IP → Services', 'Firewall Filter'],
+  },
+  'system-api': {
+    title: 'API',
+    summary: 'Endpoint otomatisasi untuk integrasi sistem eksternal.',
+    impact: [
+      'Akses API perlu autentikasi kuat dan pembatasan IP.',
+      'Ekspos API ke internet tanpa kontrol berisiko tinggi.',
+    ],
+    relations: ['IP → Services', 'Firewall Filter'],
+  },
+  'system-ftp': {
+    title: 'FTP',
+    summary: 'Layanan transfer file untuk backup/restore dan manajemen file.',
+    impact: [
+      'FTP klasik tidak terenkripsi secara default.',
+      'Gunakan hanya di jaringan internal terpercaya.',
+    ],
+    relations: ['IP → Services', 'System → Logging'],
+  },
+  'files-list': {
+    title: 'Files List',
+    summary: 'Daftar file internal router seperti backup, script, cert, dan log export.',
+    impact: [
+      'Penyimpanan penuh dapat mengganggu operasi backup/log.',
+      'File sensitif perlu kontrol akses ketat.',
+    ],
+    relations: ['System → Logging', 'System Backup'],
+  },
+  'files-backup': {
+    title: 'Files Backup',
+    summary: 'Pengelolaan file backup konfigurasi untuk pemulihan cepat.',
+    impact: [
+      'Backup terenkripsi membantu menjaga kerahasiaan konfigurasi.',
+      'Backup berkala mengurangi downtime saat insiden.',
+    ],
+    relations: ['System Backup', 'Files List'],
+  },
+
+  'routing-rules': {
+    title: 'Routing Rules',
+    summary: 'Policy rule untuk memilih tabel routing berdasarkan parameter traffic.',
+    impact: [
+      'Rule salah dapat membuat traffic salah jalur atau blackhole.',
+      'Digunakan bersama routing tables untuk policy-based routing.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+  'routing-filters': {
+    title: 'Routing Filters',
+    summary: 'Filter kebijakan route import/export pada protokol routing dinamis.',
+    impact: [
+      'Mencegah route tidak valid masuk ke tabel routing.',
+      'Salah filter dapat memutus konektivitas antar jaringan.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+  'routing-ospf': {
+    title: 'OSPF',
+    summary: 'Protokol routing dinamis interior gateway berbasis link-state.',
+    impact: [
+      'Area design memengaruhi skala dan performa.',
+      'Autentikasi adjacency perlu diaktifkan untuk keamanan.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+  'routing-rip': {
+    title: 'RIP',
+    summary: 'Protokol routing distance-vector legacy untuk jaringan sederhana.',
+    impact: [
+      'Konvergensi lambat dibanding protokol modern.',
+      'Kurang cocok untuk topologi besar/kompleks.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+  'routing-bgp': {
+    title: 'BGP',
+    summary: 'Protokol routing antar autonomous system untuk kebijakan skala besar.',
+    impact: [
+      'Policy dan prefix filter wajib untuk mencegah route leak.',
+      'Salah advertise dapat berdampak luas ke jaringan upstream.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+  'routing-mpls': {
+    title: 'MPLS',
+    summary: 'Forwarding berbasis label untuk core jaringan provider/enterprise.',
+    impact: [
+      'MPLS meningkatkan efisiensi forwarding di backbone.',
+      'Butuh desain label/LDP yang tepat agar stabil.',
+    ],
+    relations: ['Routing Tables', 'Network Interfaces'],
+  },
+  'routing-vrf': {
+    title: 'VRF',
+    summary: 'Virtual Routing and Forwarding untuk isolasi tabel routing per tenant.',
+    impact: [
+      'Memisahkan trafik antar pelanggan/departemen secara logis.',
+      'Route leaking antar VRF perlu kontrol ketat.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+
+  'firewall-layer7': {
+    title: 'Layer7 Protocols',
+    summary: 'Pencocokan traffic berbasis pola aplikasi (regex/content) pada payload.',
+    impact: [
+      'Akurat untuk identifikasi aplikasi tertentu, namun berat di CPU.',
+      'Disarankan selektif hanya untuk kebutuhan khusus.',
+    ],
+    relations: ['Firewall Filter', 'Firewall → Mangle'],
+  },
+
+  'queues-simple': {
+    title: 'Simple Queues',
+    summary: 'Pembatasan bandwidth cepat per target IP/interface tanpa hirarki kompleks.',
+    impact: [
+      'Cocok untuk limit cepat per user atau subnet.',
+      'Pada skala besar, Queue Tree biasanya lebih efisien.',
+    ],
+    relations: ['Queue Tree', 'Queue Types'],
+  },
+  'queues-interfaces': {
+    title: 'Interface Queues',
+    summary: 'Pengaturan antrean langsung per interface untuk traffic shaping dasar.',
+    impact: [
+      'Mudah diterapkan untuk kontrol sederhana per port.',
+      'Kurang fleksibel dibanding kombinasi mangle + queue tree.',
+    ],
+    relations: ['Queue Types', 'Network Interfaces'],
+  },
+
+  'tools-ping': {
+    title: 'Ping',
+    summary: 'Uji konektivitas dasar dan latency ke host tujuan.',
+    impact: [
+      'Membantu verifikasi reachability gateway/DNS/host remote.',
+      'Packet loss tinggi mengindikasikan masalah link atau congestion.',
+    ],
+    relations: ['IP → Routes', 'Network Interfaces'],
+  },
+  'tools-traceroute': {
+    title: 'Traceroute',
+    summary: 'Menelusuri hop jalur paket menuju tujuan.',
+    impact: [
+      'Membantu menemukan titik bottleneck atau putus jalur.',
+      'Hasil bisa dipengaruhi kebijakan firewall di hop tengah.',
+    ],
+    relations: ['IP → Routes', 'Routing Tables'],
+  },
+  'tools-bandwidth-test': {
+    title: 'Bandwidth Test',
+    summary: 'Pengukuran throughput antar endpoint untuk evaluasi kapasitas link.',
+    impact: [
+      'Pengujian dapat menambah beban CPU/traffic sementara.',
+      'Lakukan di jam maintenance agar tidak ganggu layanan.',
+    ],
+    relations: ['Queue Tree', 'Network Interfaces'],
+  },
+  'tools-torch': {
+    title: 'Torch',
+    summary: 'Analisis traffic real-time per interface/protokol/host.',
+    impact: [
+      'Memudahkan identifikasi top talker dan aplikasi dominan.',
+      'Sampling real-time intensif bisa berdampak pada performa perangkat lama.',
+    ],
+    relations: ['Network Interfaces', 'Firewall Filter'],
+  },
+  'tools-packet-sniffer': {
+    title: 'Packet Sniffer',
+    summary: 'Capture paket untuk analisis forensik jaringan.',
+    impact: [
+      'Berguna untuk troubleshooting detail level paket.',
+      'Capture berlebihan dapat memenuhi storage dengan cepat.',
+    ],
+    relations: ['Network Interfaces', 'System → Logging'],
+  },
+  'tools-profile': {
+    title: 'Profile',
+    summary: 'Monitoring penggunaan CPU per proses/router task.',
+    impact: [
+      'Membantu identifikasi bottleneck proses (firewall, routing, dll).',
+      'Data profile penting untuk tuning performa.',
+    ],
+    relations: ['System Resources', 'Firewall Filter'],
+  },
+  'tools-netwatch': {
+    title: 'Netwatch',
+    summary: 'Monitoring host up/down dan trigger script otomatis.',
+    impact: [
+      'Bermanfaat untuk failover link otomatis.',
+      'Interval terlalu rapat dapat menambah overhead monitoring.',
+    ],
+    relations: ['IP → Routes', 'System Scripts'],
+  },
+  'tools-sms': {
+    title: 'SMS',
+    summary: 'Integrasi notifikasi atau kontrol via modem GSM/LTE.',
+    impact: [
+      'Cocok untuk notifikasi fallback saat internet down.',
+      'Perlu kontrol akses agar tidak disalahgunakan.',
+    ],
+    relations: ['LTE Interfaces', 'System → Logging'],
+  },
+  'tools-email': {
+    title: 'Email',
+    summary: 'Pengiriman notifikasi/log/backup via SMTP.',
+    impact: [
+      'Memungkinkan alert otomatis ke admin.',
+      'Konfigurasi SMTP salah membuat notifikasi gagal terkirim.',
+    ],
+    relations: ['System → Logging', 'System Scripts'],
+  },
+  'tools-romon': {
+    title: 'RoMON',
+    summary: 'MikroTik proprietary layer untuk manajemen perangkat via jaringan L2/L3 tertentu.',
+    impact: [
+      'Memudahkan manajemen multi-router dalam topologi kompleks.',
+      'Perlu pembatasan agent agar tidak membuka jalur manajemen berlebih.',
+    ],
+    relations: ['Network Interfaces', 'System → Identity'],
+  },
+  'tools-mac-server': {
+    title: 'MAC Server',
+    summary: 'Layanan manajemen berbasis MAC-level untuk akses lokal.',
+    impact: [
+      'Membantu akses saat IP management bermasalah.',
+      'Harus dibatasi ke interface tepercaya.',
+    ],
+    relations: ['IP → Services', 'Firewall Filter'],
+  },
+  'tools-mac-winbox': {
+    title: 'MAC Winbox',
+    summary: 'Akses Winbox menggunakan identitas MAC pada segmen lokal.',
+    impact: [
+      'Berguna untuk recovery akses ketika IP lockout.',
+      'Jangan dibuka di interface publik.',
+    ],
+    relations: ['IP → Services', 'Firewall Filter'],
+  },
+  'tools-winbox': {
+    title: 'Winbox Settings',
+    summary: 'Pengaturan layanan Winbox untuk akses manajemen GUI.',
+    impact: [
+      'Batasi source address dan port untuk hardening.',
+      'Konfigurasi salah bisa mengunci akses GUI.',
+    ],
+    relations: ['IP → Services', 'System → Identity'],
+  },
+
+  'wireless-interfaces': {
+    title: 'Wireless Interfaces',
+    summary: 'Konfigurasi interface radio nirkabel (SSID, band, channel, mode).',
+    impact: [
+      'Pemilihan channel dan bandwidth memengaruhi performa RF.',
+      'Mode AP/Station menentukan peran interface di topologi.',
+    ],
+    relations: ['Network Interfaces', 'IP → Addresses'],
+  },
+  'wireless-security': {
+    title: 'Wireless Security Profiles',
+    summary: 'Profil autentikasi dan enkripsi WLAN (WPA2/WPA3, key management).',
+    impact: [
+      'Profil lemah meningkatkan risiko akses ilegal.',
+      'Rotasi key dan enkripsi modern meningkatkan keamanan WLAN.',
+    ],
+    relations: ['Wireless Interfaces', 'Firewall Filter'],
+  },
+  'wireless-access-list': {
+    title: 'Wireless Access List',
+    summary: 'Kontrol perangkat yang boleh/tidak boleh terhubung berdasarkan aturan.',
+    impact: [
+      'Dapat membatasi klien berdasarkan MAC/sinyal/waktu.',
+      'Konfigurasi salah dapat memblokir klien sah.',
+    ],
+    relations: ['Wireless Interfaces', 'Wireless Security Profiles'],
+  },
+  'wireless-connect-list': {
+    title: 'Wireless Connect List',
+    summary: 'Daftar preferensi koneksi wireless untuk mode station.',
+    impact: [
+      'Membantu prioritas AP target saat roaming/scan.',
+      'Urutan list memengaruhi kestabilan koneksi uplink.',
+    ],
+    relations: ['Wireless Interfaces', 'IP → Routes'],
+  },
+
+  'ppp-profiles': {
+    title: 'PPP Profiles',
+    summary: 'Template parameter PPP (addressing, rate-limit, DNS, script).',
+    impact: [
+      'Menyederhanakan provisioning banyak user PPP.',
+      'Kesalahan profile akan berdampak ke semua akun terkait.',
+    ],
+    relations: ['VPN', 'IP → Pools'],
+  },
+  'ppp-secrets': {
+    title: 'PPP Secrets',
+    summary: 'Kredensial user PPP untuk autentikasi koneksi remote.',
+    impact: [
+      'Kredensial kuat wajib untuk keamanan akses remote.',
+      'Binding profile/user menentukan hak akses jaringan.',
+    ],
+    relations: ['PPP Profiles', 'VPN'],
+  },
+  'ppp-active': {
+    title: 'PPP Active Connections',
+    summary: 'Daftar sesi PPP yang sedang aktif secara real-time.',
+    impact: [
+      'Membantu audit pengguna online dan troubleshooting sesi.',
+      'Sesi abnormal bisa mengindikasikan credential sharing/abuse.',
+    ],
+    relations: ['PPP Secrets', 'System → Logging'],
+  },
+
+  'user-manager-users': {
+    title: 'User Manager Users',
+    summary: 'Daftar akun pelanggan/pengguna pada User Manager.',
+    impact: [
+      'Akun user menentukan autentikasi layanan hotspot/PPP.',
+      'Konsistensi data user penting untuk billing/auth.',
+    ],
+    relations: ['IP → Hotspot', 'PPP Secrets'],
+  },
+  'user-manager-profiles': {
+    title: 'User Manager Profiles',
+    summary: 'Template layanan dan limit untuk grup pengguna.',
+    impact: [
+      'Profile memudahkan penerapan kebijakan massal.',
+      'Salah profile dapat menyebabkan limit atau akses tidak sesuai.',
+    ],
+    relations: ['User Manager Users', 'Queue Tree'],
+  },
+  'user-manager-sessions': {
+    title: 'User Manager Sessions',
+    summary: 'Riwayat sesi login user untuk monitoring penggunaan.',
+    impact: [
+      'Berguna untuk audit durasi dan pola pemakaian.',
+      'Membantu investigasi masalah autentikasi.',
+    ],
+    relations: ['User Manager Users', 'System → Logging'],
+  },
+
+  'capsman-interfaces': {
+    title: 'CAPsMAN Interfaces',
+    summary: 'Antarmuka virtual/managed AP yang dikontrol CAPsMAN.',
+    impact: [
+      'Memusatkan kontrol AP dalam satu controller.',
+      'Sinkronisasi konfigurasi mempercepat deploy WLAN multi-AP.',
+    ],
+    relations: ['Network Interfaces', 'Wireless Interfaces'],
+  },
+  'capsman-provisioning': {
+    title: 'CAPsMAN Provisioning',
+    summary: 'Aturan provisioning otomatis AP CAP ke konfigurasi tertentu.',
+    impact: [
+      'Memudahkan onboarding AP baru secara konsisten.',
+      'Rule salah bisa memetakan AP ke profil yang tidak tepat.',
+    ],
+    relations: ['CAPsMAN Interfaces', 'Wireless Security Profiles'],
+  },
+  'capsman-access-list': {
+    title: 'CAPsMAN Access List',
+    summary: 'Kontrol akses klien pada jaringan wireless terkelola CAPsMAN.',
+    impact: [
+      'Meningkatkan kontrol admission klien di banyak AP sekaligus.',
+      'Policy terlalu ketat dapat menurunkan user experience.',
+    ],
+    relations: ['CAPsMAN Interfaces', 'Firewall Filter'],
+  },
+  'capsman-configuration': {
+    title: 'CAPsMAN Configuration',
+    summary: 'Template SSID, channel, security, dan datapath untuk AP managed.',
+    impact: [
+      'Standarisasi konfigurasi meningkatkan kestabilan jaringan wireless.',
+      'Kesalahan template akan terdorong ke banyak AP sekaligus.',
+    ],
+    relations: ['CAPsMAN Provisioning', 'Wireless Security Profiles'],
+  },
+
+  'lte-interfaces': {
+    title: 'LTE Interfaces',
+    summary: 'Konfigurasi interface modem LTE untuk konektivitas WAN.',
+    impact: [
+      'Kualitas sinyal dan band lock memengaruhi throughput.',
+      'Fallback route penting saat LTE dijadikan cadangan.',
+    ],
+    relations: ['IP → Routes', 'DHCP Client'],
+  },
+  'lte-apn': {
+    title: 'LTE APN Profiles',
+    summary: 'Profil APN operator seluler untuk autentikasi dan akses data.',
+    impact: [
+      'APN salah menyebabkan gagal attach/data session.',
+      'Beberapa operator butuh APN khusus untuk IP publik/static.',
+    ],
+    relations: ['LTE Interfaces', 'IP → Addresses'],
+  },
+  'lte-info': {
+    title: 'LTE Info',
+    summary: 'Informasi status modem, sinyal, cell, dan parameter radio LTE.',
+    impact: [
+      'Membantu optimasi posisi antena dan kualitas link.',
+      'Monitoring berkala membantu deteksi degradasi sinyal.',
+    ],
+    relations: ['LTE Interfaces', 'Tools → Graphing'],
+  },
+
+  'gps-settings': {
+    title: 'GPS Settings',
+    summary: 'Pengaturan modul GPS untuk koordinat, waktu, dan telemetri lokasi.',
+    impact: [
+      'Berguna untuk perangkat mobile/fleet tracking.',
+      'Konfigurasi update interval memengaruhi konsumsi resource.',
+    ],
+    relations: ['GPS Monitor', 'System → Clock'],
+  },
+  'gps-monitor': {
+    title: 'GPS Monitor',
+    summary: 'Pemantauan data GPS real-time seperti koordinat dan satelit.',
+    impact: [
+      'Membantu validasi lock satelit dan akurasi posisi.',
+      'Data lokasi dapat dipakai untuk otomasi berbasis geofence.',
+    ],
+    relations: ['GPS Settings', 'System → Logging'],
+  },
+
+  neighbors: {
+    title: 'Neighbors',
+    summary: 'Deteksi perangkat tetangga pada layer discovery (MNDP/CDP/LLDP).',
+    impact: [
+      'Membantu inventaris cepat perangkat di segmen jaringan lokal.',
+      'Discovery sebaiknya dibatasi pada interface tepercaya.',
+    ],
+    relations: ['System → Identity', 'Network Interfaces'],
+  },
+  log: {
+    title: 'Log',
+    summary: 'Tampilan log runtime untuk event sistem, firewall, dan service.',
+    impact: [
+      'Sumber utama troubleshooting operasional harian.',
+      'Log yang terlalu verbose dapat menambah beban storage.',
+    ],
+    relations: ['System → Logging', 'System → Clock'],
+  },
+  skin: {
+    title: 'Skin',
+    summary: 'Pengaturan tampilan antarmuka manajemen.',
+    impact: [
+      'Meningkatkan kenyamanan navigasi admin.',
+      'Tidak berdampak langsung pada forwarding traffic.',
+    ],
+    relations: ['System → Identity'],
+  },
 };
