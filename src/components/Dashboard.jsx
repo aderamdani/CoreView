@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { 
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight,
-  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2
+  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag
 } from 'lucide-react';
+import { configHelp } from '../utils/configHelp';
 
 // Safely converts any value to a renderable string (prevents "Objects are not valid as React children" errors)
 const safeStr = (val, fallback = '-') => {
@@ -27,6 +28,161 @@ class SectionErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+/* ─── Relation label → sidebar tab ID mapping ──────────────────── */
+const RELATION_TO_TAB = {
+  'Network Interfaces':      'interfaces-list',
+  'Interface Lists':         'interfaces-lists',
+  'Bridge':                  'bridge-list',
+  'Bridge → Ports':          'bridge-ports',
+  'IP → Addresses':          'ip-addresses',
+  'DHCP Server':             'ip-dhcp-server',
+  'DHCP Client':             'ip-dhcp-client',
+  'DNS':                     'ip-dns',
+  'IP → Routes':             'ip-routes',
+  'Routing Tables':          'routing-tables',
+  'IP → Pools':              'ip-pool',
+  'IP → Cloud':              'ip-cloud',
+  'Hotspot':                 'ip-hotspot',
+  'IP → Services':           'ip-services',
+  'Firewall Filter':         'firewall-filter',
+  'Firewall → NAT':          'firewall-nat',
+  'Firewall → Mangle':       'firewall-mangle',
+  'Firewall → Raw':          'firewall-raw',
+  'Firewall Address Lists':  'firewall-address-lists',
+  'Queue Tree':              'queues-tree',
+  'Queue Types':             'queues-types',
+  'VPN':                     'vpn',
+  'System → Identity':       'system-identity',
+  'System → Clock':          'system-clock',
+  'System → Logging':        'system-logging',
+  'SNMP':                    'system-snmp',
+  'Hardware Ports':          'system-ports',
+  'Interface Graphing':      'tools-graphing',
+};
+
+/* ─── HelpPanel ────────────────────────────────────────────────────
+ * Collapsible contextual help shown at the top of each config section.
+ * onNavigate = setActiveTab from Dashboard so relation tags can deep-link.
+ */
+const HelpPanel = ({ id, onNavigate }) => {
+  const [open, setOpen] = useState(false);
+  const help = configHelp[id];
+  if (!help) return null;
+
+  return (
+    <div style={{
+      marginBottom: '1.5rem',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--r-md)',
+      overflow: 'hidden',
+      background: 'var(--bg-elevated, #1a1e2a)',
+    }}>
+      {/* Header – always visible */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 14px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: 'var(--accent-light, #818cf8)',
+          fontSize: '0.82rem',
+          fontFamily: 'inherit',
+          fontWeight: 500,
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <HelpCircle size={14} />
+          {open ? 'Sembunyikan bantuan' : `Apa itu ${help.title}?`}
+        </span>
+        <ChevronDown
+          size={14}
+          style={{ transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none', opacity: 0.5 }}
+        />
+      </button>
+
+      {/* Expandable body */}
+      {open && (
+        <div style={{ padding: '0 14px 16px', borderTop: '1px solid var(--border)' }}>
+
+          {/* Summary */}
+          <p style={{ margin: '12px 0 14px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+            {help.summary}
+          </p>
+
+          {/* Impact bullets */}
+          {help.impact && (
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                Dampak &amp; Pertimbangan
+              </div>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {help.impact.map((point, i) => (
+                  <li key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+                    <span style={{ color: 'var(--accent, #6366f1)', marginTop: '4px', flexShrink: 0 }}>▸</span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Relations – clickable if they have a mapped tab */}
+          {help.relations && (
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                Bagian Terkait
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {help.relations.map((rel, i) => {
+                  const tabId = RELATION_TO_TAB[rel];
+                  const isNavigable = !!tabId && !!onNavigate;
+                  return (
+                    <span
+                      key={i}
+                      onClick={isNavigable ? () => { onNavigate(tabId); setOpen(false); } : undefined}
+                      title={isNavigable ? `Navigasi ke ${rel}` : rel}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                        padding: '3px 10px', borderRadius: '99px',
+                        fontSize: '0.75rem', fontWeight: 500,
+                        background: isNavigable ? 'rgba(99,102,241,0.12)' : 'rgba(75,85,99,0.2)',
+                        color: isNavigable ? 'var(--accent-light, #818cf8)' : 'var(--text-secondary)',
+                        border: `1px solid ${isNavigable ? 'rgba(99,102,241,0.3)' : 'rgba(75,85,99,0.4)'}`,
+                        cursor: isNavigable ? 'pointer' : 'default',
+                        transition: 'background 0.15s, border-color 0.15s',
+                        userSelect: 'none',
+                      }}
+                      onMouseEnter={isNavigable ? e => {
+                        e.currentTarget.style.background = 'rgba(99,102,241,0.22)';
+                        e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)';
+                      } : undefined}
+                      onMouseLeave={isNavigable ? e => {
+                        e.currentTarget.style.background = 'rgba(99,102,241,0.12)';
+                        e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
+                      } : undefined}
+                    >
+                      <Tag size={10} />
+                      {rel}
+                      {isNavigable && <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>→</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 export const Dashboard = ({ config }) => {
   // Since 'firewall' expands, let's default the first submenu as active or 'overview'
@@ -273,9 +429,7 @@ export const Dashboard = ({ config }) => {
         <Activity className="summary-card-icon" />
         <h2 className="section-title">Network Interfaces</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Interfaces represent the physical and virtual connections of the router. Active interfaces highlighted in green are currently enabled and passing traffic.
-      </p>
+      <HelpPanel id="interfaces-list" onNavigate={setActiveTab} />
       
       <div className="data-table-container">
         <table className="data-table">
@@ -359,9 +513,7 @@ export const Dashboard = ({ config }) => {
         <Share2 className="summary-card-icon" />
         <h2 className="section-title">Network Bridges</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Layer 2 bridging of multiple physical or virtual interfaces.
-      </p>
+      <HelpPanel id="bridge-list" onNavigate={setActiveTab} />
       
       <div className="data-table-container">
         <table className="data-table">
@@ -414,9 +566,7 @@ export const Dashboard = ({ config }) => {
         <Activity className="summary-card-icon" />
         <h2 className="section-title">Bridge Ports</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Interfaces assigned to participate in a bridge.
-      </p>
+      <HelpPanel id="bridge-ports" onNavigate={setActiveTab} />
       
       <div className="data-table-container">
         <table className="data-table">
@@ -461,9 +611,7 @@ export const Dashboard = ({ config }) => {
         <Server className="summary-card-icon" />
         <h2 className="section-title">IP Addresses</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Configured IP addresses and their associated interfaces.
-      </p>
+      <HelpPanel id="ip-addresses" onNavigate={setActiveTab} />
 
       <div className="data-table-container">
         <table className="data-table">
@@ -563,9 +711,7 @@ export const Dashboard = ({ config }) => {
         <DownloadCloud className="summary-card-icon" />
         <h2 className="section-title">DHCP Clients</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Interfaces configured to dynamically receive IP assignments.
-      </p>
+      <HelpPanel id="ip-dhcp-client" onNavigate={setActiveTab} />
 
       <div className="data-table-container">
         <table className="data-table">
@@ -704,9 +850,7 @@ export const Dashboard = ({ config }) => {
         <Activity className="summary-card-icon" />
         <h2 className="section-title">IP Pools</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Address pools used for DHCP leasing or VPN connections.
-      </p>
+      <HelpPanel id="ip-pool" onNavigate={setActiveTab} />
 
       <div className="data-table-container">
         <table className="data-table">
@@ -747,6 +891,7 @@ export const Dashboard = ({ config }) => {
         <Cloud className="summary-card-icon" />
         <h2 className="section-title">MikroTik Cloud (DDNS)</h2>
       </div>
+      <HelpPanel id="ip-cloud" onNavigate={setActiveTab} />
       
       <div style={{ 
           background: 'rgba(255, 255, 255, 0.05)', 
@@ -976,6 +1121,7 @@ export const Dashboard = ({ config }) => {
         <Shield className="summary-card-icon" />
         <h2 className="section-title">Firewall Filter Rules</h2>
       </div>
+      <HelpPanel id="firewall-filter" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Filter rules determine whether traffic is allowed or dropped based on various conditions.
       </p>
@@ -1154,6 +1300,7 @@ export const Dashboard = ({ config }) => {
         <Shield className="summary-card-icon" />
         <h2 className="section-title">Firewall Address Lists</h2>
       </div>
+      <HelpPanel id="firewall-address-lists" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Groupings of IP addresses used in firewall filter, NAT, and mangle rules.
       </p>
@@ -1217,6 +1364,7 @@ export const Dashboard = ({ config }) => {
         <DownloadCloud className="summary-card-icon" />
         <h2 className="section-title">Queue Tree</h2>
       </div>
+      <HelpPanel id="queues-tree" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Hierarchical bandwidth management using Packet Marks.
       </p>
@@ -1266,6 +1414,7 @@ export const Dashboard = ({ config }) => {
         <Cpu className="summary-card-icon" />
         <h2 className="section-title">Queue Types</h2>
       </div>
+      <HelpPanel id="queues-types" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Custom queueing disciplines (PCQ, SFQ, RED) used by limits.
       </p>
@@ -1399,9 +1548,7 @@ export const Dashboard = ({ config }) => {
         <BarChart2 className="summary-card-icon" />
         <h2 className="section-title">Interface Graphing</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Stores history of interface traffic and utilization rates.
-      </p>
+      <HelpPanel id="tools-graphing" onNavigate={setActiveTab} />
 
       <div className="data-table-container">
         <table className="data-table">
@@ -1506,6 +1653,7 @@ export const Dashboard = ({ config }) => {
         <Clock className="summary-card-icon" />
         <h2 className="section-title">System Clock</h2>
       </div>
+      <HelpPanel id="system-clock" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Timezone and NTP configuration parameters.
       </p>
