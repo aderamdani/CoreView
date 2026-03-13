@@ -38,6 +38,26 @@
   --font: 'Inter', system-ui, sans-serif;
 }
 
+html.light {
+  --bg-base:       #f8fafc;
+  --bg-surface:    #ffffff;
+  --bg-elevated:   #f1f5f9;
+  --bg-hover:      rgba(0,0,0,0.04);
+  --bg-active:     rgba(99,102,241,0.12);
+
+  --accent:        #4f46e5;
+  --accent-light:  #6366f1;
+  --accent-glow:   rgba(99,102,241,0.2);
+
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+
+  --border:         rgba(0,0,0,0.08);
+  --border-strong:  rgba(0,0,0,0.15);
+}
+
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

@@ -5,6 +5,7 @@ import {
   Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
+import { MindMap } from './MindMap';
 
 // Safely converts any value to a renderable string (prevents "Objects are not valid as React children" errors)
 const safeStr = (val, fallback = '-') => {
@@ -205,6 +206,7 @@ export const Dashboard = ({ config }) => {
   const renderSidebar = () => {
     const menus = [
       { id: 'overview', label: 'Overview', icon: <Server size={15} /> },
+      { id: 'mindmap', label: 'Mind Map', icon: <Share2 size={15} /> },
       { 
         id: 'interfaces', 
         label: 'Interfaces', 
@@ -1781,6 +1783,7 @@ export const Dashboard = ({ config }) => {
       <div className="main-view">
         <SectionErrorBoundary>
         {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'mindmap' && <MindMap config={config} onNavigate={setActiveTab} />}
         {activeTab === 'interfaces-list' && renderInterfaces()}
         {activeTab === 'interfaces-lists' && renderInterfaceLists()}
         
