@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft,
-  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers
+  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
 import { MindMap } from './MindMap';
@@ -321,7 +321,29 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         icon: <Share2 size={15} />,
         submenus: [
           { id: 'bridge-list', label: 'Bridges' },
-          { id: 'bridge-ports', label: 'Ports' }
+          { id: 'bridge-ports', label: 'Ports' },
+          { id: 'bridge-vlans', label: 'VLANs' }
+        ]
+      },
+      { 
+        id: 'wireless', 
+        label: 'Wireless', 
+        icon: <Wifi size={15} />,
+        submenus: [
+          { id: 'wireless-interfaces', label: 'Interfaces' },
+          { id: 'wireless-security', label: 'Security Profiles' },
+          { id: 'wireless-access-list', label: 'Access List' },
+          { id: 'wireless-connect-list', label: 'Connect List' }
+        ]
+      },
+      { 
+        id: 'ppp', 
+        label: 'PPP', 
+        icon: <Lock size={15} />,
+        submenus: [
+          { id: 'ppp-profiles', label: 'Profiles' },
+          { id: 'ppp-secrets', label: 'Secrets' },
+          { id: 'ppp-active', label: 'Active Connections' }
         ]
       },
       { 
@@ -330,14 +352,20 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         icon: <Globe size={15} />,
         submenus: [
           { id: 'ip-addresses', label: 'Addresses' },
+          { id: 'ip-routes', label: 'Routes' },
+          { id: 'ip-pools', label: 'Pools' },
           { id: 'ip-dhcp-server', label: 'DHCP Server' },
           { id: 'ip-dhcp-client', label: 'DHCP Client' },
+          { id: 'ip-dhcp-relay', label: 'DHCP Relay' },
           { id: 'ip-dns', label: 'DNS' },
-          { id: 'ip-routes', label: 'Routes' },
-          { id: 'ip-pool', label: 'Pools' },
           { id: 'ip-cloud', label: 'Cloud' },
           { id: 'ip-hotspot', label: 'Hotspot' },
-          { id: 'ip-services', label: 'Services' }
+          { id: 'ip-upnp', label: 'UPnP' },
+          { id: 'ip-services', label: 'Services' },
+          { id: 'ip-socks', label: 'SOCKS' },
+          { id: 'ip-proxy', label: 'Proxy' },
+          { id: 'ip-traffic-flow', label: 'Traffic Flow' },
+          { id: 'ip-accounting', label: 'Accounting' }
         ]
       },
       { 
@@ -345,7 +373,14 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         label: 'Routing', 
         icon: <Route size={15} />,
         submenus: [
-          { id: 'routing-tables', label: 'Tables' }
+          { id: 'routing-tables', label: 'Tables' },
+          { id: 'routing-rules', label: 'Rules' },
+          { id: 'routing-filters', label: 'Filters' },
+          { id: 'routing-ospf', label: 'OSPF' },
+          { id: 'routing-rip', label: 'RIP' },
+          { id: 'routing-bgp', label: 'BGP' },
+          { id: 'routing-mpls', label: 'MPLS' },
+          { id: 'routing-vrf', label: 'VRF' }
         ]
       },
       {
@@ -357,7 +392,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           { id: 'firewall-nat', label: 'NAT' },
           { id: 'firewall-mangle', label: 'Mangle' },
           { id: 'firewall-raw', label: 'Raw' },
-          { id: 'firewall-address-lists', label: 'Address Lists' }
+          { id: 'firewall-address-lists', label: 'Address Lists' },
+          { id: 'firewall-layer7', label: 'Layer7 Protocols' }
         ]
       },
       { 
@@ -366,7 +402,9 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         icon: <DownloadCloud size={15} />,
         submenus: [
           { id: 'queues-tree', label: 'Queue Tree' },
-          { id: 'queues-types', label: 'Queue Types' }
+          { id: 'queues-simple', label: 'Simple Queues' },
+          { id: 'queues-types', label: 'Queue Types' },
+          { id: 'queues-interfaces', label: 'Interface Queues' }
         ]
       },
       { 
@@ -376,9 +414,31 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         submenus: [
           { id: 'system-identity', label: 'Identity' },
           { id: 'system-clock', label: 'Clock' },
+          { id: 'system-ntp-client', label: 'NTP Client' },
+          { id: 'system-ntp-server', label: 'NTP Server' },
           { id: 'system-logging', label: 'Logging' },
+          { id: 'system-log', label: 'Log' },
+          { id: 'system-history', label: 'History' },
+          { id: 'system-users', label: 'Users' },
+          { id: 'system-groups', label: 'Groups' },
+          { id: 'system-passwords', label: 'Passwords' },
+          { id: 'system-ssh', label: 'SSH' },
+          { id: 'system-telnet', label: 'Telnet' },
+          { id: 'system-www', label: 'WebFig' },
+          { id: 'system-api', label: 'API' },
+          { id: 'system-ftp', label: 'FTP' },
           { id: 'system-snmp', label: 'SNMP' },
-          { id: 'system-ports', label: 'Ports' }
+          { id: 'system-ports', label: 'Ports' },
+          { id: 'system-packages', label: 'Packages' },
+          { id: 'system-resources', label: 'Resources' },
+          { id: 'system-routerboard', label: 'RouterBoard' },
+          { id: 'system-health', label: 'Health' },
+          { id: 'system-leds', label: 'LEDs' },
+          { id: 'system-watchdog', label: 'Watchdog' },
+          { id: 'system-scheduler', label: 'Scheduler' },
+          { id: 'system-scripts', label: 'Scripts' },
+          { id: 'system-backup', label: 'Backup' },
+          { id: 'system-reset', label: 'Reset Configuration' }
         ]
       },
       { 
@@ -386,10 +446,74 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         label: 'Tools', 
         icon: <BarChart2 size={15} />,
         submenus: [
-          { id: 'tools-graphing', label: 'Graphing' }
+          { id: 'tools-ping', label: 'Ping' },
+          { id: 'tools-traceroute', label: 'Traceroute' },
+          { id: 'tools-bandwidth-test', label: 'Bandwidth Test' },
+          { id: 'tools-torch', label: 'Torch' },
+          { id: 'tools-packet-sniffer', label: 'Packet Sniffer' },
+          { id: 'tools-profile', label: 'Profile' },
+          { id: 'tools-netwatch', label: 'Netwatch' },
+          { id: 'tools-sms', label: 'SMS' },
+          { id: 'tools-email', label: 'Email' },
+          { id: 'tools-graphing', label: 'Graphing' },
+          { id: 'tools-romon', label: 'RoMON' },
+          { id: 'tools-mac-server', label: 'MAC Server' },
+          { id: 'tools-mac-winbox', label: 'MAC Winbox' },
+          { id: 'tools-winbox', label: 'Winbox Settings' }
         ]
       },
-      { id: 'vpn', label: 'VPN', icon: <Lock size={15} /> }
+      { 
+        id: 'files', 
+        label: 'Files', 
+        icon: <FileText size={15} />,
+        submenus: [
+          { id: 'files-list', label: 'File List' },
+          { id: 'files-backup', label: 'Backup' }
+        ]
+      },
+      { 
+        id: 'user-manager', 
+        label: 'User Manager', 
+        icon: <Key size={15} />,
+        submenus: [
+          { id: 'user-manager-users', label: 'Users' },
+          { id: 'user-manager-profiles', label: 'Profiles' },
+          { id: 'user-manager-sessions', label: 'Active Sessions' }
+        ]
+      },
+      { 
+        id: 'capsman', 
+        label: 'CAPsMAN', 
+        icon: <Wifi size={15} />,
+        submenus: [
+          { id: 'capsman-interfaces', label: 'Interfaces' },
+          { id: 'capsman-provisioning', label: 'Provisioning' },
+          { id: 'capsman-access-list', label: 'Access List' },
+          { id: 'capsman-configuration', label: 'Configuration' }
+        ]
+      },
+      { 
+        id: 'lte', 
+        label: 'LTE', 
+        icon: <Globe size={15} />,
+        submenus: [
+          { id: 'lte-interfaces', label: 'Interfaces' },
+          { id: 'lte-apn', label: 'APN Profiles' },
+          { id: 'lte-info', label: 'LTE Info' }
+        ]
+      },
+      { 
+        id: 'gps', 
+        label: 'GPS', 
+        icon: <Globe size={15} />,
+        submenus: [
+          { id: 'gps-settings', label: 'GPS Settings' },
+          { id: 'gps-monitor', label: 'GPS Monitor' }
+        ]
+      },
+      { id: 'neighbors', label: 'Neighbors', icon: <Share2 size={15} /> },
+      { id: 'log', label: 'Log', icon: <Terminal size={15} /> },
+      { id: 'skin', label: 'Skin', icon: <Monitor size={15} /> }
     ];
 
     return (
@@ -2172,6 +2296,136 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     </div>
   );
 
+  // Placeholder render functions for new menus - to be implemented
+  const renderPlaceholder = (title) => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Settings className="summary-card-icon" />
+        <h2 className="section-title">{title}</h2>
+      </div>
+      <div style={{ textAlign: 'center', padding: '3rem 2rem', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>🚧</div>
+        <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Fitur Dalam Pengembangan</h3>
+        <p style={{ fontSize: '0.9rem', lineHeight: 1.6, maxWidth: '400px', margin: '0 auto' }}>
+          Menu <strong>{title}</strong> sedang dalam tahap pengembangan. 
+          Fitur ini akan segera tersedia dalam versi mendatang.
+        </p>
+        <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+          <p style={{ fontSize: '0.8rem', margin: 0 }}>
+            💡 <strong>Catatan:</strong> Semua menu Winbox telah ditambahkan ke sidebar untuk kelengkapan. 
+            Fitur-fitur ini akan diimplementasikan secara bertahap.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // System Menu Placeholders
+  const renderSystemNTPClient = () => renderPlaceholder('NTP Client');
+  const renderSystemNTPServer = () => renderPlaceholder('NTP Server');
+  const renderSystemLog = () => renderPlaceholder('System Log');
+  const renderSystemHistory = () => renderPlaceholder('System History');
+  const renderSystemUsers = () => renderPlaceholder('System Users');
+  const renderSystemGroups = () => renderPlaceholder('System Groups');
+  const renderSystemPasswords = () => renderPlaceholder('System Passwords');
+  const renderSystemSSH = () => renderPlaceholder('SSH');
+  const renderSystemTelnet = () => renderPlaceholder('Telnet');
+  const renderSystemWebFig = () => renderPlaceholder('WebFig');
+  const renderSystemAPI = () => renderPlaceholder('API');
+  const renderSystemFTP = () => renderPlaceholder('FTP');
+  const renderSystemPackages = () => renderPlaceholder('Packages');
+  const renderSystemResources = () => renderPlaceholder('Resources');
+  const renderSystemRouterBoard = () => renderPlaceholder('RouterBoard');
+  const renderSystemHealth = () => renderPlaceholder('Health');
+  const renderSystemLEDs = () => renderPlaceholder('LEDs');
+  const renderSystemWatchdog = () => renderPlaceholder('Watchdog');
+  const renderSystemScheduler = () => renderPlaceholder('Scheduler');
+  const renderSystemScripts = () => renderPlaceholder('Scripts');
+  const renderSystemBackup = () => renderPlaceholder('Backup');
+  const renderSystemReset = () => renderPlaceholder('Reset Configuration');
+
+  // IP Menu Placeholders
+  const renderDHCPRelay = () => renderPlaceholder('DHCP Relay');
+  const renderUPnP = () => renderPlaceholder('UPnP');
+  const renderSOCKS = () => renderPlaceholder('SOCKS');
+  const renderProxy = () => renderPlaceholder('Proxy');
+  const renderTrafficFlow = () => renderPlaceholder('Traffic Flow');
+  const renderAccounting = () => renderPlaceholder('Accounting');
+
+  // Bridge Menu Placeholders
+  const renderBridgeVLANs = () => renderPlaceholder('Bridge VLANs');
+
+  // Routing Menu Placeholders
+  const renderRoutingRules = () => renderPlaceholder('Routing Rules');
+  const renderRoutingFilters = () => renderPlaceholder('Routing Filters');
+  const renderOSPF = () => renderPlaceholder('OSPF');
+  const renderRIP = () => renderPlaceholder('RIP');
+  const renderBGP = () => renderPlaceholder('BGP');
+  const renderMPLS = () => renderPlaceholder('MPLS');
+  const renderVRF = () => renderPlaceholder('VRF');
+
+  // Firewall Menu Placeholders
+  const renderLayer7Protocols = () => renderPlaceholder('Layer7 Protocols');
+
+  // Queues Menu Placeholders
+  const renderSimpleQueues = () => renderPlaceholder('Simple Queues');
+  const renderInterfaceQueues = () => renderPlaceholder('Interface Queues');
+
+  // Tools Menu Placeholders
+  const renderPing = () => renderPlaceholder('Ping');
+  const renderTraceroute = () => renderPlaceholder('Traceroute');
+  const renderBandwidthTest = () => renderPlaceholder('Bandwidth Test');
+  const renderTorch = () => renderPlaceholder('Torch');
+  const renderPacketSniffer = () => renderPlaceholder('Packet Sniffer');
+  const renderProfile = () => renderPlaceholder('Profile');
+  const renderNetwatch = () => renderPlaceholder('Netwatch');
+  const renderSMS = () => renderPlaceholder('SMS');
+  const renderEmail = () => renderPlaceholder('Email');
+  const renderRoMON = () => renderPlaceholder('RoMON');
+  const renderMACServer = () => renderPlaceholder('MAC Server');
+  const renderMACWinbox = () => renderPlaceholder('MAC Winbox');
+  const renderWinboxSettings = () => renderPlaceholder('Winbox Settings');
+
+  // Wireless Menu Placeholders
+  const renderWirelessInterfaces = () => renderPlaceholder('Wireless Interfaces');
+  const renderWirelessSecurity = () => renderPlaceholder('Wireless Security Profiles');
+  const renderWirelessAccessList = () => renderPlaceholder('Wireless Access List');
+  const renderWirelessConnectList = () => renderPlaceholder('Wireless Connect List');
+
+  // PPP Menu Placeholders
+  const renderPPPProfiles = () => renderPlaceholder('PPP Profiles');
+  const renderPPPSecrets = () => renderPlaceholder('PPP Secrets');
+  const renderPPPActive = () => renderPlaceholder('PPP Active Connections');
+
+  // Files Menu Placeholders
+  const renderFilesList = () => renderPlaceholder('Files List');
+  const renderFilesBackup = () => renderPlaceholder('Files Backup');
+
+  // User Manager Menu Placeholders
+  const renderUserManagerUsers = () => renderPlaceholder('User Manager Users');
+  const renderUserManagerProfiles = () => renderPlaceholder('User Manager Profiles');
+  const renderUserManagerSessions = () => renderPlaceholder('User Manager Sessions');
+
+  // CAPsMAN Menu Placeholders
+  const renderCAPsMANInterfaces = () => renderPlaceholder('CAPsMAN Interfaces');
+  const renderCAPsMANProvisioning = () => renderPlaceholder('CAPsMAN Provisioning');
+  const renderCAPsMANAccessList = () => renderPlaceholder('CAPsMAN Access List');
+  const renderCAPsMANConfiguration = () => renderPlaceholder('CAPsMAN Configuration');
+
+  // LTE Menu Placeholders
+  const renderLTEInterfaces = () => renderPlaceholder('LTE Interfaces');
+  const renderLTEAPN = () => renderPlaceholder('LTE APN Profiles');
+  const renderLTEInfo = () => renderPlaceholder('LTE Info');
+
+  // GPS Menu Placeholders
+  const renderGPSSettings = () => renderPlaceholder('GPS Settings');
+  const renderGPSMonitor = () => renderPlaceholder('GPS Monitor');
+
+  // Standalone Menu Placeholders
+  const renderNeighbors = () => renderPlaceholder('Neighbors');
+  const renderLog = () => renderPlaceholder('Log');
+  const renderSkin = () => renderPlaceholder('Skin');
+
   return (
     <div className="dashboard-layout">
       {renderSidebar()}
@@ -2208,6 +2462,113 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         {activeTab === 'system-logging' && renderSystemLogging()}
         {activeTab === 'system-snmp' && renderSNMP()}
         {activeTab === 'system-ports' && renderPorts()}
+
+        {/* New System Menus */}
+        {activeTab === 'system-ntp-client' && renderSystemNTPClient()}
+        {activeTab === 'system-ntp-server' && renderSystemNTPServer()}
+        {activeTab === 'system-log' && renderSystemLog()}
+        {activeTab === 'system-history' && renderSystemHistory()}
+        {activeTab === 'system-users' && renderSystemUsers()}
+        {activeTab === 'system-groups' && renderSystemGroups()}
+        {activeTab === 'system-passwords' && renderSystemPasswords()}
+        {activeTab === 'system-ssh' && renderSystemSSH()}
+        {activeTab === 'system-telnet' && renderSystemTelnet()}
+        {activeTab === 'system-www' && renderSystemWebFig()}
+        {activeTab === 'system-api' && renderSystemAPI()}
+        {activeTab === 'system-ftp' && renderSystemFTP()}
+        {activeTab === 'system-packages' && renderSystemPackages()}
+        {activeTab === 'system-resources' && renderSystemResources()}
+        {activeTab === 'system-routerboard' && renderSystemRouterBoard()}
+        {activeTab === 'system-health' && renderSystemHealth()}
+        {activeTab === 'system-leds' && renderSystemLEDs()}
+        {activeTab === 'system-watchdog' && renderSystemWatchdog()}
+        {activeTab === 'system-scheduler' && renderSystemScheduler()}
+        {activeTab === 'system-scripts' && renderSystemScripts()}
+        {activeTab === 'system-backup' && renderSystemBackup()}
+        {activeTab === 'system-reset' && renderSystemReset()}
+
+        {/* New IP Menus */}
+        {activeTab === 'ip-pools' && renderIPPools()}
+        {activeTab === 'ip-dhcp-relay' && renderDHCPRelay()}
+        {activeTab === 'ip-upnp' && renderUPnP()}
+        {activeTab === 'ip-socks' && renderSOCKS()}
+        {activeTab === 'ip-proxy' && renderProxy()}
+        {activeTab === 'ip-traffic-flow' && renderTrafficFlow()}
+        {activeTab === 'ip-accounting' && renderAccounting()}
+
+        {/* New Bridge Menus */}
+        {activeTab === 'bridge-vlans' && renderBridgeVLANs()}
+
+        {/* New Routing Menus */}
+        {activeTab === 'routing-rules' && renderRoutingRules()}
+        {activeTab === 'routing-filters' && renderRoutingFilters()}
+        {activeTab === 'routing-ospf' && renderOSPF()}
+        {activeTab === 'routing-rip' && renderRIP()}
+        {activeTab === 'routing-bgp' && renderBGP()}
+        {activeTab === 'routing-mpls' && renderMPLS()}
+        {activeTab === 'routing-vrf' && renderVRF()}
+
+        {/* New Firewall Menus */}
+        {activeTab === 'firewall-layer7' && renderLayer7Protocols()}
+
+        {/* New Queues Menus */}
+        {activeTab === 'queues-simple' && renderSimpleQueues()}
+        {activeTab === 'queues-interfaces' && renderInterfaceQueues()}
+
+        {/* New Tools Menus */}
+        {activeTab === 'tools-ping' && renderPing()}
+        {activeTab === 'tools-traceroute' && renderTraceroute()}
+        {activeTab === 'tools-bandwidth-test' && renderBandwidthTest()}
+        {activeTab === 'tools-torch' && renderTorch()}
+        {activeTab === 'tools-packet-sniffer' && renderPacketSniffer()}
+        {activeTab === 'tools-profile' && renderProfile()}
+        {activeTab === 'tools-netwatch' && renderNetwatch()}
+        {activeTab === 'tools-sms' && renderSMS()}
+        {activeTab === 'tools-email' && renderEmail()}
+        {activeTab === 'tools-romon' && renderRoMON()}
+        {activeTab === 'tools-mac-server' && renderMACServer()}
+        {activeTab === 'tools-mac-winbox' && renderMACWinbox()}
+        {activeTab === 'tools-winbox' && renderWinboxSettings()}
+
+        {/* New Wireless Menus */}
+        {activeTab === 'wireless-interfaces' && renderWirelessInterfaces()}
+        {activeTab === 'wireless-security' && renderWirelessSecurity()}
+        {activeTab === 'wireless-access-list' && renderWirelessAccessList()}
+        {activeTab === 'wireless-connect-list' && renderWirelessConnectList()}
+
+        {/* New PPP Menus */}
+        {activeTab === 'ppp-profiles' && renderPPPProfiles()}
+        {activeTab === 'ppp-secrets' && renderPPPSecrets()}
+        {activeTab === 'ppp-active' && renderPPPActive()}
+
+        {/* New Files Menus */}
+        {activeTab === 'files-list' && renderFilesList()}
+        {activeTab === 'files-backup' && renderFilesBackup()}
+
+        {/* New User Manager Menus */}
+        {activeTab === 'user-manager-users' && renderUserManagerUsers()}
+        {activeTab === 'user-manager-profiles' && renderUserManagerProfiles()}
+        {activeTab === 'user-manager-sessions' && renderUserManagerSessions()}
+
+        {/* New CAPsMAN Menus */}
+        {activeTab === 'capsman-interfaces' && renderCAPsMANInterfaces()}
+        {activeTab === 'capsman-provisioning' && renderCAPsMANProvisioning()}
+        {activeTab === 'capsman-access-list' && renderCAPsMANAccessList()}
+        {activeTab === 'capsman-configuration' && renderCAPsMANConfiguration()}
+
+        {/* New LTE Menus */}
+        {activeTab === 'lte-interfaces' && renderLTEInterfaces()}
+        {activeTab === 'lte-apn' && renderLTEAPN()}
+        {activeTab === 'lte-info' && renderLTEInfo()}
+
+        {/* New GPS Menus */}
+        {activeTab === 'gps-settings' && renderGPSSettings()}
+        {activeTab === 'gps-monitor' && renderGPSMonitor()}
+
+        {/* New Standalone Menus */}
+        {activeTab === 'neighbors' && renderNeighbors()}
+        {activeTab === 'log' && renderLog()}
+        {activeTab === 'skin' && renderSkin()}
 
         {/* Routing Menus */}
         {activeTab === 'routing-tables' && renderRoutingTables()}
