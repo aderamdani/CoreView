@@ -318,9 +318,9 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         label: 'Bridge', 
         icon: <Share2 size={15} />,
         submenus: [
-          { id: 'bridge-list', label: 'Bridges' },
-          { id: 'bridge-ports', label: 'Ports' },
-          { id: 'bridge-vlans', label: 'VLANs' }
+          { id: 'bridge-list', label: 'Bridge' },
+          { id: 'bridge-ports', label: 'Port' },
+          { id: 'bridge-vlans', label: 'VLAN' }
         ]
       },
       { 
@@ -989,6 +989,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Activity className="summary-card-icon" />
         <h2 className="section-title">Interface Lists</h2>
       </div>
+      <HelpPanel id="interfaces-lists" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
         Logical grouping of interfaces for simplified firewall and routing rules.
       </p>
@@ -1180,6 +1181,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Share2 className="summary-card-icon" />
         <h2 className="section-title">DHCP Servers</h2>
       </div>
+      <HelpPanel id="ip-dhcp-server" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         DHCP servers automatically assign IP addresses to clients on specific interfaces.
       </p>
@@ -1275,6 +1277,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Globe className="summary-card-icon" />
         <h2 className="section-title">DNS Configuration</h2>
       </div>
+      <HelpPanel id="ip-dns" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Upstream DNS servers and static local DNS entries.
       </p>
@@ -1326,6 +1329,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Route className="summary-card-icon" />
         <h2 className="section-title">IP Routes</h2>
       </div>
+      <HelpPanel id="ip-routes" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Routing table determining path selection for IP traffic.
       </p>
@@ -1442,6 +1446,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Wifi className="summary-card-icon" />
         <h2 className="section-title">Hotspot Servers</h2>
       </div>
+      <HelpPanel id="ip-hotspot" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Hotspot gateways providing authentication for network access.
       </p>
@@ -1600,6 +1605,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Route className="summary-card-icon" />
         <h2 className="section-title">Routing Tables (FIB)</h2>
       </div>
+      <HelpPanel id="routing-tables" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Forwarding Information Bases for policy routing.
       </p>
@@ -1689,6 +1695,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Share2 className="summary-card-icon" />
         <h2 className="section-title">Firewall NAT Rules</h2>
       </div>
+      <HelpPanel id="firewall-nat" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Network Address Translation modifies IP addresses of passing packets.
       </p>
@@ -1734,6 +1741,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Cpu className="summary-card-icon" />
         <h2 className="section-title">Firewall Mangle Rules</h2>
       </div>
+      <HelpPanel id="firewall-mangle" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Mangle rules mark packets for future processing by routing marks or QoS.
       </p>
@@ -1775,6 +1783,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <AlertCircle className="summary-card-icon" />
         <h2 className="section-title">Firewall Raw Rules</h2>
       </div>
+      <HelpPanel id="firewall-raw" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         Raw rules can selectively bypass connection tracking to increase routing performance.
       </p>
@@ -2295,12 +2304,13 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   );
 
   // Placeholder render functions for new menus - to be implemented
-  const renderPlaceholder = (title) => (
+  const renderPlaceholder = (title, helpId = null) => (
     <div className="glass-panel config-section animate-fade-in">
       <div className="section-header">
         <Settings className="summary-card-icon" />
         <h2 className="section-title">{title}</h2>
       </div>
+      {helpId && <HelpPanel id={helpId} onNavigate={setActiveTab} />}
       <div style={{ textAlign: 'center', padding: '3rem 2rem', color: 'var(--text-muted)' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>🚧</div>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Fitur Dalam Pengembangan</h3>
@@ -2319,110 +2329,110 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   );
 
   // System Menu Placeholders
-  const renderSystemNTPClient = () => renderPlaceholder('NTP Client');
-  const renderSystemNTPServer = () => renderPlaceholder('NTP Server');
-  const renderSystemLog = () => renderPlaceholder('System Log');
-  const renderSystemHistory = () => renderPlaceholder('System History');
-  const renderSystemUsers = () => renderPlaceholder('System Users');
-  const renderSystemGroups = () => renderPlaceholder('System Groups');
-  const renderSystemPasswords = () => renderPlaceholder('System Passwords');
-  const renderSystemSSH = () => renderPlaceholder('SSH');
-  const renderSystemTelnet = () => renderPlaceholder('Telnet');
-  const renderSystemWebFig = () => renderPlaceholder('WebFig');
-  const renderSystemAPI = () => renderPlaceholder('API');
-  const renderSystemFTP = () => renderPlaceholder('FTP');
-  const renderSystemPackages = () => renderPlaceholder('Packages');
-  const renderSystemResources = () => renderPlaceholder('Resources');
-  const renderSystemRouterBoard = () => renderPlaceholder('RouterBoard');
-  const renderSystemHealth = () => renderPlaceholder('Health');
-  const renderSystemLEDs = () => renderPlaceholder('LEDs');
-  const renderSystemWatchdog = () => renderPlaceholder('Watchdog');
-  const renderSystemScheduler = () => renderPlaceholder('Scheduler');
-  const renderSystemScripts = () => renderPlaceholder('Scripts');
-  const renderSystemBackup = () => renderPlaceholder('Backup');
-  const renderSystemReset = () => renderPlaceholder('Reset Configuration');
+  const renderSystemNTPClient = () => renderPlaceholder('NTP Client', 'system-ntp-client');
+  const renderSystemNTPServer = () => renderPlaceholder('NTP Server', 'system-ntp-server');
+  const renderSystemLog = () => renderPlaceholder('System Log', 'system-log');
+  const renderSystemHistory = () => renderPlaceholder('System History', 'system-history');
+  const renderSystemUsers = () => renderPlaceholder('System Users', 'system-users');
+  const renderSystemGroups = () => renderPlaceholder('System Groups', 'system-groups');
+  const renderSystemPasswords = () => renderPlaceholder('System Passwords', 'system-passwords');
+  const renderSystemSSH = () => renderPlaceholder('SSH', 'system-ssh');
+  const renderSystemTelnet = () => renderPlaceholder('Telnet', 'system-telnet');
+  const renderSystemWebFig = () => renderPlaceholder('WebFig', 'system-www');
+  const renderSystemAPI = () => renderPlaceholder('API', 'system-api');
+  const renderSystemFTP = () => renderPlaceholder('FTP', 'system-ftp');
+  const renderSystemPackages = () => renderPlaceholder('Packages', 'system-identity');
+  const renderSystemResources = () => renderPlaceholder('Resources', 'system-identity');
+  const renderSystemRouterBoard = () => renderPlaceholder('RouterBoard', 'system-ports');
+  const renderSystemHealth = () => renderPlaceholder('Health', 'system-snmp');
+  const renderSystemLEDs = () => renderPlaceholder('LEDs', 'system-identity');
+  const renderSystemWatchdog = () => renderPlaceholder('Watchdog', 'system-logging');
+  const renderSystemScheduler = () => renderPlaceholder('Scheduler', 'system-clock');
+  const renderSystemScripts = () => renderPlaceholder('Scripts', 'system-logging');
+  const renderSystemBackup = () => renderPlaceholder('Backup', 'files-backup');
+  const renderSystemReset = () => renderPlaceholder('Reset Configuration', 'system-identity');
 
   // IP Menu Placeholders
-  const renderDHCPRelay = () => renderPlaceholder('DHCP Relay');
-  const renderUPnP = () => renderPlaceholder('UPnP');
-  const renderSOCKS = () => renderPlaceholder('SOCKS');
-  const renderProxy = () => renderPlaceholder('Proxy');
-  const renderTrafficFlow = () => renderPlaceholder('Traffic Flow');
-  const renderAccounting = () => renderPlaceholder('Accounting');
+  const renderDHCPRelay = () => renderPlaceholder('DHCP Relay', 'ip-dhcp-server');
+  const renderUPnP = () => renderPlaceholder('UPnP', 'ip-services');
+  const renderSOCKS = () => renderPlaceholder('SOCKS', 'ip-services');
+  const renderProxy = () => renderPlaceholder('Proxy', 'ip-services');
+  const renderTrafficFlow = () => renderPlaceholder('Traffic Flow', 'tools-graphing');
+  const renderAccounting = () => renderPlaceholder('Accounting', 'ip-services');
 
   // Bridge Menu Placeholders
-  const renderBridgeVLANs = () => renderPlaceholder('Bridge VLANs');
+  const renderBridgeVLANs = () => renderPlaceholder('Bridge VLANs', 'bridge-ports');
 
   // Routing Menu Placeholders
-  const renderRoutingRules = () => renderPlaceholder('Routing Rules');
-  const renderRoutingFilters = () => renderPlaceholder('Routing Filters');
-  const renderOSPF = () => renderPlaceholder('OSPF');
-  const renderRIP = () => renderPlaceholder('RIP');
-  const renderBGP = () => renderPlaceholder('BGP');
-  const renderMPLS = () => renderPlaceholder('MPLS');
-  const renderVRF = () => renderPlaceholder('VRF');
+  const renderRoutingRules = () => renderPlaceholder('Routing Rules', 'routing-rules');
+  const renderRoutingFilters = () => renderPlaceholder('Routing Filters', 'routing-filters');
+  const renderOSPF = () => renderPlaceholder('OSPF', 'routing-ospf');
+  const renderRIP = () => renderPlaceholder('RIP', 'routing-rip');
+  const renderBGP = () => renderPlaceholder('BGP', 'routing-bgp');
+  const renderMPLS = () => renderPlaceholder('MPLS', 'routing-mpls');
+  const renderVRF = () => renderPlaceholder('VRF', 'routing-vrf');
 
   // Firewall Menu Placeholders
-  const renderLayer7Protocols = () => renderPlaceholder('Layer7 Protocols');
+  const renderLayer7Protocols = () => renderPlaceholder('Layer7 Protocols', 'firewall-layer7');
 
   // Queues Menu Placeholders
-  const renderSimpleQueues = () => renderPlaceholder('Simple Queues');
-  const renderInterfaceQueues = () => renderPlaceholder('Interface Queues');
+  const renderSimpleQueues = () => renderPlaceholder('Simple Queues', 'queues-simple');
+  const renderInterfaceQueues = () => renderPlaceholder('Interface Queues', 'queues-interfaces');
 
   // Tools Menu Placeholders
-  const renderPing = () => renderPlaceholder('Ping');
-  const renderTraceroute = () => renderPlaceholder('Traceroute');
-  const renderBandwidthTest = () => renderPlaceholder('Bandwidth Test');
-  const renderTorch = () => renderPlaceholder('Torch');
-  const renderPacketSniffer = () => renderPlaceholder('Packet Sniffer');
-  const renderProfile = () => renderPlaceholder('Profile');
-  const renderNetwatch = () => renderPlaceholder('Netwatch');
-  const renderSMS = () => renderPlaceholder('SMS');
-  const renderEmail = () => renderPlaceholder('Email');
-  const renderRoMON = () => renderPlaceholder('RoMON');
-  const renderMACServer = () => renderPlaceholder('MAC Server');
-  const renderMACWinbox = () => renderPlaceholder('MAC Winbox');
-  const renderWinboxSettings = () => renderPlaceholder('Winbox Settings');
+  const renderPing = () => renderPlaceholder('Ping', 'tools-ping');
+  const renderTraceroute = () => renderPlaceholder('Traceroute', 'tools-traceroute');
+  const renderBandwidthTest = () => renderPlaceholder('Bandwidth Test', 'tools-bandwidth-test');
+  const renderTorch = () => renderPlaceholder('Torch', 'tools-torch');
+  const renderPacketSniffer = () => renderPlaceholder('Packet Sniffer', 'tools-packet-sniffer');
+  const renderProfile = () => renderPlaceholder('Profile', 'tools-profile');
+  const renderNetwatch = () => renderPlaceholder('Netwatch', 'tools-netwatch');
+  const renderSMS = () => renderPlaceholder('SMS', 'tools-sms');
+  const renderEmail = () => renderPlaceholder('Email', 'tools-email');
+  const renderRoMON = () => renderPlaceholder('RoMON', 'tools-romon');
+  const renderMACServer = () => renderPlaceholder('MAC Server', 'tools-mac-server');
+  const renderMACWinbox = () => renderPlaceholder('MAC Winbox', 'tools-mac-winbox');
+  const renderWinboxSettings = () => renderPlaceholder('Winbox Settings', 'tools-winbox');
 
   // Wireless Menu Placeholders
-  const renderWirelessInterfaces = () => renderPlaceholder('Wireless Interfaces');
-  const renderWirelessSecurity = () => renderPlaceholder('Wireless Security Profiles');
-  const renderWirelessAccessList = () => renderPlaceholder('Wireless Access List');
-  const renderWirelessConnectList = () => renderPlaceholder('Wireless Connect List');
+  const renderWirelessInterfaces = () => renderPlaceholder('Wireless Interfaces', 'wireless-interfaces');
+  const renderWirelessSecurity = () => renderPlaceholder('Wireless Security Profiles', 'wireless-security');
+  const renderWirelessAccessList = () => renderPlaceholder('Wireless Access List', 'wireless-access-list');
+  const renderWirelessConnectList = () => renderPlaceholder('Wireless Connect List', 'wireless-connect-list');
 
   // PPP Menu Placeholders
-  const renderPPPProfiles = () => renderPlaceholder('PPP Profiles');
-  const renderPPPSecrets = () => renderPlaceholder('PPP Secrets');
-  const renderPPPActive = () => renderPlaceholder('PPP Active Connections');
+  const renderPPPProfiles = () => renderPlaceholder('PPP Profiles', 'ppp-profiles');
+  const renderPPPSecrets = () => renderPlaceholder('PPP Secrets', 'ppp-secrets');
+  const renderPPPActive = () => renderPlaceholder('PPP Active Connections', 'ppp-active');
 
   // Files Menu Placeholders
-  const renderFilesList = () => renderPlaceholder('Files List');
-  const renderFilesBackup = () => renderPlaceholder('Files Backup');
+  const renderFilesList = () => renderPlaceholder('Files List', 'files-list');
+  const renderFilesBackup = () => renderPlaceholder('Files Backup', 'files-backup');
 
   // User Manager Menu Placeholders
-  const renderUserManagerUsers = () => renderPlaceholder('User Manager Users');
-  const renderUserManagerProfiles = () => renderPlaceholder('User Manager Profiles');
-  const renderUserManagerSessions = () => renderPlaceholder('User Manager Sessions');
+  const renderUserManagerUsers = () => renderPlaceholder('User Manager Users', 'user-manager-users');
+  const renderUserManagerProfiles = () => renderPlaceholder('User Manager Profiles', 'user-manager-profiles');
+  const renderUserManagerSessions = () => renderPlaceholder('User Manager Sessions', 'user-manager-sessions');
 
   // CAPsMAN Menu Placeholders
-  const renderCAPsMANInterfaces = () => renderPlaceholder('CAPsMAN Interfaces');
-  const renderCAPsMANProvisioning = () => renderPlaceholder('CAPsMAN Provisioning');
-  const renderCAPsMANAccessList = () => renderPlaceholder('CAPsMAN Access List');
-  const renderCAPsMANConfiguration = () => renderPlaceholder('CAPsMAN Configuration');
+  const renderCAPsMANInterfaces = () => renderPlaceholder('CAPsMAN Interfaces', 'capsman-interfaces');
+  const renderCAPsMANProvisioning = () => renderPlaceholder('CAPsMAN Provisioning', 'capsman-provisioning');
+  const renderCAPsMANAccessList = () => renderPlaceholder('CAPsMAN Access List', 'capsman-access-list');
+  const renderCAPsMANConfiguration = () => renderPlaceholder('CAPsMAN Configuration', 'capsman-configuration');
 
   // LTE Menu Placeholders
-  const renderLTEInterfaces = () => renderPlaceholder('LTE Interfaces');
-  const renderLTEAPN = () => renderPlaceholder('LTE APN Profiles');
-  const renderLTEInfo = () => renderPlaceholder('LTE Info');
+  const renderLTEInterfaces = () => renderPlaceholder('LTE Interfaces', 'lte-interfaces');
+  const renderLTEAPN = () => renderPlaceholder('LTE APN Profiles', 'lte-apn');
+  const renderLTEInfo = () => renderPlaceholder('LTE Info', 'lte-info');
 
   // GPS Menu Placeholders
-  const renderGPSSettings = () => renderPlaceholder('GPS Settings');
-  const renderGPSMonitor = () => renderPlaceholder('GPS Monitor');
+  const renderGPSSettings = () => renderPlaceholder('GPS Settings', 'gps-settings');
+  const renderGPSMonitor = () => renderPlaceholder('GPS Monitor', 'gps-monitor');
 
   // Standalone Menu Placeholders
-  const renderNeighbors = () => renderPlaceholder('Neighbors');
-  const renderLog = () => renderPlaceholder('Log');
-  const renderSkin = () => renderPlaceholder('Skin');
+  const renderNeighbors = () => renderPlaceholder('Neighbors', 'neighbors');
+  const renderLog = () => renderPlaceholder('Log', 'log');
+  const renderSkin = () => renderPlaceholder('Skin', 'skin');
 
   return (
     <div className="dashboard-layout">
