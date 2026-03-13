@@ -185,10 +185,19 @@ const HelpPanel = ({ id, onNavigate }) => {
 };
 
 
-export const Dashboard = ({ config }) => {
+export const Dashboard = ({ config, searchTerm = '' }) => {
   // Since 'firewall' expands, let's default the first submenu as active or 'overview'
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedMenus, setExpandedMenus] = useState({ firewall: true });
+
+  // A helper function to filter arrays based on searchTerm
+  const applyFilter = (arr) => {
+    if (!searchTerm) return arr;
+    const lowerTerm = searchTerm.toLowerCase();
+    return arr.filter(item => 
+      Object.values(item).some(val => safeStr(val).toLowerCase().includes(lowerTerm))
+    );
+  };
 
   const { metadata, interfaces, ipAddresses, routes, vpn, firewall, dhcp } = config;
   
@@ -445,7 +454,10 @@ export const Dashboard = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {interfaces.map((iface, idx) => (
+            {applyFilter(interfaces).length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interfaces match search.</td></tr>
+            ) : (
+              applyFilter(interfaces).map((iface, idx) => (
               <tr key={idx}>
                 <td>
                   {iface.active 
@@ -458,7 +470,7 @@ export const Dashboard = ({ config }) => {
                 <td>{iface.ip || <span style={{color: 'var(--text-muted)'}}>-</span>}</td>
                 <td style={{ color: 'var(--text-muted)' }}>{iface.comment || '-'}</td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>
@@ -627,10 +639,10 @@ export const Dashboard = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {ipAddresses.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP Addresses configured.</td></tr>
+            {applyFilter(ipAddresses).length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP Addresses match search.</td></tr>
             ) : (
-              ipAddresses.map((ip, idx) => {
+              applyFilter(ipAddresses).map((ip, idx) => {
                 const hasDHCP = ip.interfaceObj?.dhcpServers?.length > 0;
                 return (
                   <tr key={idx} style={{ opacity: ip.active ? 1 : 0.6 }}>
@@ -1141,10 +1153,10 @@ export const Dashboard = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {firewall.filter.length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules configured.</td></tr>
+            {applyFilter(firewall.filter).length === 0 ? (
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules match search.</td></tr>
             ) : (
-              firewall.filter.map((rule, idx) => (
+              applyFilter(firewall.filter).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td>
                     <span className={`badge ${rule.action === 'accept' ? 'badge-success' : rule.action === 'drop' ? 'badge-error' : 'badge-neutral'}`}>
@@ -1187,10 +1199,10 @@ export const Dashboard = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {firewall.nat.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules configured.</td></tr>
+            {applyFilter(firewall.nat).length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules match search.</td></tr>
             ) : (
-              firewall.nat.map((rule, idx) => (
+              applyFilter(firewall.nat).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td>
                     <span className={`badge ${rule.action === 'masquerade' ? 'badge-info' : 'badge-warning'}`}>
@@ -1232,10 +1244,10 @@ export const Dashboard = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {(!firewall.mangle || firewall.mangle.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Mangle rules configured.</td></tr>
+            {(!firewall.mangle || applyFilter(firewall.mangle).length === 0) ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Mangle rules match search.</td></tr>
             ) : (
-              firewall.mangle.map((rule, idx) => (
+              applyFilter(firewall.mangle).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td><span className="badge badge-info">{rule.action}</span></td>
                   <td>{rule.chain}</td>
@@ -1273,10 +1285,10 @@ export const Dashboard = ({ config }) => {
             </tr>
           </thead>
           <tbody>
-            {(!firewall.raw || firewall.raw.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Raw rules configured.</td></tr>
+            {(!firewall.raw || applyFilter(firewall.raw).length === 0) ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Raw rules match search.</td></tr>
             ) : (
-              firewall.raw.map((rule, idx) => (
+              applyFilter(firewall.raw).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td>
                     <span className={`badge ${rule.action === 'drop' ? 'badge-error' : 'badge-neutral'}`}>
