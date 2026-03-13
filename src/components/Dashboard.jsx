@@ -455,63 +455,89 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
 
   const renderOverview = () => {
-    // 1. Interface Status Data
-    const ifaceActive = interfaces.filter(i => i.active).length;
-    const ifaceDisabled = interfaces.length - ifaceActive;
-    const ifaceData = [
-      { name: 'Active', value: ifaceActive, color: 'var(--green)' },
-      { name: 'Disabled', value: ifaceDisabled, color: 'var(--text-muted)' }
-    ];
-
-    // 2. IP Distribution Data (ips per interface)
-    const ipDistMap = {};
-    ipAddresses.forEach(ip => {
-      const iface = ip.interface || 'Unknown';
-      ipDistMap[iface] = (ipDistMap[iface] || 0) + 1;
+    // Interactive Config Story Logic
+    const storySteps = [];
+    
+    // Step 1: Identity & Access
+    const identity = config?.system?.identity?.name || metadata.identity || 'MikroTik';
+    let usersCount = 0;
+    if (config?.user) usersCount = config.user.length;
+    storySteps.push({
+      id: 'step-identity',
+      icon: <Server size={18} />,
+      title: 'Identitas & Akses Sistem',
+      color: 'var(--blue)',
+      description: `Perangkat Anda dikonfigurasi dengan nama **${identity}**.${usersCount > 0 ? ` Terdapat ${usersCount} user yang terdaftar di konfigurasi ini.` : ''}`,
+      detailType: 'system-identity'
     });
-    const ipDistData = Object.entries(ipDistMap)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a,b) => b.count - a.count)
-      .slice(0, 5); // top 5
 
-    // 3. Firewall Rules by Chain
-    const fwChains = {};
-    ['filter', 'nat', 'mangle', 'raw'].forEach(table => {
-      (firewall[table] || []).forEach(rule => {
-        const chain = rule.chain || 'unknown';
-        fwChains[chain] = (fwChains[chain] || 0) + 1;
-      });
+    // Step 2: Interfaces
+    const activeIfaces = interfaces.filter(i => i.active).length;
+    const bridges = config?.interface?.bridge?.length || 0;
+    storySteps.push({
+      id: 'step-interfaces',
+      icon: <Activity size={18} />,
+      title: 'Antarmuka Jaringan (Interfaces)',
+      color: 'var(--green)',
+      description: `Terdapat **${activeIfaces}** interface fisik/virtual yang berstatus aktif.${bridges > 0 ? ` Perangkat ini juga memiliki ${bridges} interface Bridge untuk menggabungkan port.` : ''}`,
+      detailType: 'interfaces-list'
     });
-    const fwData = Object.entries(fwChains).map(([name, value]) => ({ name, value }));
-    const fwColors = ['#818cf8', '#34d399', '#fbbf24', '#f87171', '#a78bfa'];
 
-    // 4. Routes by Type (Static vs Dynamic/Connected)
-    let staticRoutes = 0;
-    let dynamicRoutes = 0;
-    routes.forEach(r => {
-      // MikroTik flags usually have 'S' for static, 'C' for connected, 'D' for dynamic
-      if (r.flags && r.flags.includes('S')) staticRoutes++;
-      else dynamicRoutes++;
+    // Step 3: IP Addressing
+    const staticIps = ipAddresses.length;
+    let dhcpDesc = '';
+    const dhcpServers = config?.ip?.['dhcp-server']?.length || 0;
+    const dhcpClients = config?.ip?.['dhcp-client']?.length || 0;
+    if (dhcpServers > 0 && dhcpClients > 0) dhcpDesc = ` Perangkat ini beroperasi sebagai DHCP Server (${dhcpServers} aktif) sekaligus DHCP Client (${dhcpClients} aktif).`;
+    else if (dhcpServers > 0) dhcpDesc = ` Layanan DHCP Server aktif pada ${dhcpServers} network untuk membagikan IP Address secara otomatis terhadap klien.`;
+    else if (dhcpClients > 0) dhcpDesc = ` Beroperasi sebagai DHCP Client (${dhcpClients} aktif) untuk mendapatkan IP otomatis dari ISP/Upstream.`;
+
+    storySteps.push({
+      id: 'step-ip',
+      icon: <Globe size={18} />,
+      title: 'Pengalamatan IP (IP Addressing)',
+      color: 'var(--yellow)',
+      description: `Sebanyak **${staticIps}** konfigurasi IP statis ditemukan pada router.${dhcpDesc}`,
+      detailType: 'ip-addresses'
     });
-    const routeData = [
-      { name: 'Static', value: staticRoutes, color: '#60a5fa' },
-      { name: 'Dynamic/Connected', value: dynamicRoutes, color: '#34d399' }
-    ];
 
-    // Custom Tooltip style for Recharts to match the theme
-    const CustomTooltip = ({ active, payload, label }) => {
-      if (active && payload && payload.length) {
-        return (
-          <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: '0.85rem' }}>{label || payload[0].name}</p>
-            <p style={{ margin: 0, color: payload[0].color || payload[0].payload.fill || 'var(--text-secondary)', fontSize: '0.8rem' }}>
-              Value: {payload[0].value}
-            </p>
-          </div>
-        );
-      }
-      return null;
-    };
+    // Step 4: Routing & Internet
+    let routingDesc = '';
+    const hasMasquerade = (config?.ip?.firewall?.nat || []).some(r => r.action === 'masquerade');
+    const defaultRoutes = routes.filter(r => r.dstAddress === '0.0.0.0/0' || !r.dstAddress).length;
+    
+    if (hasMasquerade && defaultRoutes > 0) {
+      routingDesc = `Aturan NAT (Masquerade) sudah ada untuk mengizinkan klien terhubung ke internet, didukung oleh ${defaultRoutes} rute default (0.0.0.0/0).`;
+    } else if (defaultRoutes > 0) {
+      routingDesc = `Memiliki ${defaultRoutes} rute default (0.0.0.0/0), namun belum ditemukan aturan NAT (Masquerade) yang jelas.`;
+    } else {
+      routingDesc = `Terdapat ${routes.length} tabel routing, pastikan rute Internet (0.0.0.0/0) sudah terkonfigurasi jika butuh akses global.`;
+    }
+
+    storySteps.push({
+      id: 'step-routing',
+      icon: <Route size={18} />,
+      title: 'Routing & Akses Internet',
+      color: 'var(--accent)',
+      description: routingDesc,
+      detailType: 'routing-tables'
+    });
+
+    // Step 5: Firewall & VPN
+    const fwRules = (config?.ip?.firewall?.filter || []).length;
+    let secDesc = fwRules > 0 ? `Keamanan jaringan dari/ke luar diatur menggunakan **${fwRules}** aturan Firewall Filter.` : 'Belum ada aturan Firewall Filter yang kuat dikonfigurasi pada perangkat ini.';
+    
+    if (totalVpns > 0) secDesc += ` Mendeteksi konfigurasi VPN (seperti L2TP, PPTP, atau OpenVPN) dengan total ${totalVpns} profil/secret.`;
+
+    storySteps.push({
+      id: 'step-security',
+      icon: <Shield size={18} />,
+      title: 'Keamanan & Akses Jauh (Firewall & VPN)',
+      color: 'var(--red)',
+      description: secDesc,
+      detailType: 'firewall-filter'
+    });
+
 
     return (
       <div className="animate-fade-in delay-100">
@@ -546,7 +572,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
         {/* Top Summary Cards */}
         <div className="dashboard-grid" style={{ marginBottom: '1.5rem' }}>
-          <div className="glass-panel summary-card card-hover">
+          <div className="glass-panel summary-card card-hover" onClick={() => setActiveTab('interfaces-list')} style={{cursor: 'pointer'}}>
             <div className="summary-card-header">
               <Activity className="summary-card-icon" size={20} />
               INTERFACES
@@ -555,21 +581,21 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               {activeInterfaces} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {totalInterfaces} Active</span>
             </div>
           </div>
-          <div className="glass-panel summary-card card-hover delay-100">
+          <div className="glass-panel summary-card card-hover delay-100" onClick={() => setActiveTab('vpn')} style={{cursor: 'pointer'}}>
             <div className="summary-card-header">
               <Lock className="summary-card-icon" size={20} />
               VPN CONNECTIONS
             </div>
             <div className="summary-card-value">{totalVpns}</div>
           </div>
-          <div className="glass-panel summary-card card-hover delay-200">
+          <div className="glass-panel summary-card card-hover delay-200" onClick={() => setActiveTab('routing-tables')} style={{cursor: 'pointer'}}>
             <div className="summary-card-header">
               <Route className="summary-card-icon" size={20} />
               ROUTES
             </div>
             <div className="summary-card-value">{totalRoutes}</div>
           </div>
-          <div className="glass-panel summary-card card-hover delay-300">
+          <div className="glass-panel summary-card card-hover delay-300" onClick={() => setActiveTab('firewall-filter')} style={{cursor: 'pointer'}}>
             <div className="summary-card-header">
               <Shield className="summary-card-icon" size={20} />
               FIREWALL RULES
@@ -578,72 +604,68 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           </div>
         </div>
 
-        {/* Chart Widgets */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-          
-          {/* Interfaces Pie */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Interface Status</h3>
-            <div style={{ height: 220 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={ifaceData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                    {ifaceData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}/>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+        {/* Interactive Configuration Story */}
+        <div className="glass-panel config-section" style={{ minHeight: '300px' }}>
+          <div className="section-header" style={{ marginBottom: '2rem' }}>
+            <Activity className="summary-card-icon" />
+            <h2 className="section-title">Configuration Story</h2>
           </div>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+            Berikut adalah penjelasan interaktif mengenai apa saja yang dikonfigurasi pada perangkat ini dari awal hingga akhir. Klik tiap langkah untuk melompat ke bagian konfigurasi terkait.
+          </p>
 
-          {/* Firewall Rules Pie */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Firewall Chains Breakdown</h3>
-            <div style={{ height: 220 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={fwData} outerRadius={85} dataKey="value" label={({name, percent}) => percent > 0.05 ? name : ''} labelLine={false}>
-                    {fwData.map((entry, index) => <Cell key={`cell-${index}`} fill={fwColors[index % fwColors.length]} />)}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+          <div style={{ position: 'relative', paddingLeft: '30px' }}>
+            {/* Timeline Line */}
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '12px', width: '2px', background: 'var(--border)', borderRadius: '2px' }}></div>
+
+            {storySteps.map((step, idx) => (
+              <div key={idx} style={{ position: 'relative', paddingBottom: idx === storySteps.length - 1 ? 0 : '2.5rem' }}>
+                {/* Node Dot */}
+                <div style={{ 
+                  position: 'absolute', left: '-30px', top: 0, 
+                  width: '28px', height: '28px', borderRadius: '50%', 
+                  background: 'var(--bg-elevated)', border: `2px solid ${step.color}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: step.color, zIndex: 2
+                }}>
+                  {step.icon}
+                </div>
+
+                {/* Content Box */}
+                <div 
+                  className="card-hover"
+                  onClick={() => setActiveTab(step.detailType)}
+                  style={{ 
+                    background: 'var(--badge-bg)', border: '1px solid var(--border)', 
+                    borderRadius: 'var(--r-md)', padding: '1.25rem', cursor: 'pointer',
+                    transition: 'all 0.2s', marginLeft: '1rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = step.color;
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.transform = 'none';
+                  }}
+                >
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {step.title}
+                    <ChevronRight size={14} style={{ opacity: 0.5 }} />
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6, margin: 0 }}>
+                    {/* Simple bold parser for markdown double asterisks */}
+                    {step.description.split(/(\*\*.*?\*\*)/).map((part, i) => {
+                      if (part.startsWith('**') && part.endsWith('**')) {
+                        return <strong key={i} style={{ color: 'var(--text-primary)' }}>{part.slice(2, -2)}</strong>;
+                      }
+                      return part;
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Routes Distribution */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Route Properties</h3>
-            <div style={{ height: 220 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={routeData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                    {routeData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}/>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* IP Distribution Bar */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Top Interfaces by IP Count</h3>
-            <div style={{ height: 220 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ipDistData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-hover)' }} />
-                  <Bar dataKey="count" fill="var(--accent-light)" radius={[4, 4, 0, 0]} barSize={30} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
         </div>
       </div>
     );
