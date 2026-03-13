@@ -14,9 +14,9 @@
   --accent-glow:   rgba(99,102,241,0.25);
 
   /* Text */
-  --text-primary:   #f1f5f9;
-  --text-secondary: #8892a4;
-  --text-muted:     #4b5563;
+  --text-primary:   #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted:     #64748b;
 
   /* Borders */
   --border:         rgba(255,255,255,0.06);
@@ -47,6 +47,18 @@
   --r-md: 10px;
   --r-lg: 16px;
   --r-xl: 24px;
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
   /* Font */
   --font: 'Inter', system-ui, sans-serif;

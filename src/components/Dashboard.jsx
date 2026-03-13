@@ -455,87 +455,185 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
 
   const renderOverview = () => {
-    // Interactive Config Story Logic
+    // Interactive Config Story Logic - Detailed Step by Step
     const storySteps = [];
     
-    // Step 1: Identity & Access
+    // Step 1: System Identity & Basic Setup
     const identity = config?.system?.identity?.name || metadata.identity || 'MikroTik';
     let usersCount = 0;
     if (config?.user) usersCount = config.user.length;
+    const systemClock = config?.system?.clock;
+    const systemLogging = config?.system?.logging;
+    
     storySteps.push({
-      id: 'step-identity',
+      id: 'step-system',
       icon: <Server size={18} />,
-      title: 'Identitas & Akses Sistem',
+      title: '1. Sistem & Identitas Perangkat',
       color: 'var(--blue)',
-      description: `Perangkat Anda dikonfigurasi dengan nama **${identity}**.${usersCount > 0 ? ` Terdapat ${usersCount} user yang terdaftar di konfigurasi ini.` : ''}`,
-      detailType: 'system-identity'
+      description: `**Router Identity:** ${identity} - Nama unik perangkat ini di jaringan.\n\n**User Management:** ${usersCount > 0 ? `${usersCount} user terdaftar` : 'Belum ada user tambahan dikonfigurasi'}.\n\n**System Clock:** ${systemClock ? `Timezone ${systemClock.timeZone || 'default'}` : 'Menggunakan waktu default sistem'}.\n\n**System Logging:** ${systemLogging ? `${systemLogging.length} aturan logging aktif` : 'Logging sistem belum dikonfigurasi'}.`,
+      detailType: 'system-identity',
+      expandedInfo: {
+        identity: 'Nama perangkat yang muncul di Winbox/WebFig dan digunakan untuk identifikasi jaringan',
+        users: 'Akun login untuk mengakses router via berbagai metode (SSH, Telnet, WebFig, dll)',
+        clock: 'Konfigurasi waktu dan timezone untuk logging dan scheduling yang akurat',
+        logging: 'Sistem pencatatan aktivitas router untuk troubleshooting dan monitoring'
+      }
     });
 
-    // Step 2: Interfaces
+    // Step 2: Network Interfaces Configuration
     const activeIfaces = interfaces.filter(i => i.active).length;
+    const totalIfaces = interfaces.length;
     const bridges = config?.interface?.bridge?.length || 0;
+    const interfaceLists = config?.interface?.['interface-list']?.length || 0;
+    
     storySteps.push({
       id: 'step-interfaces',
       icon: <Activity size={18} />,
-      title: 'Antarmuka Jaringan (Interfaces)',
+      title: '2. Konfigurasi Antarmuka Jaringan',
       color: 'var(--green)',
-      description: `Terdapat **${activeIfaces}** interface fisik/virtual yang berstatus aktif.${bridges > 0 ? ` Perangkat ini juga memiliki ${bridges} interface Bridge untuk menggabungkan port.` : ''}`,
-      detailType: 'interfaces-list'
+      description: `**Interface Status:** ${activeIfaces}/${totalIfaces} interface aktif dari total ${totalIfaces} interface.\n\n**Bridge Configuration:** ${bridges > 0 ? `${bridges} bridge interface untuk menggabungkan port` : 'Belum ada bridge yang dikonfigurasi'}.\n\n**Interface Lists:** ${interfaceLists > 0 ? `${interfaceLists} grup interface untuk keperluan firewall dan routing` : 'Belum ada interface list yang dikonfigurasi'}.`,
+      detailType: 'interfaces-list',
+      expandedInfo: {
+        physical: 'Interface fisik seperti ether1, ether2, wlan1 untuk koneksi hardware',
+        virtual: 'Interface virtual seperti VLAN, Bridge, PPP untuk segmentasi jaringan',
+        bridge: 'Menggabungkan multiple interface menjadi satu broadcast domain',
+        lists: 'Pengelompokan interface untuk aturan firewall dan routing yang lebih efisien'
+      }
     });
 
-    // Step 3: IP Addressing
+    // Step 3: IP Addressing & DHCP Services
     const staticIps = ipAddresses.length;
-    let dhcpDesc = '';
     const dhcpServers = config?.ip?.['dhcp-server']?.length || 0;
     const dhcpClients = config?.ip?.['dhcp-client']?.length || 0;
-    if (dhcpServers > 0 && dhcpClients > 0) dhcpDesc = ` Perangkat ini beroperasi sebagai DHCP Server (${dhcpServers} aktif) sekaligus DHCP Client (${dhcpClients} aktif).`;
-    else if (dhcpServers > 0) dhcpDesc = ` Layanan DHCP Server aktif pada ${dhcpServers} network untuk membagikan IP Address secara otomatis terhadap klien.`;
-    else if (dhcpClients > 0) dhcpDesc = ` Beroperasi sebagai DHCP Client (${dhcpClients} aktif) untuk mendapatkan IP otomatis dari ISP/Upstream.`;
-
+    const dnsServers = config?.ip?.dns?.servers?.length || 0;
+    const ipPools = config?.ip?.pool?.length || 0;
+    
     storySteps.push({
-      id: 'step-ip',
+      id: 'step-ip-services',
       icon: <Globe size={18} />,
-      title: 'Pengalamatan IP (IP Addressing)',
+      title: '3. Layanan IP & DHCP',
       color: 'var(--yellow)',
-      description: `Sebanyak **${staticIps}** konfigurasi IP statis ditemukan pada router.${dhcpDesc}`,
-      detailType: 'ip-addresses'
+      description: `**IP Addresses:** ${staticIps} konfigurasi IP statis pada interface.\n\n**DHCP Server:** ${dhcpServers > 0 ? `${dhcpServers} server DHCP aktif untuk pembagian IP otomatis` : 'Belum ada DHCP server yang dikonfigurasi'}.\n\n**DHCP Client:** ${dhcpClients > 0 ? `${dhcpClients} client DHCP untuk mendapatkan IP dari upstream` : 'Tidak beroperasi sebagai DHCP client'}.\n\n**DNS Configuration:** ${dnsServers > 0 ? `${dnsServers} server DNS untuk resolusi nama domain` : 'Menggunakan DNS default sistem'}.\n\n**IP Pools:** ${ipPools > 0 ? `${ipPools} pool IP untuk DHCP dan PPP` : 'Belum ada IP pool yang dikonfigurasi'}.`,
+      detailType: 'ip-addresses',
+      expandedInfo: {
+        static: 'IP address tetap yang tidak berubah untuk server dan perangkat penting',
+        dhcpServer: 'Layanan pembagian IP otomatis kepada client di jaringan lokal',
+        dhcpClient: 'Mengambil IP address otomatis dari provider internet',
+        dns: 'Domain Name System untuk mengubah nama domain menjadi IP address',
+        pools: 'Koleksi IP address yang dapat digunakan oleh DHCP atau koneksi PPP'
+      }
     });
 
-    // Step 4: Routing & Internet
-    let routingDesc = '';
-    const hasMasquerade = (config?.ip?.firewall?.nat || []).some(r => r.action === 'masquerade');
+    // Step 4: Routing & Internet Access
+    const totalRoutes = routes.length;
     const defaultRoutes = routes.filter(r => r.dstAddress === '0.0.0.0/0' || !r.dstAddress).length;
+    const staticRoutes = routes.filter(r => r.static === 'yes').length;
+    const dynamicRoutes = totalRoutes - staticRoutes;
+    const hasMasquerade = (config?.ip?.firewall?.nat || []).some(r => r.action === 'masquerade');
+    const routingTables = config?.routing?.table?.length || 0;
     
-    if (hasMasquerade && defaultRoutes > 0) {
-      routingDesc = `Aturan NAT (Masquerade) sudah ada untuk mengizinkan klien terhubung ke internet, didukung oleh ${defaultRoutes} rute default (0.0.0.0/0).`;
-    } else if (defaultRoutes > 0) {
-      routingDesc = `Memiliki ${defaultRoutes} rute default (0.0.0.0/0), namun belum ditemukan aturan NAT (Masquerade) yang jelas.`;
-    } else {
-      routingDesc = `Terdapat ${routes.length} tabel routing, pastikan rute Internet (0.0.0.0/0) sudah terkonfigurasi jika butuh akses global.`;
-    }
-
     storySteps.push({
       id: 'step-routing',
       icon: <Route size={18} />,
-      title: 'Routing & Akses Internet',
+      title: '4. Routing & Akses Internet',
       color: 'var(--accent)',
-      description: routingDesc,
-      detailType: 'routing-tables'
+      description: `**Total Routes:** ${totalRoutes} rute dalam tabel routing (${staticRoutes} statis, ${dynamicRoutes} dinamis).\n\n**Default Routes:** ${defaultRoutes} rute default (0.0.0.0/0) untuk akses internet.\n\n**NAT Configuration:** ${hasMasquerade ? 'Masquerade rule aktif untuk sharing internet' : 'Belum ada aturan NAT untuk internet sharing'}.\n\n**Routing Tables:** ${routingTables > 0 ? `${routingTables} tabel routing tambahan` : 'Menggunakan tabel routing default'}.`,
+      detailType: 'routing-tables',
+      expandedInfo: {
+        static: 'Rute tetap yang dikonfigurasi manual untuk jaringan tertentu',
+        dynamic: 'Rute yang dipelajari otomatis dari protokol routing (OSPF, RIP, BGP)',
+        default: 'Rute fallback untuk traffic yang tidak cocok dengan rute spesifik',
+        nat: 'Network Address Translation untuk mengubah IP private ke public',
+        tables: 'Multiple routing table untuk policy-based routing'
+      }
     });
 
-    // Step 5: Firewall & VPN
-    const fwRules = (config?.ip?.firewall?.filter || []).length;
-    let secDesc = fwRules > 0 ? `Keamanan jaringan dari/ke luar diatur menggunakan **${fwRules}** aturan Firewall Filter.` : 'Belum ada aturan Firewall Filter yang kuat dikonfigurasi pada perangkat ini.';
+    // Step 5: Firewall & Security
+    const filterRules = (config?.ip?.firewall?.filter || []).length;
+    const natRules = (config?.ip?.firewall?.nat || []).length;
+    const mangleRules = (config?.ip?.firewall?.mangle || []).length;
+    const rawRules = (config?.ip?.firewall?.raw || []).length;
+    const addressLists = (config?.ip?.firewall?.['address-list'] || []).length;
     
-    if (totalVpns > 0) secDesc += ` Mendeteksi konfigurasi VPN (seperti L2TP, PPTP, atau OpenVPN) dengan total ${totalVpns} profil/secret.`;
-
     storySteps.push({
-      id: 'step-security',
+      id: 'step-firewall',
       icon: <Shield size={18} />,
-      title: 'Keamanan & Akses Jauh (Firewall & VPN)',
+      title: '5. Firewall & Keamanan Jaringan',
       color: 'var(--red)',
-      description: secDesc,
-      detailType: 'firewall-filter'
+      description: `**Filter Rules:** ${filterRules} aturan filter untuk kontrol traffic masuk/keluar.\n\n**NAT Rules:** ${natRules} aturan NAT untuk port forwarding dan masquerade.\n\n**Mangle Rules:** ${mangleRules} aturan mangle untuk modifikasi packet.\n\n**Raw Rules:** ${rawRules} aturan raw untuk performance dan filtering awal.\n\n**Address Lists:** ${addressLists} daftar alamat IP untuk kebijakan keamanan.`,
+      detailType: 'firewall-filter',
+      expandedInfo: {
+        filter: 'Aturan utama untuk allow/deny traffic berdasarkan kriteria tertentu',
+        nat: 'Network Address Translation untuk mengubah IP dan port',
+        mangle: 'Modifikasi packet untuk QoS, marking, dan routing khusus',
+        raw: 'Filtering awal sebelum connection tracking untuk performa',
+        lists: 'Koleksi IP address untuk kebijakan firewall yang konsisten'
+      }
+    });
+
+    // Step 6: VPN & Remote Access
+    const pptpSecrets = config?.ppp?.['pptp-secret']?.length || 0;
+    const l2tpSecrets = config?.ppp?.['l2tp-secret']?.length || 0;
+    const sstpSecrets = config?.ppp?.['sstp-secret']?.length || 0;
+    const ovpnSecrets = config?.ppp?.['ovpn-server']?.length || 0;
+    const wireguard = config?.interface?.wireguard?.length || 0;
+    const totalVpns = pptpSecrets + l2tpSecrets + sstpSecrets + ovpnSecrets + wireguard;
+    
+    storySteps.push({
+      id: 'step-vpn',
+      icon: <Lock size={18} />,
+      title: '6. VPN & Akses Remote',
+      color: 'var(--accent-light)',
+      description: `**Total VPN Connections:** ${totalVpns} konfigurasi VPN aktif.\n\n**PPTP:** ${pptpSecrets} secret PPTP untuk koneksi VPN klasik.\n\n**L2TP:** ${l2tpSecrets} secret L2TP dengan enkripsi yang lebih baik.\n\n**SSTP:** ${sstpSecrets} secret SSTP untuk Windows integration.\n\n**OpenVPN:** ${ovpnSecrets} server OpenVPN untuk akses remote.\n\n**WireGuard:** ${wireguard} interface WireGuard untuk VPN modern berperforma tinggi.`,
+      detailType: 'vpn',
+      expandedInfo: {
+        pptp: 'Point-to-Point Tunneling Protocol - VPN klasik dengan setup mudah',
+        l2tp: 'Layer 2 Tunneling Protocol - Kombinasi L2TP dan IPSec untuk keamanan',
+        sstp: 'Secure Socket Tunneling Protocol - Terintegrasi dengan Windows SSTP client',
+        openvpn: 'OpenVPN - Fleksibel dan cross-platform dengan konfigurasi advanced',
+        wireguard: 'WireGuard - VPN modern dengan performa tinggi dan setup sederhana'
+      }
+    });
+
+    // Step 7: Quality of Service (QoS)
+    const queueTrees = config?.queue?.tree?.length || 0;
+    const queueTypes = config?.queue?.type?.length || 0;
+    const simpleQueues = config?.queue?.simple?.length || 0;
+    
+    storySteps.push({
+      id: 'step-qos',
+      icon: <BarChart2 size={18} />,
+      title: '7. Quality of Service (QoS)',
+      color: 'var(--status-warning)',
+      description: `**Queue Tree:** ${queueTrees} struktur hierarki untuk bandwidth management.\n\n**Queue Types:** ${queueTypes} tipe antrian untuk algoritma scheduling berbeda.\n\n**Simple Queues:** ${simpleQueues} aturan QoS sederhana per IP/interface.\n\nQoS memastikan traffic penting mendapat prioritas bandwidth yang cukup.`,
+      detailType: 'queues-tree',
+      expandedInfo: {
+        tree: 'Hierarchical Token Bucket untuk kontrol bandwidth yang presisi',
+        types: 'Algoritma antrian seperti PCQ, RED, SFQ untuk fairness',
+        simple: 'Konfigurasi QoS cepat untuk limit bandwidth per user/service',
+        priority: 'Marking dan queuing untuk VoIP, video, dan traffic bisnis'
+      }
+    });
+
+    // Step 8: Monitoring & Management
+    const snmp = config?.snmp;
+    const graphing = config?.tool?.graphing;
+    const netwatch = config?.tool?.['netwatch']?.length || 0;
+    const bandwidthTest = config?.tool?.['bandwidth-test'];
+    
+    storySteps.push({
+      id: 'step-monitoring',
+      icon: <Monitor size={18} />,
+      title: '8. Monitoring & Manajemen',
+      color: 'var(--status-success)',
+      description: `**SNMP:** ${snmp ? 'Aktif untuk monitoring via protokol SNMP' : 'Belum dikonfigurasi untuk monitoring eksternal'}.\n\n**Interface Graphing:** ${graphing ? 'Grafik traffic interface aktif' : 'Grafik interface belum diaktifkan'}.\n\n**Netwatch:** ${netwatch > 0 ? `${netwatch} host monitoring untuk uptime check` : 'Belum ada monitoring host'}.\n\n**Bandwidth Test:** ${bandwidthTest ? 'Server bandwidth test tersedia' : 'Bandwidth test server belum dikonfigurasi'}.`,
+      detailType: 'tools-graphing',
+      expandedInfo: {
+        snmp: 'Simple Network Management Protocol untuk monitoring oleh NMS',
+        graphing: 'Grafik real-time traffic, CPU, memory di WebFig',
+        netwatch: 'Monitoring uptime dan konektivitas host penting',
+        bandwidth: 'Server untuk mengukur kecepatan koneksi jaringan'
+      }
     });
 
 
@@ -605,13 +703,14 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         </div>
 
         {/* Interactive Configuration Story */}
-        <div className="glass-panel config-section" style={{ minHeight: '300px' }}>
+        <div className="glass-panel config-section" style={{ minHeight: '400px' }}>
           <div className="section-header" style={{ marginBottom: '2rem' }}>
             <Activity className="summary-card-icon" />
-            <h2 className="section-title">Configuration Story</h2>
+            <h2 className="section-title">Panduan Konfigurasi Lengkap</h2>
           </div>
           <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
-            Berikut adalah penjelasan interaktif mengenai apa saja yang dikonfigurasi pada perangkat ini dari awal hingga akhir. Klik tiap langkah untuk melompat ke bagian konfigurasi terkait.
+            Berikut adalah panduan step-by-step lengkap mengenai semua konfigurasi yang ada pada perangkat MikroTik ini. 
+            Setiap langkah menjelaskan fungsi dan detail konfigurasi. Klik untuk melihat detail lengkap.
           </p>
 
           <div style={{ position: 'relative', paddingLeft: '30px' }}>
@@ -619,7 +718,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
             <div style={{ position: 'absolute', top: 0, bottom: 0, left: '12px', width: '2px', background: 'var(--border)', borderRadius: '2px' }}></div>
 
             {storySteps.map((step, idx) => (
-              <div key={idx} style={{ position: 'relative', paddingBottom: idx === storySteps.length - 1 ? 0 : '2.5rem' }}>
+              <div key={idx} style={{ position: 'relative', paddingBottom: idx === storySteps.length - 1 ? 0 : '3rem' }}>
                 {/* Node Dot */}
                 <div style={{ 
                   position: 'absolute', left: '-30px', top: 0, 
@@ -637,7 +736,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   onClick={() => setActiveTab(step.detailType)}
                   style={{ 
                     background: 'var(--badge-bg)', border: '1px solid var(--border)', 
-                    borderRadius: 'var(--r-md)', padding: '1.25rem', cursor: 'pointer',
+                    borderRadius: 'var(--r-md)', padding: '1.5rem', cursor: 'pointer',
                     transition: 'all 0.2s', marginLeft: '1rem'
                   }}
                   onMouseEnter={(e) => {
@@ -649,11 +748,13 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     e.currentTarget.style.transform = 'none';
                   }}
                 >
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {step.title}
                     <ChevronRight size={14} style={{ opacity: 0.5 }} />
                   </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6, margin: 0 }}>
+                  
+                  {/* Main Description */}
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem', whiteSpace: 'pre-line' }}>
                     {/* Simple bold parser for markdown double asterisks */}
                     {step.description.split(/(\*\*.*?\*\*)/).map((part, i) => {
                       if (part.startsWith('**') && part.endsWith('**')) {
@@ -661,7 +762,39 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                       }
                       return part;
                     })}
-                  </p>
+                  </div>
+
+                  {/* Expanded Info Section */}
+                  {step.expandedInfo && (
+                    <div style={{ 
+                      background: 'var(--bg-surface)', 
+                      border: '1px solid var(--border)', 
+                      borderRadius: 'var(--r-sm)',
+                      padding: '1rem',
+                      marginTop: '1rem'
+                    }}>
+                      <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
+                        📋 Detail Konfigurasi:
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                        {Object.entries(step.expandedInfo).map(([key, value]) => (
+                          <div key={key} style={{ 
+                            background: 'var(--bg-base)', 
+                            padding: '0.5rem 0.75rem', 
+                            borderRadius: 'var(--r-sm)',
+                            border: '1px solid var(--border)'
+                          }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: step.color, textTransform: 'capitalize', marginBottom: '0.25rem' }}>
+                              {key.replace(/([A-Z])/g, ' $1').trim()}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                              {value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
