@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
-  Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight,
+  Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft,
   Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
@@ -277,6 +277,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   // Since 'firewall' expands, let's default the first submenu as active or 'overview'
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedMenus, setExpandedMenus] = useState({ firewall: true });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // A helper function to filter arrays based on searchTerm
   const applyFilter = (arr) => {
@@ -392,10 +393,21 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     ];
 
     return (
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          {config?.system?.identity?.name || config?.metadata?.identity || 'DashMik'}
+      <aside className={`sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        {/* Sidebar Header with Collapse Toggle */}
+        <div className="sidebar-header">
+          <div className="sidebar-logo">
+            {sidebarCollapsed ? 'CV' : (config?.system?.identity?.name || config?.metadata?.identity || 'CoreView')}
+          </div>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          >
+            {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
         </div>
+
         <ul className="sidebar-menu">
           {menus.map(menu => {
             const hasSubmenus = !!menu.submenus;
@@ -419,12 +431,13 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                       setActiveTab(menu.id);
                     }
                   }}
+                  title={sidebarCollapsed ? menu.label : ''}
                 >
                   <div className="sidebar-item-content">
                     {menu.icon}
-                    <span>{menu.label}</span>
+                    {!sidebarCollapsed && <span>{menu.label}</span>}
                   </div>
-                  {hasSubmenus && (
+                  {hasSubmenus && !sidebarCollapsed && (
                     <ChevronRight
                       size={13}
                       className={`sidebar-chevron ${isMenuExpanded ? 'open' : ''}`}
@@ -432,13 +445,14 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   )}
                 </div>
 
-                {hasSubmenus && isMenuExpanded && (
+                {hasSubmenus && isMenuExpanded && !sidebarCollapsed && (
                   <div className="sidebar-submenus">
                     {menu.submenus.map(sub => (
                       <div 
                         key={sub.id}
                         className={`sidebar-subitem ${activeTab === sub.id ? 'active' : ''}`}
                         onClick={() => setActiveTab(sub.id)}
+                        title={sub.label}
                       >
                         {sub.label}
                       </div>
