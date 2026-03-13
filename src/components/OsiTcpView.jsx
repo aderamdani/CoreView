@@ -350,8 +350,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
         {/* OSI Model Side */}
         <div style={{ flex: '3', minWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <h3 style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-secondary)' }}>OSI 7-Layer Model</h3>
-          {osiConfig.map((layerInfo, index) => {
-            const layerNum = 7 - index;
+          {osiConfig.map((layerInfo) => {
             const layerData = layers[layerInfo.id];
             const layerDetail = layerDetails[layerInfo.id];
             const isExpanded = expandedLayer === layerInfo.id;
