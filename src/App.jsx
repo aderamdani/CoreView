@@ -21,7 +21,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <h1 className="header-title text-gradient">DashMik</h1>
+        <h1 className="header-title text-gradient">CoreView</h1>
         {config && (
           <button className="btn btn-primary animate-fade-in" onClick={handleReset}>
             ↑ Upload New File
