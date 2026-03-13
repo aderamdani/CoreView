@@ -293,8 +293,6 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   // Calculate summaries
   const totalInterfaces = interfaces.length;
   const activeInterfaces = interfaces.filter(i => i.active).length;
-  const totalVpns = vpn.wireguard.length + vpn.ovpn.length + vpn.l2tp.length;
-  const totalRoutes = routes.length;
   const firewallRules = firewall.filter.length + firewall.nat.length + (firewall.mangle?.length || 0) + (firewall.raw?.length || 0);
 
   const toggleMenu = (menu) => {

@@ -48,7 +48,7 @@ export const Uploader = ({ onFileParsed }) => {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
     }
-  }, [onFileParsed]);
+  }, [processFile]);
 
   const handleChange = (e) => {
     e.preventDefault();
