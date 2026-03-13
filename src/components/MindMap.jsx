@@ -45,6 +45,9 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
   return { nodes: layoutedNodes, edges };
 };
 
+const nodeTypes = {};
+const edgeTypes = {};
+
 export const MindMap = ({ config, onNavigate }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -184,6 +187,8 @@ export const MindMap = ({ config, onNavigate }) => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}

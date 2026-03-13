@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { 
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight,
-  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight
+  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
 import { MindMap } from './MindMap';
+import { OsiTcpView } from './OsiTcpView';
+import { 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
+} from 'recharts';
 
 // Safely converts any value to a renderable string (prevents "Objects are not valid as React children" errors)
 const safeStr = (val, fallback = '-') => {
@@ -197,18 +202,18 @@ const HelpPanel = ({ id, onNavigate }) => {
                         display: 'inline-flex', alignItems: 'center', gap: '5px',
                         padding: '3px 10px', borderRadius: '99px',
                         fontSize: '0.75rem', fontWeight: 500,
-                        background: 'rgba(234, 179, 8, 0.12)', // Yellowish warning/prereq
+                        background: 'var(--bg-warning-subtle)', // Yellowish warning/prereq
                         color: 'var(--status-warning)',
-                        border: '1px solid rgba(234, 179, 8, 0.3)',
+                        border: '1px solid var(--bg-warning-subtle-hover)',
                         cursor: isNavigable ? 'pointer' : 'default',
                         transition: 'background 0.15s, border-color 0.15s',
                         userSelect: 'none',
                       }}
                       onMouseEnter={isNavigable ? e => {
-                        e.currentTarget.style.background = 'rgba(234, 179, 8, 0.22)';
+                        e.currentTarget.style.background = 'var(--bg-warning-subtle-hover)';
                       } : undefined}
                       onMouseLeave={isNavigable ? e => {
-                        e.currentTarget.style.background = 'rgba(234, 179, 8, 0.12)';
+                        e.currentTarget.style.background = 'var(--bg-warning-subtle)';
                       } : undefined}
                     >
                       <ArrowLeft size={10} />
@@ -239,18 +244,18 @@ const HelpPanel = ({ id, onNavigate }) => {
                         display: 'inline-flex', alignItems: 'center', gap: '5px',
                         padding: '3px 10px', borderRadius: '99px',
                         fontSize: '0.75rem', fontWeight: 500,
-                        background: 'rgba(34, 197, 94, 0.12)', // Greenish success/next
+                        background: 'var(--bg-success-subtle)', // Greenish success/next
                         color: 'var(--status-success)',
-                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        border: '1px solid var(--bg-success-subtle-hover)',
                         cursor: isNavigable ? 'pointer' : 'default',
                         transition: 'background 0.15s, border-color 0.15s',
                         userSelect: 'none',
                       }}
                       onMouseEnter={isNavigable ? e => {
-                        e.currentTarget.style.background = 'rgba(34, 197, 94, 0.22)';
+                        e.currentTarget.style.background = 'var(--bg-success-subtle-hover)';
                       } : undefined}
                       onMouseLeave={isNavigable ? e => {
-                        e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)';
+                        e.currentTarget.style.background = 'var(--bg-success-subtle)';
                       } : undefined}
                     >
                       {rel}
@@ -299,6 +304,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     const menus = [
       { id: 'overview', label: 'Overview', icon: <Server size={15} /> },
       { id: 'mindmap', label: 'Mind Map', icon: <Share2 size={15} /> },
+      { id: 'osi-tcp', label: 'OSI & TCP/IP', icon: <Layers size={15} /> },
       { 
         id: 'interfaces', 
         label: 'Interfaces', 
@@ -448,74 +454,200 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   };
 
 
-  const renderOverview = () => (
-    <div className="animate-fade-in delay-100">
-      <div className="glass-panel config-section">
-        <div className="section-header">
-          <Server className="summary-card-icon" />
-          <h2 className="section-title">Device Information</h2>
+  const renderOverview = () => {
+    // 1. Interface Status Data
+    const ifaceActive = interfaces.filter(i => i.active).length;
+    const ifaceDisabled = interfaces.length - ifaceActive;
+    const ifaceData = [
+      { name: 'Active', value: ifaceActive, color: 'var(--green)' },
+      { name: 'Disabled', value: ifaceDisabled, color: 'var(--text-muted)' }
+    ];
+
+    // 2. IP Distribution Data (ips per interface)
+    const ipDistMap = {};
+    ipAddresses.forEach(ip => {
+      const iface = ip.interface || 'Unknown';
+      ipDistMap[iface] = (ipDistMap[iface] || 0) + 1;
+    });
+    const ipDistData = Object.entries(ipDistMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a,b) => b.count - a.count)
+      .slice(0, 5); // top 5
+
+    // 3. Firewall Rules by Chain
+    const fwChains = {};
+    ['filter', 'nat', 'mangle', 'raw'].forEach(table => {
+      (firewall[table] || []).forEach(rule => {
+        const chain = rule.chain || 'unknown';
+        fwChains[chain] = (fwChains[chain] || 0) + 1;
+      });
+    });
+    const fwData = Object.entries(fwChains).map(([name, value]) => ({ name, value }));
+    const fwColors = ['#818cf8', '#34d399', '#fbbf24', '#f87171', '#a78bfa'];
+
+    // 4. Routes by Type (Static vs Dynamic/Connected)
+    let staticRoutes = 0;
+    let dynamicRoutes = 0;
+    routes.forEach(r => {
+      // MikroTik flags usually have 'S' for static, 'C' for connected, 'D' for dynamic
+      if (r.flags && r.flags.includes('S')) staticRoutes++;
+      else dynamicRoutes++;
+    });
+    const routeData = [
+      { name: 'Static', value: staticRoutes, color: '#60a5fa' },
+      { name: 'Dynamic/Connected', value: dynamicRoutes, color: '#34d399' }
+    ];
+
+    // Custom Tooltip style for Recharts to match the theme
+    const CustomTooltip = ({ active, payload, label }) => {
+      if (active && payload && payload.length) {
+        return (
+          <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: '0.85rem' }}>{label || payload[0].name}</p>
+            <p style={{ margin: 0, color: payload[0].color || payload[0].payload.fill || 'var(--text-secondary)', fontSize: '0.8rem' }}>
+              Value: {payload[0].value}
+            </p>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <div className="animate-fade-in delay-100">
+        <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
+          <div className="section-header">
+            <Server className="summary-card-icon" />
+            <h2 className="section-title">Device Information</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Router Identity</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.identity || 'MikroTik'}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Model</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.model || 'Unknown Device'}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Serial Number</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.serialNumber || 'N/A'}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Software ID</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.softwareId || 'N/A'}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Generated At</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 500 }}>{metadata.generatedAt || 'N/A'}</div>
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Router Identity</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.identity || 'MikroTik'}</div>
+
+        {/* Top Summary Cards */}
+        <div className="dashboard-grid" style={{ marginBottom: '1.5rem' }}>
+          <div className="glass-panel summary-card card-hover">
+            <div className="summary-card-header">
+              <Activity className="summary-card-icon" size={20} />
+              INTERFACES
+            </div>
+            <div className="summary-card-value">
+              {activeInterfaces} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {totalInterfaces} Active</span>
+            </div>
           </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Model</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.model || 'Unknown Device'}</div>
+          <div className="glass-panel summary-card card-hover delay-100">
+            <div className="summary-card-header">
+              <Lock className="summary-card-icon" size={20} />
+              VPN CONNECTIONS
+            </div>
+            <div className="summary-card-value">{totalVpns}</div>
           </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Serial Number</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.serialNumber || 'N/A'}</div>
+          <div className="glass-panel summary-card card-hover delay-200">
+            <div className="summary-card-header">
+              <Route className="summary-card-icon" size={20} />
+              ROUTES
+            </div>
+            <div className="summary-card-value">{totalRoutes}</div>
           </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Software ID</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{metadata.softwareId || 'N/A'}</div>
+          <div className="glass-panel summary-card card-hover delay-300">
+            <div className="summary-card-header">
+              <Shield className="summary-card-icon" size={20} />
+              FIREWALL RULES
+            </div>
+            <div className="summary-card-value">{firewallRules}</div>
           </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Generated At</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 500 }}>{metadata.generatedAt || 'N/A'}</div>
+        </div>
+
+        {/* Chart Widgets */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+          
+          {/* Interfaces Pie */}
+          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Interface Status</h3>
+            <div style={{ height: 220 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={ifaceData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    {ifaceData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
+
+          {/* Firewall Rules Pie */}
+          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Firewall Chains Breakdown</h3>
+            <div style={{ height: 220 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={fwData} outerRadius={85} dataKey="value" label={({name, percent}) => percent > 0.05 ? name : ''} labelLine={false}>
+                    {fwData.map((entry, index) => <Cell key={`cell-${index}`} fill={fwColors[index % fwColors.length]} />)}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Routes Distribution */}
+          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Route Properties</h3>
+            <div style={{ height: 220 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={routeData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    {routeData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* IP Distribution Bar */}
+          <div className="glass-panel" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Top Interfaces by IP Count</h3>
+            <div style={{ height: 220 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ipDistData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-hover)' }} />
+                  <Bar dataKey="count" fill="var(--accent-light)" radius={[4, 4, 0, 0]} barSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
         </div>
       </div>
-
-      <div className="dashboard-grid">
-        <div className="glass-panel summary-card card-hover">
-          <div className="summary-card-header">
-            <Share2 className="summary-card-icon" size={20} />
-            INTERFACES
-          </div>
-          <div className="summary-card-value">
-            {activeInterfaces} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {totalInterfaces} Active</span>
-          </div>
-        </div>
-
-        <div className="glass-panel summary-card card-hover delay-100">
-          <div className="summary-card-header">
-            <Lock className="summary-card-icon" size={20} />
-            VPN CONNECTIONS
-          </div>
-          <div className="summary-card-value">{totalVpns}</div>
-        </div>
-
-        <div className="glass-panel summary-card card-hover delay-200">
-          <div className="summary-card-header">
-            <Route className="summary-card-icon" size={20} />
-            ROUTES
-          </div>
-          <div className="summary-card-value">{totalRoutes}</div>
-        </div>
-
-        <div className="glass-panel summary-card card-hover delay-300">
-          <div className="summary-card-header">
-            <Shield className="summary-card-icon" size={20} />
-            FIREWALL RULES
-          </div>
-          <div className="summary-card-value">{firewallRules}</div>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderInterfaces = () => (
     <div className="glass-panel config-section animate-fade-in">
@@ -1879,6 +2011,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <SectionErrorBoundary>
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'mindmap' && <MindMap config={config} onNavigate={setActiveTab} />}
+        {activeTab === 'osi-tcp' && <OsiTcpView config={config} onNavigate={setActiveTab} />}
         {activeTab === 'interfaces-list' && renderInterfaces()}
         {activeTab === 'interfaces-lists' && renderInterfaceLists()}
         
