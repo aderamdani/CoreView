@@ -30,6 +30,7 @@ export const parseMikroTikConfig = (fileContent) => {
       addressLists: [],
     },
     vlans: [],
+    bridgeVlans: [],
     hotspot: {
       servers: [],
       profiles: [],
@@ -165,6 +166,8 @@ const mapToStructuredData = (path, attrs, config) => {
     config.bridges.push({ ...attrs, ports: [] }); // Initialize with empty ports array
   } else if (path === '/interface bridge port') {
     config.bridgePorts.push(attrs);
+  } else if (path === '/interface bridge vlan') {
+    config.bridgeVlans.push(attrs);
   } else if (path === '/interface vlan') {
     config.interfaces.push({...attrs, type: 'vlan'});
     config.vlans.push(attrs);

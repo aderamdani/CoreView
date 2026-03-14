@@ -576,6 +576,96 @@ export const configHelp = {
     ],
     relations: ['System Backup', 'Files List'],
   },
+  'system-packages': {
+    title: 'Packages',
+    summary: 'Manajemen paket fitur (bundle) and plugin pada RouterOS.',
+    impact: [
+      'Memungkinkan penambahan atau pengurangan fitur sistem.',
+      'Software upgrade dilakukan melalui manajemen paket ini.',
+    ],
+    relations: ['System → Identity', 'System → Logging'],
+  },
+  'system-resources': {
+    title: 'Resources',
+    summary: 'Informasi penggunaan resource hardware: CPU, RAM, and storage.',
+    impact: [
+      'Memantau beban kerja router secara real-time.',
+      'Mengidentifikasi potensi bottleneck sebelum terjadi gangguan.',
+    ],
+    relations: ['System → Identity', 'System → Logging'],
+  },
+  'system-routerboard': {
+    title: 'RouterBoard',
+    summary: 'Informasi hardware spesifik RouterBOARD, firmware, and serial number.',
+    impact: [
+      'Upgrade firmware tingkat rendah (BIOS/Bootloader) dilakukan di sini.',
+      'Mengetahui model and kemampuan hardware dasar.',
+    ],
+    relations: ['System → Identity', 'System → Health'],
+  },
+  'system-health': {
+    title: 'Health',
+    summary: 'Monitoring kondisi hardware: temperatur, voltase, and status fan.',
+    impact: [
+      'Deteksi dini malfungsi hardware akibat panas berlebih atau daya tidak stabil.',
+      'Penting for menjaga umur pakai perangkat di lingkungan ekstrem.',
+    ],
+    relations: ['System → Identity', 'System → RouterBoard'],
+  },
+  'system-leds': {
+    title: 'LEDs',
+    summary: 'Konfigurasi perilaku lampu indikator (LED) pada perangkat.',
+    impact: [
+      'Membantu identifikasi visual status interface atau sistem di lokasi fisik.',
+      'LED dapat diprogram for menunjukkan kekuatan sinyal atau aktivitas tertentu.',
+    ],
+    relations: ['System → Identity', 'Network Interfaces'],
+  },
+  'system-watchdog': {
+    title: 'Watchdog',
+    summary: 'Fitur pemulihan otomatis yang me-reboot router jika sistem hang atau gagal ping target.',
+    impact: [
+      'Meningkatkan ketersediaan sistem di lokasi terpencil (unattended).',
+      'Kesalahan target ping dapat menyebabkan reboot loop yang tidak diinginkan.',
+    ],
+    relations: ['System → Identity', 'System → Logging'],
+  },
+  'system-scheduler': {
+    title: 'Scheduler',
+    summary: 'Menjalankan script atau perintah secara otomatis pada interval waktu tertentu.',
+    impact: [
+      'Otomatisasi pemeliharaan rutin seperti backup atau pembersihan log.',
+      'Tergantung pada akurasi System Clock for eksekusi yang tepat.',
+    ],
+    relations: ['System → Scripts', 'System → Clock'],
+  },
+  'system-scripts': {
+    title: 'Scripts',
+    summary: 'Tempat penyimpanan and manajemen script kustom for logika sistem tingkat lanjut.',
+    impact: [
+      'Memungkinkan kustomisasi perilaku router di luar menu standar.',
+      'Script yang tidak efisien dapat meningkatkan beban CPU secara drastis.',
+    ],
+    relations: ['System → Scheduler', 'System → Logging'],
+  },
+  'system-backup': {
+    title: 'Backup',
+    summary: 'Pembuatan file cadangan konfigurasi biner (non-readable) for pemulihan sistem utuh.',
+    impact: [
+      'Metode tercepat for memulihkan seluruh router ke state sebelumnya.',
+      'Backup biner tidak bisa diedit manual and terikat pada model hardware sejenis.',
+    ],
+    relations: ['Files List', 'System → Reset Configuration'],
+  },
+  'system-reset': {
+    title: 'Reset Configuration',
+    summary: 'Mengembalikan seluruh pengaturan ke default pabrik atau state kosong.',
+    impact: [
+      'Menghapus seluruh konfigurasi — pastikan memiliki backup sebelum melakukan ini.',
+      'Dapat menyertakan default configuration MikroTik atau benar-benar kosong.',
+    ],
+    relations: ['System → Backup', 'System → Identity'],
+  },
 
   'routing-rules': {
     title: 'Routing Rules',

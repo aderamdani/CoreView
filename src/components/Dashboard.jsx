@@ -288,7 +288,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     );
   };
 
-  const { metadata, interfaces, ipAddresses, routes, vpn, firewall, dhcp } = config;
+  const { metadata, interfaces, ipAddresses, routes, vpn, firewall, dhcp, bridgeVlans } = config;
   
   // Calculate summaries
   const totalInterfaces = interfaces.length;
@@ -983,9 +983,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Interface Lists</h2>
       </div>
       <HelpPanel id="interfaces-lists" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-        Logical grouping of interfaces for simplified firewall and routing rules.
-      </p>
+
       
       <div className="data-table-container">
         <table className="data-table">
@@ -1440,9 +1438,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Hotspot Servers</h2>
       </div>
       <HelpPanel id="ip-hotspot" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Hotspot gateways providing authentication for network access.
-      </p>
+
       
       <div className="data-table-container" style={{ marginBottom: '2rem' }}>
         <table className="data-table">
@@ -1599,9 +1595,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Routing Tables (FIB)</h2>
       </div>
       <HelpPanel id="routing-tables" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Forwarding Information Bases for policy routing.
-      </p>
+
 
       <div className="data-table-container">
         <table className="data-table">
@@ -1823,9 +1817,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Firewall Address Lists</h2>
       </div>
       <HelpPanel id="firewall-address-lists" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Groupings of IP addresses used in firewall filter, NAT, and mangle rules.
-      </p>
+
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
         {config.firewall.groupedAddressLists.length === 0 ? (
@@ -1887,9 +1879,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Queue Tree</h2>
       </div>
       <HelpPanel id="queues-tree" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Hierarchical bandwidth management using Packet Marks.
-      </p>
+
 
       <div className="data-table-container" style={{ marginBottom: '2rem' }}>
         <table className="data-table">
@@ -1937,9 +1927,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Queue Types</h2>
       </div>
       <HelpPanel id="queues-types" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Custom queueing disciplines (PCQ, SFQ, RED) used by limits.
-      </p>
+
 
       <div className="data-table-container">
         <table className="data-table">
@@ -2105,9 +2093,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Monitor className="summary-card-icon" />
         <h2 className="section-title">IP Services</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Configured management services like Winbox, SSH, API, Web.
-      </p>
+      <HelpPanel id="ip-services" onNavigate={setActiveTab} />
+
 
       <div className="data-table-container">
         <table className="data-table">
@@ -2148,9 +2135,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Settings className="summary-card-icon" />
         <h2 className="section-title">System Identity</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        The hostname of this specific network device.
-      </p>
+      <HelpPanel id="system-identity" onNavigate={setActiveTab} />
+
       
       <div style={{ 
           background: 'rgba(255, 255, 255, 0.05)', 
@@ -2176,9 +2162,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">System Clock</h2>
       </div>
       <HelpPanel id="system-clock" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Timezone and NTP configuration parameters.
-      </p>
+
       <div className="data-table-container">
         <table className="data-table">
           <tbody>
@@ -2202,9 +2186,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Terminal className="summary-card-icon" />
         <h2 className="section-title">Logging Actions</h2>
       </div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Destinations for system log events.
-      </p>
+      <HelpPanel id="system-logging" onNavigate={setActiveTab} />
+
 
       <div className="data-table-container">
         <table className="data-table">
@@ -2239,6 +2222,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Activity className="summary-card-icon" />
         <h2 className="section-title">SNMP Configuration</h2>
       </div>
+      <HelpPanel id="system-snmp" onNavigate={setActiveTab} />
       
       <div style={{ 
           background: 'rgba(255, 255, 255, 0.02)', 
@@ -2268,6 +2252,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <Key className="summary-card-icon" />
         <h2 className="section-title">Serial / Hardware Ports</h2>
       </div>
+      <HelpPanel id="system-ports" onNavigate={setActiveTab} />
 
       <div className="data-table-container">
         <table className="data-table">
@@ -2322,39 +2307,86 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   );
 
   // System Menu Placeholders
-  const renderSystemNTPClient = () => renderPlaceholder('NTP Client');
-  const renderSystemNTPServer = () => renderPlaceholder('NTP Server');
-  const renderSystemLog = () => renderPlaceholder('System Log');
-  const renderSystemHistory = () => renderPlaceholder('System History');
-  const renderSystemUsers = () => renderPlaceholder('System Users');
-  const renderSystemGroups = () => renderPlaceholder('System Groups');
-  const renderSystemPasswords = () => renderPlaceholder('System Passwords');
-  const renderSystemSSH = () => renderPlaceholder('SSH');
-  const renderSystemTelnet = () => renderPlaceholder('Telnet');
-  const renderSystemWebFig = () => renderPlaceholder('WebFig');
-  const renderSystemAPI = () => renderPlaceholder('API');
-  const renderSystemFTP = () => renderPlaceholder('FTP');
-  const renderSystemPackages = () => renderPlaceholder('Packages');
-  const renderSystemResources = () => renderPlaceholder('Resources');
-  const renderSystemRouterBoard = () => renderPlaceholder('RouterBoard');
-  const renderSystemHealth = () => renderPlaceholder('Health');
-  const renderSystemLEDs = () => renderPlaceholder('LEDs');
-  const renderSystemWatchdog = () => renderPlaceholder('Watchdog');
-  const renderSystemScheduler = () => renderPlaceholder('Scheduler');
-  const renderSystemScripts = () => renderPlaceholder('Scripts');
-  const renderSystemBackup = () => renderPlaceholder('Backup');
-  const renderSystemReset = () => renderPlaceholder('Reset Configuration');
+  const renderSystemNTPClient = () => renderPlaceholder('NTP Client', 'system-ntp-client');
+  const renderSystemNTPServer = () => renderPlaceholder('NTP Server', 'system-ntp-server');
+  const renderSystemLog = () => renderPlaceholder('System Log', 'system-log');
+  const renderSystemHistory = () => renderPlaceholder('System History', 'system-history');
+  const renderSystemUsers = () => renderPlaceholder('System Users', 'system-users');
+  const renderSystemGroups = () => renderPlaceholder('System Groups', 'system-groups');
+  const renderSystemPasswords = () => renderPlaceholder('System Passwords', 'system-passwords');
+  const renderSystemSSH = () => renderPlaceholder('SSH', 'system-ssh');
+  const renderSystemTelnet = () => renderPlaceholder('Telnet', 'system-telnet');
+  const renderSystemWebFig = () => renderPlaceholder('WebFig', 'system-www');
+  const renderSystemAPI = () => renderPlaceholder('API', 'system-api');
+  const renderSystemFTP = () => renderPlaceholder('FTP', 'system-ftp');
+  const renderSystemPackages = () => renderPlaceholder('Packages', 'system-packages');
+  const renderSystemResources = () => renderPlaceholder('Resources', 'system-resources');
+  const renderSystemRouterBoard = () => renderPlaceholder('RouterBoard', 'system-routerboard');
+  const renderSystemHealth = () => renderPlaceholder('Health', 'system-health');
+  const renderSystemLEDs = () => renderPlaceholder('LEDs', 'system-leds');
+  const renderSystemWatchdog = () => renderPlaceholder('Watchdog', 'system-watchdog');
+  const renderSystemScheduler = () => renderPlaceholder('Scheduler', 'system-scheduler');
+  const renderSystemScripts = () => renderPlaceholder('Scripts', 'system-scripts');
+  const renderSystemBackup = () => renderPlaceholder('Backup', 'system-backup');
+  const renderSystemReset = () => renderPlaceholder('Reset Configuration', 'system-reset');
 
   // IP Menu Placeholders
-  const renderDHCPRelay = () => renderPlaceholder('DHCP Relay');
-  const renderUPnP = () => renderPlaceholder('UPnP');
-  const renderSOCKS = () => renderPlaceholder('SOCKS');
-  const renderProxy = () => renderPlaceholder('Proxy');
-  const renderTrafficFlow = () => renderPlaceholder('Traffic Flow');
-  const renderAccounting = () => renderPlaceholder('Accounting');
+  const renderDHCPRelay = () => renderPlaceholder('DHCP Relay', 'ip-dhcp-relay');
+  const renderUPnP = () => renderPlaceholder('UPnP', 'ip-upnp');
+  const renderSOCKS = () => renderPlaceholder('SOCKS', 'ip-socks');
+  const renderProxy = () => renderPlaceholder('Proxy', 'ip-proxy');
+  const renderTrafficFlow = () => renderPlaceholder('Traffic Flow', 'ip-traffic-flow');
+  const renderAccounting = () => renderPlaceholder('Accounting', 'ip-accounting');
 
   // Bridge Menu Placeholders
-  const renderBridgeVLANs = () => renderPlaceholder('Bridge VLANs');
+  const renderBridgeVLANs = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Layers className="summary-card-icon" />
+        <h2 className="section-title">Bridge VLANs</h2>
+      </div>
+      <HelpPanel id="bridge-vlans" onNavigate={setActiveTab} />
+      
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Bridge</th>
+              <th>VLAN IDs</th>
+              <th>Tagged</th>
+              <th>Untagged</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!bridgeVlans || bridgeVlans.length === 0 ? (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridge VLANs configured.</td></tr>
+            ) : (
+              bridgeVlans.map((vlan, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{vlan.bridge}</td>
+                  <td><span className="badge badge-primary">{vlan['vlan-ids']}</span></td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {vlan.tagged ? vlan.tagged.split(',').map((t, i) => (
+                        <span key={i} className="badge badge-info">{t}</span>
+                      )) : '-'}
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {vlan.untagged ? vlan.untagged.split(',').map((u, i) => (
+                        <span key={i} className="badge badge-success">{u}</span>
+                      )) : '-'}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   // Routing Menu Placeholders
   const renderRoutingRules = () => renderPlaceholder('Routing Rules', 'routing-rules');
