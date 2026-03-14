@@ -125,7 +125,7 @@ Pastikan sudah terinstal:
 
 ```bash
 # 1. Clone repositori ini
-git clone https://github.com/yourusername/CoreView.git
+git clone https://github.com/aderamdani/CoreView.git
 cd CoreView
 
 # 2. Install semua dependency
