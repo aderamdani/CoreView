@@ -4,7 +4,7 @@ import './App.css';
 import { parseMikroTikConfig } from './utils/parser';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Github } from 'lucide-react';
 
 function App() {
   const [config, setConfig] = useState(null);
@@ -32,13 +32,32 @@ function App() {
     <div className="app-container">
       <header className="header">
         <h1 className="header-title text-gradient">CoreView</h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+          <a 
+            href="https://github.com/aderamdani/CoreView" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ 
+              color: 'var(--text-secondary)', 
+              display: 'flex', 
+              alignItems: 'center',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            title="View on GitHub"
+          >
+            <Github size={20} />
+          </a>
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
             style={{ 
               background: 'none', border: 'none', cursor: 'pointer', 
-              color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' 
+              color: 'var(--text-secondary)', display: 'flex', alignItems: 'center',
+              transition: 'color 0.2s'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
             title="Toggle Theme"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}

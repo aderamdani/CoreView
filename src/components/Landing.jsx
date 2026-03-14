@@ -138,10 +138,10 @@ export const Landing = ({ onFileParsed }) => {
             <h4>Visualisasi Instan</h4>
             <p>Ubah script mentah menjadi mind map, tabel routing, dan ringkasan langkah-demi-langkah.</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card" style={{ opacity: 0.8 }}>
             <FileText size={24} className="feature-icon blue" />
             <h4>Export-Ready</h4>
-            <p>Download hasil analisis sebagai resume konfigurasi yang mudah dibagikan ke tim.</p>
+            <p>Fitur untuk mengunduh hasil analisis sebagai resume konfigurasi masih dalam pengembangan.</p>
           </div>
         </div>
       </section>
@@ -189,7 +189,7 @@ export const Landing = ({ onFileParsed }) => {
       </section>
       
       <footer className="landing-footer">
-        <p>CoreView &copy; 2026 • Dibuat untuk Network Engineer Indonesia</p>
+        <p>CoreView &copy; 2026 • <a href="https://linkedin.com/in/aderamdani" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }} onMouseEnter={(e) => e.target.style.color = 'var(--accent-light)'} onMouseLeave={(e) => e.target.style.color = 'inherit'}>Dibuat untuk Network Engineer Indonesia</a></p>
       </footer>
     </div>
   );
