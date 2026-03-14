@@ -294,6 +294,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const totalInterfaces = interfaces.length;
   const activeInterfaces = interfaces.filter(i => i.active).length;
   const firewallRules = firewall.filter.length + firewall.nat.length + (firewall.mangle?.length || 0) + (firewall.raw?.length || 0);
+  const totalRoutes = routes.length;
+  const totalVpns = (vpn.wireguard?.length || 0) + (vpn.ovpn?.length || 0) + (vpn.l2tp?.length || 0);
 
   const toggleMenu = (menu) => {
     setExpandedMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
@@ -595,9 +597,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     const storySteps = [];
     
     // Step 1: System Identity & Basic Setup
-    const identity = config?.system?.identity?.name || metadata.identity || 'MikroTik';
-    let usersCount = 0;
-    if (config?.user) usersCount = config.user.length;
+    const identity = metadata.identity || 'MikroTik';
     const systemClock = config?.system?.clock;
     const systemLogging = config?.system?.logging;
     
@@ -606,11 +606,10 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
       icon: <Server size={18} />,
       title: '1. Sistem & Identitas Perangkat',
       color: 'var(--blue)',
-      description: `**Router Identity:** ${identity} - Nama unik perangkat ini di jaringan.\n\n**User Management:** ${usersCount > 0 ? `${usersCount} user terdaftar` : 'Belum ada user tambahan dikonfigurasi'}.\n\n**System Clock:** ${systemClock ? `Timezone ${systemClock.timeZone || 'default'}` : 'Menggunakan waktu default sistem'}.\n\n**System Logging:** ${systemLogging ? `${systemLogging.length} aturan logging aktif` : 'Logging sistem belum dikonfigurasi'}.`,
+      description: `**Router Identity:** ${identity} - Nama unik perangkat ini di jaringan.\n\n**System Clock:** ${systemClock?.['time-zone-name'] ? `Timezone ${systemClock['time-zone-name']}` : 'Menggunakan waktu default sistem'}.\n\n**System Logging:** ${systemLogging && systemLogging.length > 0 ? `${systemLogging.length} aturan logging aktif` : 'Logging sistem belum dikonfigurasi'}.`,
       detailType: 'system-identity',
       expandedInfo: {
         identity: 'Nama perangkat yang muncul di Winbox/WebFig dan digunakan untuk identifikasi jaringan',
-        users: 'Akun login untuk mengakses router via berbagai metode (SSH, Telnet, WebFig, dll)',
         clock: 'Konfigurasi waktu dan timezone untuk logging dan scheduling yang akurat',
         logging: 'Sistem pencatatan aktivitas router untuk troubleshooting dan monitoring'
       }
@@ -619,8 +618,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     // Step 2: Network Interfaces Configuration
     const activeIfaces = interfaces.filter(i => i.active).length;
     const totalIfaces = interfaces.length;
-    const bridges = config?.interface?.bridge?.length || 0;
-    const interfaceLists = config?.interface?.['interface-list']?.length || 0;
+    const bridges = config?.bridges?.length || 0;
+    const interfaceLists = config?.interfaceLists?.length || 0;
     
     storySteps.push({
       id: 'step-interfaces',
@@ -639,17 +638,17 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
     // Step 3: IP Addressing & DHCP Services
     const staticIps = ipAddresses.length;
-    const dhcpServers = config?.ip?.['dhcp-server']?.length || 0;
-    const dhcpClients = config?.ip?.['dhcp-client']?.length || 0;
-    const dnsServers = config?.ip?.dns?.servers?.length || 0;
-    const ipPools = config?.ip?.pool?.length || 0;
+    const dhcpServersCount = config?.dhcp?.servers?.length || 0;
+    const dhcpClientsCount = config?.dhcp?.clients?.length || 0;
+    const dnsServersCount = config?.dns?.servers?.length || 0;
+    const ipPoolsCount = config?.pools?.length || 0;
     
     storySteps.push({
       id: 'step-ip-services',
       icon: <Globe size={18} />,
       title: '3. Layanan IP & DHCP',
       color: 'var(--yellow)',
-      description: `**IP Addresses:** ${staticIps} konfigurasi IP statis pada interface.\n\n**DHCP Server:** ${dhcpServers > 0 ? `${dhcpServers} server DHCP aktif untuk pembagian IP otomatis` : 'Belum ada DHCP server yang dikonfigurasi'}.\n\n**DHCP Client:** ${dhcpClients > 0 ? `${dhcpClients} client DHCP untuk mendapatkan IP dari upstream` : 'Tidak beroperasi sebagai DHCP client'}.\n\n**DNS Configuration:** ${dnsServers > 0 ? `${dnsServers} server DNS untuk resolusi nama domain` : 'Menggunakan DNS default sistem'}.\n\n**IP Pools:** ${ipPools > 0 ? `${ipPools} pool IP untuk DHCP dan PPP` : 'Belum ada IP pool yang dikonfigurasi'}.`,
+      description: `**IP Addresses:** ${staticIps} konfigurasi IP statis pada interface.\n\n**DHCP Server:** ${dhcpServersCount > 0 ? `${dhcpServersCount} server DHCP aktif untuk pembagian IP otomatis` : 'Belum ada DHCP server yang dikonfigurasi'}.\n\n**DHCP Client:** ${dhcpClientsCount > 0 ? `${dhcpClientsCount} client DHCP untuk mendapatkan IP dari upstream` : 'Tidak beroperasi sebagai DHCP client'}.\n\n**DNS Configuration:** ${dnsServersCount > 0 ? `${dnsServersCount} server DNS untuk resolusi nama domain` : 'Menggunakan DNS default sistem'}.\n\n**IP Pools:** ${ipPoolsCount > 0 ? `${ipPoolsCount} pool IP untuk DHCP dan PPP` : 'Belum ada IP pool yang dikonfigurasi'}.`,
       detailType: 'ip-addresses',
       expandedInfo: {
         static: 'IP address tetap yang tidak berubah untuk server dan perangkat penting',
@@ -661,19 +660,17 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     });
 
     // Step 4: Routing & Internet Access
-    const totalRoutes = routes.length;
-    const defaultRoutes = routes.filter(r => r.dstAddress === '0.0.0.0/0' || !r.dstAddress).length;
-    const staticRoutes = routes.filter(r => r.static === 'yes').length;
-    const dynamicRoutes = totalRoutes - staticRoutes;
-    const hasMasquerade = (config?.ip?.firewall?.nat || []).some(r => r.action === 'masquerade');
-    const routingTables = config?.routing?.table?.length || 0;
+    const storyTotalRoutes = routes.length;
+    const storyDefaultRoutes = routes.filter(r => r['dst-address'] === '0.0.0.0/0').length;
+    const storyHasMasquerade = (config?.firewall?.nat || []).some(r => r.action === 'masquerade');
+    const storyRoutingTables = config?.routingTables?.length || 0;
     
     storySteps.push({
       id: 'step-routing',
       icon: <Route size={18} />,
       title: '4. Routing & Akses Internet',
       color: 'var(--accent)',
-      description: `**Total Routes:** ${totalRoutes} rute dalam tabel routing (${staticRoutes} statis, ${dynamicRoutes} dinamis).\n\n**Default Routes:** ${defaultRoutes} rute default (0.0.0.0/0) untuk akses internet.\n\n**NAT Configuration:** ${hasMasquerade ? 'Masquerade rule aktif untuk sharing internet' : 'Belum ada aturan NAT untuk internet sharing'}.\n\n**Routing Tables:** ${routingTables > 0 ? `${routingTables} tabel routing tambahan` : 'Menggunakan tabel routing default'}.`,
+      description: `**Total Routes:** ${storyTotalRoutes} rute dalam tabel routing.\n\n**Default Routes:** ${storyDefaultRoutes} rute default (0.0.0.0/0) untuk akses internet.\n\n**NAT Configuration:** ${storyHasMasquerade ? 'Masquerade rule aktif untuk sharing internet' : 'Belum ada aturan NAT untuk internet sharing'}.\n\n**Routing Tables:** ${storyRoutingTables > 0 ? `${storyRoutingTables} tabel routing tambahan` : 'Menggunakan tabel routing default'}.`,
       detailType: 'routing-tables',
       expandedInfo: {
         static: 'Rute tetap yang dikonfigurasi manual untuk jaringan tertentu',
@@ -685,18 +682,18 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     });
 
     // Step 5: Firewall & Security
-    const filterRules = (config?.ip?.firewall?.filter || []).length;
-    const natRules = (config?.ip?.firewall?.nat || []).length;
-    const mangleRules = (config?.ip?.firewall?.mangle || []).length;
-    const rawRules = (config?.ip?.firewall?.raw || []).length;
-    const addressLists = (config?.ip?.firewall?.['address-list'] || []).length;
+    const filterRules = (config?.firewall?.filter || []).length;
+    const natRules = (config?.firewall?.nat || []).length;
+    const mangleRules = (config?.firewall?.mangle || []).length;
+    const rawRules = (config?.firewall?.raw || []).length;
+    const addressListsCount = (config?.firewall?.addressLists || []).length;
     
     storySteps.push({
       id: 'step-firewall',
       icon: <Shield size={18} />,
       title: '5. Firewall & Keamanan Jaringan',
       color: 'var(--red)',
-      description: `**Filter Rules:** ${filterRules} aturan filter untuk kontrol traffic masuk/keluar.\n\n**NAT Rules:** ${natRules} aturan NAT untuk port forwarding dan masquerade.\n\n**Mangle Rules:** ${mangleRules} aturan mangle untuk modifikasi packet.\n\n**Raw Rules:** ${rawRules} aturan raw untuk performance dan filtering awal.\n\n**Address Lists:** ${addressLists} daftar alamat IP untuk kebijakan keamanan.`,
+      description: `**Filter Rules:** ${filterRules} aturan filter untuk kontrol traffic masuk/keluar.\n\n**NAT Rules:** ${natRules} aturan NAT untuk port forwarding dan masquerade.\n\n**Mangle Rules:** ${mangleRules} aturan mangle untuk modifikasi packet.\n\n**Raw Rules:** ${rawRules} aturan raw untuk performance dan filtering awal.\n\n**Address Lists:** ${addressListsCount} daftar alamat IP untuk kebijakan keamanan.`,
       detailType: 'firewall-filter',
       expandedInfo: {
         filter: 'Aturan utama untuk allow/deny traffic berdasarkan kriteria tertentu',
@@ -708,33 +705,30 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     });
 
     // Step 6: VPN & Remote Access
-    const pptpSecrets = config?.ppp?.['pptp-secret']?.length || 0;
-    const l2tpSecrets = config?.ppp?.['l2tp-secret']?.length || 0;
-    const sstpSecrets = config?.ppp?.['sstp-secret']?.length || 0;
-    const ovpnSecrets = config?.ppp?.['ovpn-server']?.length || 0;
-    const wireguard = config?.interface?.wireguard?.length || 0;
-    const totalVpns = pptpSecrets + l2tpSecrets + sstpSecrets + ovpnSecrets + wireguard;
+    const storyWireguard = config?.vpn?.wireguard?.length || 0;
+    const storyOvpn = config?.vpn?.ovpn?.length || 0;
+    const storyL2tp = config?.vpn?.l2tp?.length || 0;
+    const storyWireguardPeers = config?.vpn?.wireguardPeers?.length || 0;
+    const storyTotalVpns = storyWireguard + storyOvpn + storyL2tp;
     
     storySteps.push({
       id: 'step-vpn',
       icon: <Lock size={18} />,
       title: '6. VPN & Akses Remote',
       color: 'var(--accent-light)',
-      description: `**Total VPN Connections:** ${totalVpns} konfigurasi VPN aktif.\n\n**PPTP:** ${pptpSecrets} secret PPTP untuk koneksi VPN klasik.\n\n**L2TP:** ${l2tpSecrets} secret L2TP dengan enkripsi yang lebih baik.\n\n**SSTP:** ${sstpSecrets} secret SSTP untuk Windows integration.\n\n**OpenVPN:** ${ovpnSecrets} server OpenVPN untuk akses remote.\n\n**WireGuard:** ${wireguard} interface WireGuard untuk VPN modern berperforma tinggi.`,
+      description: `**Total VPN Interfaces:** ${storyTotalVpns} interface VPN dikonfigurasi.\n\n**WireGuard:** ${storyWireguard > 0 ? `${storyWireguard} interface WireGuard${storyWireguardPeers > 0 ? ` (${storyWireguardPeers} peer)` : ''}` : 'Tidak ada interface WireGuard'}.\n\n**OpenVPN:** ${storyOvpn > 0 ? `${storyOvpn} client OpenVPN` : 'Tidak ada OpenVPN client'}.\n\n**L2TP:** ${storyL2tp > 0 ? `${storyL2tp} client L2TP` : 'Tidak ada L2TP client'}.`,
       detailType: 'vpn',
       expandedInfo: {
-        pptp: 'Point-to-Point Tunneling Protocol - VPN klasik dengan setup mudah',
-        l2tp: 'Layer 2 Tunneling Protocol - Kombinasi L2TP dan IPSec untuk keamanan',
-        sstp: 'Secure Socket Tunneling Protocol - Terintegrasi dengan Windows SSTP client',
+        wireguard: 'WireGuard - VPN modern dengan performa tinggi dan setup sederhana',
         openvpn: 'OpenVPN - Fleksibel dan cross-platform dengan konfigurasi advanced',
-        wireguard: 'WireGuard - VPN modern dengan performa tinggi dan setup sederhana'
+        l2tp: 'Layer 2 Tunneling Protocol - Kombinasi L2TP dan IPSec untuk keamanan'
       }
     });
 
     // Step 7: Quality of Service (QoS)
-    const queueTrees = config?.queue?.tree?.length || 0;
-    const queueTypes = config?.queue?.type?.length || 0;
-    const simpleQueues = config?.queue?.simple?.length || 0;
+    const queueTrees = config?.queues?.trees?.length || 0;
+    const queueTypes = config?.queues?.types?.length || 0;
+    const simpleQueues = config?.queues?.simple?.length || 0;
     
     storySteps.push({
       id: 'step-qos',
@@ -752,22 +746,21 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     });
 
     // Step 8: Monitoring & Management
-    const snmp = config?.snmp;
-    const graphing = config?.tool?.graphing;
-    const netwatch = config?.tool?.['netwatch']?.length || 0;
-    const bandwidthTest = config?.tool?.['bandwidth-test'];
+    const hasSnmp = config?.snmp && Object.keys(config.snmp).length > 0;
+    const graphingInterfaces = config?.tools?.graphingInterfaces?.length || 0;
+    const hasServices = (config?.services?.length || 0) > 0;
     
     storySteps.push({
       id: 'step-monitoring',
       icon: <Monitor size={18} />,
       title: '8. Monitoring & Manajemen',
       color: 'var(--status-success)',
-      description: `**SNMP:** ${snmp ? 'Aktif untuk monitoring via protokol SNMP' : 'Belum dikonfigurasi untuk monitoring eksternal'}.\n\n**Interface Graphing:** ${graphing ? 'Grafik traffic interface aktif' : 'Grafik interface belum diaktifkan'}.\n\n**Netwatch:** ${netwatch > 0 ? `${netwatch} host monitoring untuk uptime check` : 'Belum ada monitoring host'}.\n\n**Bandwidth Test:** ${bandwidthTest ? 'Server bandwidth test tersedia' : 'Bandwidth test server belum dikonfigurasi'}.`,
+      description: `**SNMP:** ${hasSnmp ? `Aktif${config.snmp.contact ? ` (Contact: ${config.snmp.contact})` : ''}` : 'Belum dikonfigurasi untuk monitoring eksternal'}.\n\n**Interface Graphing:** ${graphingInterfaces > 0 ? `${graphingInterfaces} interface dengan grafik traffic aktif` : 'Grafik interface belum diaktifkan'}.\n\n**IP Services:** ${hasServices ? `${config.services.length} layanan (Winbox, SSH, Web, API, dll) dikonfigurasi` : 'Layanan IP menggunakan konfigurasi default'}.`,
       detailType: 'tools-graphing',
       expandedInfo: {
         snmp: 'Simple Network Management Protocol untuk monitoring oleh NMS',
         graphing: 'Grafik real-time traffic, CPU, memory di WebFig',
-        netwatch: 'Monitoring uptime dan konektivitas host penting',
+        services: 'IP Services untuk Winbox, SSH, Telnet, API, Web management',
         bandwidth: 'Server untuk mengukur kecepatan koneksi jaringan'
       }
     });

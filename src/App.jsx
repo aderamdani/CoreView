@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './index.css';
 import './App.css';
 import { parseMikroTikConfig } from './utils/parser';
-import { Uploader } from './components/Uploader';
+import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
-import { Sun, Moon, Download } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 function App() {
   const [config, setConfig] = useState(null);
@@ -47,7 +47,7 @@ function App() {
           {config && (
             <>
               <button className="btn btn-primary animate-fade-in" onClick={handleReset}>
-                ↑ Upload New
+                ↑ Upload Baru
               </button>
             </>
           )}
@@ -56,7 +56,7 @@ function App() {
 
       <main className="main-content">
         {!config ? (
-          <Uploader onFileParsed={handleFileParsed} />
+          <Landing onFileParsed={handleFileParsed} />
         ) : (
           <Dashboard config={config} />
         )}
