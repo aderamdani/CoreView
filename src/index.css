@@ -487,3 +487,37 @@ body {
   color: var(--accent-light);
   font-weight: 600;
 }
+
+/* ─── React Flow Controls ────────────────────────────────────── */
+.react-flow__controls {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: var(--bg-surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
+  transition: background 0.2s, fill 0.2s !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--bg-hover) !important;
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor !important;
+}
+
+/* Light mode overrides for React Flow Controls */
+html.light .react-flow__controls-button {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
+}
