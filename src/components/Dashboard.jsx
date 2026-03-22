@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { 
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft,
-  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText
+  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText, X
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
+import { generateItemExplanation } from '../utils/itemExplainer';
 import { MindMap } from './MindMap';
 import { OsiTcpView } from './OsiTcpView';
 import { 
@@ -278,6 +279,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedMenus, setExpandedMenus] = useState({ firewall: true });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [selectedItemDetail, setSelectedItemDetail] = useState(null);
 
   // A helper function to filter arrays based on searchTerm
   const applyFilter = (arr) => {
@@ -312,6 +314,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         icon: <Activity size={15} />,
         submenus: [
           { id: 'interfaces-list', label: 'All Interfaces' },
+          { id: 'interfaces-ethernet', label: 'Ethernet' },
+          { id: 'interfaces-lte', label: 'LTE APNs' },
           { id: 'interfaces-lists', label: 'Interface Lists' }
         ]
       },
@@ -334,6 +338,16 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           { id: 'wireless-security', label: 'Security Profiles' },
           { id: 'wireless-access-list', label: 'Access List' },
           { id: 'wireless-connect-list', label: 'Connect List' }
+        ]
+      },
+      { 
+        id: 'vpn', 
+        label: 'VPN', 
+        icon: <Shield size={15} />,
+        submenus: [
+          { id: 'vpn', label: 'VPN Interfaces' },
+          { id: 'vpn-ipsec', label: 'IPsec Profiles' },
+          { id: 'vpn-ovpn-server', label: 'OpenVPN Server' }
         ]
       },
       { 
@@ -376,6 +390,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           { id: 'routing-tables', label: 'Tables' },
           { id: 'routing-rules', label: 'Rules' },
           { id: 'routing-filters', label: 'Filters' },
+          { id: 'routing-bfd', label: 'BFD' },
           { id: 'routing-ospf', label: 'OSPF' },
           { id: 'routing-rip', label: 'RIP' },
           { id: 'routing-bgp', label: 'BGP' },
@@ -393,6 +408,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           { id: 'firewall-mangle', label: 'Mangle' },
           { id: 'firewall-raw', label: 'Raw' },
           { id: 'firewall-address-lists', label: 'Address Lists' },
+          { id: 'firewall-tracking', label: 'Connection Tracking' },
           { id: 'firewall-layer7', label: 'Layer7 Protocols' }
         ]
       },
@@ -414,11 +430,11 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         submenus: [
           { id: 'system-identity', label: 'Identity' },
           { id: 'system-clock', label: 'Clock' },
+          { id: 'system-settings', label: 'General Settings' },
           { id: 'system-ntp-client', label: 'NTP Client' },
           { id: 'system-ntp-server', label: 'NTP Server' },
           { id: 'system-logging', label: 'Logging' },
           { id: 'system-log', label: 'Log' },
-          { id: 'system-history', label: 'History' },
           { id: 'system-users', label: 'Users' },
           { id: 'system-groups', label: 'Groups' },
           { id: 'system-passwords', label: 'Passwords' },
@@ -428,6 +444,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           { id: 'system-api', label: 'API' },
           { id: 'system-ftp', label: 'FTP' },
           { id: 'system-snmp', label: 'SNMP' },
+          { id: 'system-snmp-comm', label: 'SNMP Communities' },
           { id: 'system-ports', label: 'Ports' },
           { id: 'system-packages', label: 'Packages' },
           { id: 'system-resources', label: 'Resources' },
@@ -950,11 +967,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Type</th>
               <th>IP Address</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {applyFilter(interfaces).length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interfaces match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interfaces match search.</td></tr>
             ) : (
               applyFilter(interfaces).map((iface, idx) => (
               <tr key={idx}>
@@ -968,6 +986,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                 <td><span className="badge badge-info">{iface.type}</span></td>
                 <td>{iface.ip || <span style={{color: 'var(--text-muted)'}}>-</span>}</td>
                 <td style={{ color: 'var(--text-muted)' }}>{iface.comment || '-'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('interface', iface)}</td>
               </tr>
             )))}
           </tbody>
@@ -975,6 +994,93 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
       </div>
     </div>
   );
+
+  const renderEthernet = () => {
+    const ethernetIfaces = interfaces.filter(i => i.type === 'ethernet');
+    
+    return (
+      <div className="glass-panel config-section animate-fade-in">
+        <div className="section-header">
+          <Activity className="summary-card-icon" />
+          <h2 className="section-title">Ethernet Interfaces</h2>
+        </div>
+        <HelpPanel id="interfaces-ethernet" onNavigate={setActiveTab} />
+
+        <div className="data-table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Name</th>
+                <th>MAC Address</th>
+                <th>MTU / L2MTU</th>
+                <th>Auto-Neg / Speed</th>
+                <th>Aksi</th>
+                <th>Comment</th>
+                <th>Penjelasan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {applyFilter(ethernetIfaces).length === 0 ? (
+                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Ethernet interfaces match search.</td></tr>
+              ) : (
+                applyFilter(ethernetIfaces).map((iface, idx) => (
+                <tr key={idx} style={{ opacity: iface.active ? 1 : 0.6 }}>
+                  <td>
+                    {iface.active 
+                      ? <span className="badge badge-success"><CheckCircle2 size={12} style={{marginRight: '4px'}}/> Active</span>
+                      : <span className="badge badge-neutral"><AlertCircle size={12} style={{marginRight: '4px'}}/> Disabled</span>
+                    }
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{iface.name || iface.defaultName}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{iface['mac-address'] || '-'}</td>
+                  <td>{iface.mtu || '1500'} {iface.l2mtu ? `/ ${iface.l2mtu}` : ''}</td>
+                  <td>
+                    {iface['auto-negotiation'] === 'no' 
+                      ? <span className="badge badge-warning">Fixed: {iface.speed || 'Unknown'}</span> 
+                      : <span className="badge badge-info">Auto{iface.speed ? ` / ${iface.speed}`: ''}</span>}
+                  </td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(iface)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ color: 'var(--text-muted)' }}>{iface.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('interfaces-ethernet', iface)}</td>
+                </tr>
+              )))}
+            </tbody>
+          </table>
+        </div>
+
+        {selectedItemDetail && (
+          <div className="modal-overlay" onClick={() => setSelectedItemDetail(null)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Detail: {selectedItemDetail.name || selectedItemDetail.defaultName || 'Interface'}</h3>
+                <button className="btn-close" onClick={() => setSelectedItemDetail(null)}><X size={18} /></button>
+              </div>
+              <div className="modal-body">
+                <table className="detail-table">
+                  <tbody>
+                    {Object.entries(selectedItemDetail).map(([k, v]) => {
+                      if (k === '_implicit' || k === 'ipAddresses' || k === 'dhcpServers') return null;
+                      return (
+                        <tr key={k}>
+                          <td className="detail-key" style={{ textTransform: 'capitalize' }}>{k.replace(/-/g, ' ')}</td>
+                          <td style={{ wordBreak: 'break-all' }}>{String(v)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderInterfaceLists = () => (
     <div className="glass-panel config-section animate-fade-in">
@@ -991,11 +1097,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
             <tr>
               <th>List Name</th>
               <th>Member Interfaces</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.interfaceLists.length === 0 ? (
-              <tr><td colSpan="2" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interface Lists configured.</td></tr>
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interface Lists configured.</td></tr>
             ) : (
               config.interfaceLists.map((list, idx) => {
                 const members = config.interfaceListMembers.filter(m => m.list === list.name);
@@ -1009,6 +1116,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                         ))}
                       </div>
                     </td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('interface-list', list)}</td>
                   </tr>
                 );
               })
@@ -1036,11 +1144,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>ARP</th>
               <th>STP / Protocol</th>
               <th>Member Ports</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!config.bridges || config.bridges.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridges configured.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridges configured.</td></tr>
             ) : (
               config.bridges.map((bridge, idx) => {
                 const isActive = bridge.disabled !== 'yes';
@@ -1062,6 +1171,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                         ))}
                       </div>
                     </td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('bridge', bridge)}</td>
                   </tr>
                 );
               })
@@ -1088,11 +1198,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Interface</th>
               <th>Bridge Name</th>
               <th>PVID / VLAN</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!config.bridgePorts || config.bridgePorts.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridge Ports configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridge Ports configured.</td></tr>
             ) : (
               config.bridgePorts.map((bp, idx) => {
                 const isActive = bp.disabled !== 'yes';
@@ -1107,6 +1218,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     <td style={{ fontWeight: 600 }}>{bp.interface}</td>
                     <td>{bp.bridge}</td>
                     <td>{bp.pvid || '1'}</td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('bridge-port', bp)}</td>
                   </tr>
                 );
               })
@@ -1134,11 +1246,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Network</th>
               <th>Interface</th>
               <th>Services Attached</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {applyFilter(ipAddresses).length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP Addresses match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP Addresses match search.</td></tr>
             ) : (
               applyFilter(ipAddresses).map((ip, idx) => {
                 const hasDHCP = ip.interfaceObj?.dhcpServers?.length > 0;
@@ -1156,6 +1269,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     <td>
                       {hasDHCP && <span className="badge badge-info" style={{marginRight: '4px'}}>DHCP Server</span>}
                     </td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('ip-address', ip)}</td>
                   </tr>
                 );
               })
@@ -1186,11 +1300,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Address Pool</th>
               <th>Network segment</th>
               <th>Gateway</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {dhcp.servers.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Servers configured.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Servers configured.</td></tr>
             ) : (
               dhcp.servers.map((server, idx) => (
                 <tr key={idx} style={{ opacity: server.active ? 1 : 0.6 }}>
@@ -1209,6 +1324,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   </td>
                   <td>{server.networkObj?.address || '-'}</td>
                   <td>{server.networkObj?.gateway || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('dhcp-server', server)}</td>
                 </tr>
               ))
             )}
@@ -1234,11 +1350,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Interface</th>
               <th>Add Default Route</th>
               <th>Use Peer DNS/NTP</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!config.dhcp.clients || config.dhcp.clients.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Clients configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Clients configured.</td></tr>
             ) : (
               config.dhcp.clients.map((client, idx) => (
                 <tr key={idx} style={{ opacity: client.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1253,6 +1370,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     {client['use-peer-dns'] !== 'no' && <span className="badge badge-info" style={{marginRight: '4px'}}>DNS</span>}
                     {client['use-peer-ntp'] !== 'no' && <span className="badge badge-info">NTP</span>}
                   </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('dhcp-client', client)}</td>
                 </tr>
               ))
             )}
@@ -1294,17 +1412,19 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Name</th>
               <th>Address</th>
               <th>TTL</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.dns.static.length === 0 ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No static DNS entries.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No static DNS entries.</td></tr>
             ) : (
               config.dns.static.map((entry, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>{entry.name}</td>
                   <td>{entry.address}</td>
                   <td>{entry.ttl || 'Default'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('dns-static', entry)}</td>
                 </tr>
               ))
             )}
@@ -1333,11 +1453,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Gateway</th>
               <th>Distance</th>
               <th>Notes / Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {routes.length === 0 ? (
-               <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routes configured.</td></tr>
+               <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routes configured.</td></tr>
             ) : (
               routes.map((rt, idx) => (
                 <tr key={idx}>
@@ -1350,6 +1471,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     {rt.disabled === 'yes' && <span className="badge badge-neutral" style={{marginRight: '8px'}}>Disabled</span>}
                     {rt.comment || '-'}
                   </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('route', rt)}</td>
                 </tr>
               ))
             )}
@@ -1374,11 +1496,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Pool Name</th>
               <th>Ranges</th>
               <th>Used By</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!config.pools || config.pools.length === 0) ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP pools configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP pools configured.</td></tr>
             ) : (
               config.pools.map((pool, idx) => (
                 <tr key={idx}>
@@ -1391,6 +1514,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                       <span className="badge badge-neutral">Unlinked / VPN / Hotspot</span>
                     )}
                   </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('pool', pool)}</td>
                 </tr>
               ))
             )}
@@ -1448,11 +1572,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Interface</th>
               <th>Address Pool</th>
               <th>Profile</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.hotspot.servers.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Hotspot Servers configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Hotspot Servers configured.</td></tr>
             ) : (
               config.hotspot.servers.map((server, idx) => (
                 <tr key={idx} style={{ opacity: server.active ? 1 : 0.6 }}>
@@ -1470,6 +1595,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     {server.poolObj && <div style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px'}}>{server.poolObj.ranges}</div>}
                   </td>
                   <td>{server.profile || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('hotspot-server', server)}</td>
                 </tr>
               ))
             )}
@@ -1486,6 +1612,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Shared Users</th>
               <th>Address Pool</th>
               <th>Keepalive Timeout</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
@@ -1498,6 +1625,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   {up.poolObj && <div style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px'}}>{up.poolObj.ranges}</div>}
                 </td>
                 <td>{up['keepalive-timeout'] || '-'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('hotspot-user-profile', up)}</td>
               </tr>
             ))}
           </tbody>
@@ -1513,11 +1641,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Profile</th>
               <th>MAC Address</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!config.hotspot.users || config.hotspot.users.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Hotspot Users configured.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Hotspot Users configured.</td></tr>
             ) : (
               config.hotspot.users.map((u, idx) => (
                 <tr key={idx} style={{ opacity: u.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1526,6 +1655,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td><span className="badge badge-info">{u.profile || 'default'}</span></td>
                   <td>{u['mac-address'] || 'Any'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{u.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('hotspot-user', u)}</td>
                 </tr>
               ))
             )}
@@ -1604,11 +1734,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Status</th>
               <th>Table Name</th>
               <th>FIB Enabled</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.routingTables.length === 0 ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Routing Tables configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Routing Tables configured.</td></tr>
             ) : (
               config.routingTables.map((rt, idx) => (
                 <tr key={idx} style={{ opacity: rt.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1619,6 +1750,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   </td>
                   <td style={{ fontWeight: 600 }}>{rt.name}</td>
                   <td>{rt.fib !== undefined ? 'Yes' : 'No'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('routing-table', rt)}</td>
                 </tr>
               ))
             )}
@@ -1649,11 +1781,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Src Address</th>
               <th>Dst Address</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {applyFilter(firewall.filter).length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules match search.</td></tr>
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules match search.</td></tr>
             ) : (
               applyFilter(firewall.filter).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1667,6 +1800,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td>{rule['src-address'] || 'Any'}</td>
                   <td>{rule['dst-address'] || 'Any'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-filter', rule)}</td>
                 </tr>
               ))
             )}
@@ -1696,11 +1830,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Protocol / Port</th>
               <th>To Addresses</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {applyFilter(firewall.nat).length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules match search.</td></tr>
             ) : (
               applyFilter(firewall.nat).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1713,6 +1848,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td>{rule.protocol && rule['dst-port'] ? `${rule.protocol}:${rule['dst-port']}` : 'Any'}</td>
                   <td>{rule['to-addresses'] || '-'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-nat', rule)}</td>
                 </tr>
               ))
             )}
@@ -1742,11 +1878,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Protocol</th>
               <th>New Mark</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!firewall.mangle || applyFilter(firewall.mangle).length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Mangle rules match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Mangle rules match search.</td></tr>
             ) : (
               applyFilter(firewall.mangle).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1755,6 +1892,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td>{rule.protocol || 'Any'}</td>
                   <td>{rule['new-connection-mark'] || rule['new-routing-mark'] || rule['new-packet-mark'] || '-'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-mangle', rule)}</td>
                 </tr>
               ))
             )}
@@ -1784,11 +1922,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Protocol / Port</th>
               <th>Target Address</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!firewall.raw || applyFilter(firewall.raw).length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Raw rules match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Raw rules match search.</td></tr>
             ) : (
               applyFilter(firewall.raw).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1801,6 +1940,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td>{rule.protocol && rule['dst-port'] ? `${rule.protocol}:${rule['dst-port']}` : 'Any'}</td>
                   <td>{rule['src-address'] || rule['dst-address'] || 'Any'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-raw', rule)}</td>
                 </tr>
               ))
             )}
@@ -1892,11 +2032,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Limit At</th>
               <th>Max Limit</th>
               <th>Priority</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.queues.trees.length === 0 ? (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Queue Trees configured.</td></tr>
+              <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Queue Trees configured.</td></tr>
             ) : (
               config.queues.trees.map((qt, idx) => (
                 <tr key={idx} style={{ opacity: qt.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1911,6 +2052,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td>{qt['limit-at'] || '-'}</td>
                   <td style={{ fontWeight: 600, color: 'var(--status-warning)' }}>{qt['max-limit'] || '-'}</td>
                   <td>{qt.priority || '8'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('queue-tree', qt)}</td>
                 </tr>
               ))
             )}
@@ -1937,11 +2079,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Kind</th>
               <th>Classifier (PCQ)</th>
               <th>Limit (PCQ)</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.queues.types.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Queue Types configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Queue Types configured.</td></tr>
             ) : (
               config.queues.types.map((qt, idx) => (
                 <tr key={idx}>
@@ -1949,6 +2092,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td><span className="badge badge-info">{qt.kind}</span></td>
                   <td>{qt['pcq-classifier'] || '-'}</td>
                   <td>{qt['pcq-limit'] || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('queue-type', qt)}</td>
                 </tr>
               ))
             )}
@@ -1976,6 +2120,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Interface / Name</th>
               <th>Listen Port</th>
               <th>MTU</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
@@ -1984,10 +2129,11 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                 <td style={{ fontWeight: 600 }}>{wg.name}</td>
                 <td>{wg['listen-port']}</td>
                 <td>{wg.mtu}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('vpn-wireguard', wg)}</td>
               </tr>
             ))}
             {vpn.wireguard.length === 0 && (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No WireGuard connections found.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No WireGuard connections found.</td></tr>
             )}
           </tbody>
         </table>
@@ -2001,6 +2147,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Type</th>
               <th>Name</th>
               <th>User / Profile</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
@@ -2009,10 +2156,11 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                 <td><span className="badge badge-info">{conn._type}</span></td>
                 <td style={{ fontWeight: 600 }}>{conn.name}</td>
                 <td>{conn.user || conn.profile || '-'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('vpn-legacy', conn)}</td>
               </tr>
             ))}
             {(vpn.ovpn.length + vpn.l2tp.length) === 0 && (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No legacy VPN connections found.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No legacy VPN connections found.</td></tr>
             )}
           </tbody>
         </table>
@@ -2029,11 +2177,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Allowed Address</th>
               <th>Endpoint</th>
               <th>Comment</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!vpn.wireguardPeers || vpn.wireguardPeers.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No WireGuard peers configured.</td></tr>
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No WireGuard peers configured.</td></tr>
             ) : (
               vpn.wireguardPeers.map((peer, idx) => (
                 <tr key={idx} style={{ opacity: peer.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2043,6 +2192,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td>{peer['allowed-address'] || 'Any'}</td>
                   <td>{peer['endpoint-address'] ? `${peer['endpoint-address']}:${peer['endpoint-port']||''}` : 'Dynamic'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{peer.comment || '-'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('vpn-wireguard-peer', peer)}</td>
                 </tr>
               ))
             )}
@@ -2067,17 +2217,19 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Interface</th>
               <th>Allow Address</th>
               <th>Store on Disk</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {(!config.tools || !config.tools.graphingInterfaces || config.tools.graphingInterfaces.length === 0) ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interface Graphing configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interface Graphing configured.</td></tr>
             ) : (
               config.tools.graphingInterfaces.map((g, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>{g.interface}</td>
                   <td>{g['allow-address'] || 'Any'}</td>
                   <td>{g['store-on-disk'] === 'no' ? 'No' : 'Yes'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('tool-graphing', g)}</td>
                 </tr>
               ))
             )}
@@ -2104,11 +2256,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>Service Name</th>
               <th>Port</th>
               <th>Address Mask</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.services.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Services specified in config.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Services specified in config.</td></tr>
             ) : (
               config.services.map((svc, idx) => (
                 <tr key={idx} style={{ opacity: svc.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2120,6 +2273,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td style={{ fontWeight: 600 }}>{svc.name}</td>
                   <td>{svc.port || '-'}</td>
                   <td>{svc.address || 'Any'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('ip-service', svc)}</td>
                 </tr>
               ))
             )}
@@ -2196,17 +2350,19 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>ID/Action</th>
               <th>Disk File Name</th>
               <th>Target</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.system.logging.length === 0 ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No specific logging actions defined.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No specific logging actions defined.</td></tr>
             ) : (
               config.system.logging.map((log, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>Action {idx + 1}</td>
                   <td>{log['disk-file-name'] || '-'}</td>
                   <td>{log.target || 'disk'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('system-logging', log)}</td>
                 </tr>
               ))
             )}
@@ -2246,6 +2402,220 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     </div>
   );
 
+  const renderLTEApns = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Activity className="summary-card-icon" />
+        <h2 className="section-title">LTE APN Profiles</h2>
+      </div>
+      <HelpPanel id="interfaces-lte" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead><tr><th>APN Name</th><th>IP Type</th><th>Use Network APN</th><th>Penjelasan</th></tr></thead>
+          <tbody>
+            {config.lteApns?.map((item, idx) => (
+              <tr key={idx}>
+                <td style={{ fontWeight: 600 }}>{item.apn || 'default'}</td>
+                <td>{item['ip-type'] || 'auto'}</td>
+                <td>{item['use-network-apn'] === 'no' ? <span className="badge badge-warning">No</span> : <span className="badge badge-success">Yes</span>}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('lte-apn', item)}</td>
+              </tr>
+            ))}
+            {(!config.lteApns || config.lteApns.length === 0) && (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi LTE APN.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderSNMPCommunities = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Activity className="summary-card-icon" />
+        <h2 className="section-title">SNMP Communities</h2>
+      </div>
+      <HelpPanel id="system-snmp-comm" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead><tr><th>Name</th><th>Allowed Addresses</th><th>Penjelasan</th></tr></thead>
+          <tbody>
+            {config.snmpCommunities?.map((item, idx) => (
+              <tr key={idx}>
+                <td style={{ fontWeight: 600 }}>{item.name}</td>
+                <td>{item.addresses || '::/0'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('snmp-community', item)}</td>
+              </tr>
+            ))}
+            {(!config.snmpCommunities || config.snmpCommunities.length === 0) && (
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi SNMP Community.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderGeneralSettings = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Settings className="summary-card-icon" />
+        <h2 className="section-title">General IP & System Settings</h2>
+      </div>
+      <HelpPanel id="system-settings" onNavigate={setActiveTab} />
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+        <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <h3 style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }}>IP Settings</h3>
+          <div><span style={{ color: 'var(--text-muted)' }}>Max Neighbor Entries: </span>{config.settings?.['max-neighbor-entries'] || '-'}</div>
+        </div>
+        <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <h3 style={{ marginBottom: '1rem', color: 'var(--accent-secondary)' }}>IPv6 Settings</h3>
+          <div><span style={{ color: 'var(--text-muted)' }}>IPv6 Status: </span>{config.ipv6Settings?.['disable-ipv6'] === 'yes' ? <span className="badge badge-warning">Disabled</span> : <span className="badge badge-success">Enabled</span>}</div>
+          <div style={{ marginTop: '0.5rem' }}><span style={{ color: 'var(--text-muted)' }}>Max Neighbor Entries: </span>{config.ipv6Settings?.['max-neighbor-entries'] || '-'}</div>
+        </div>
+        <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <h3 style={{ marginBottom: '1rem', color: 'var(--status-info)' }}>Detect Internet</h3>
+          <div><span style={{ color: 'var(--text-muted)' }}>Detect Interface List: </span>{config.detectInternet?.['detect-interface-list'] || '-'}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderIpsecProfiles = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Lock className="summary-card-icon" />
+        <h2 className="section-title">IPsec Profiles</h2>
+      </div>
+      <HelpPanel id="vpn-ipsec" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead><tr><th>DPD Interval</th><th>DPD Max Failures</th><th>Penjelasan</th></tr></thead>
+          <tbody>
+            {config.ipsecProfiles?.map((item, idx) => (
+              <tr key={idx}>
+                <td>{item['dpd-interval'] || '-'}</td>
+                <td>{item['dpd-maximum-failures'] || '-'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('ipsec-profile', item)}</td>
+              </tr>
+            ))}
+            {(!config.ipsecProfiles || config.ipsecProfiles.length === 0) && (
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi IPsec Profile.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderRoutingBfd = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Route className="summary-card-icon" />
+        <h2 className="section-title">Routing BFD</h2>
+      </div>
+      <HelpPanel id="routing-bfd" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead><tr><th>Interfaces</th><th>Min Rx</th><th>Min Tx</th><th>Multiplier</th><th>Penjelasan</th></tr></thead>
+          <tbody>
+            {config.routingBfd?.map((item, idx) => (
+              <tr key={idx} style={{ opacity: item.disabled === 'yes' ? 0.6 : 1 }}>
+                <td style={{ fontWeight: 600 }}>{item.interfaces || 'all'}</td>
+                <td>{item['min-rx'] || '-'}</td>
+                <td>{item['min-tx'] || '-'}</td>
+                <td>{item.multiplier || '-'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('routing-bfd', item)}</td>
+              </tr>
+            ))}
+            {(!config.routingBfd || config.routingBfd.length === 0) && (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Routing BFD.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderRoutingRules = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Route className="summary-card-icon" />
+        <h2 className="section-title">Routing Rules</h2>
+      </div>
+      <HelpPanel id="routing-rules" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead><tr><th>Action</th><th>Src Address</th><th>Dst Address</th><th>Table</th><th>Penjelasan</th></tr></thead>
+          <tbody>
+            {config.routingRules?.map((item, idx) => (
+              <tr key={idx} style={{ opacity: item.disabled === 'yes' ? 0.6 : 1 }}>
+                <td>{item.action || 'lookup'}</td>
+                <td>{item['src-address'] || 'Any'}</td>
+                <td>{item['dst-address'] || 'Any'}</td>
+                <td style={{ fontWeight: 600, color: 'var(--accent-secondary)' }}>{item.table || 'main'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('routing-rule', item)}</td>
+              </tr>
+            ))}
+            {(!config.routingRules || config.routingRules.length === 0) && (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Routing Rules.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderConnectionTracking = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Shield className="summary-card-icon" />
+        <h2 className="section-title">Connection Tracking</h2>
+      </div>
+      <HelpPanel id="firewall-tracking" onNavigate={setActiveTab} />
+      <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+        {config.firewall?.connectionTracking ? (
+          <div>
+            <div style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>UDP Timeout</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{config.firewall.connectionTracking['udp-timeout'] || '-'}</div>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Pengaturan default atau tidak ditemukan.</div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderOpenVPNServer = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Lock className="summary-card-icon" />
+        <h2 className="section-title">OpenVPN Server</h2>
+      </div>
+      <HelpPanel id="vpn-ovpn-server" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead><tr><th>Server Name</th><th>Auth</th><th>MAC Address</th><th>Penjelasan</th></tr></thead>
+          <tbody>
+            {config.vpn?.ovpnServers?.map((item, idx) => (
+              <tr key={idx}>
+                <td style={{ fontWeight: 600 }}>{item.name || 'Server'}</td>
+                <td>{item.auth || 'any'}</td>
+                <td>{item['mac-address'] || '-'}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('vpn-ovpn-server', item)}</td>
+              </tr>
+            ))}
+            {(!config.vpn?.ovpnServers || config.vpn.ovpnServers.length === 0) && (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada layanan OpenVPN Server.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   const renderPorts = () => (
     <div className="glass-panel config-section animate-fade-in">
       <div className="section-header">
@@ -2261,17 +2631,19 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <th>ID</th>
               <th>Name</th>
               <th>Baud Rate</th>
+              <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.ports.length === 0 ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Ports configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Ports configured.</td></tr>
             ) : (
               config.ports.map((p, idx) => (
                 <tr key={idx}>
                   <td>{p[0] || p.id || idx}</td>
                   <td style={{ fontWeight: 600 }}>{p.name || `serial${idx}`}</td>
                   <td>{p['baud-rate'] || 'auto'}</td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('port', p)}</td>
                 </tr>
               ))
             )}
@@ -2389,7 +2761,6 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   );
 
   // Routing Menu Placeholders
-  const renderRoutingRules = () => renderPlaceholder('Routing Rules', 'routing-rules');
   const renderRoutingFilters = () => renderPlaceholder('Routing Filters', 'routing-filters');
   const renderOSPF = () => renderPlaceholder('OSPF', 'routing-ospf');
   const renderRIP = () => renderPlaceholder('RIP', 'routing-rip');
@@ -2469,6 +2840,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         {activeTab === 'mindmap' && <MindMap config={config} onNavigate={setActiveTab} />}
         {activeTab === 'osi-tcp' && <OsiTcpView config={config} onNavigate={setActiveTab} />}
         {activeTab === 'interfaces-list' && renderInterfaces()}
+        {activeTab === 'interfaces-ethernet' && renderEthernet()}
         {activeTab === 'interfaces-lists' && renderInterfaceLists()}
         
         {/* Bridge Menus */}
@@ -2477,6 +2849,11 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
         {/* Fallback for interfaces parent click if submenus logic routes there */}
         {activeTab === 'interfaces' && renderInterfaces()}
+        {activeTab === 'interfaces-lte' && renderLTEApns()}
+        
+        {/* VPN */}
+        {activeTab === 'vpn-ipsec' && renderIpsecProfiles()}
+        {activeTab === 'vpn-ovpn-server' && renderOpenVPNServer()}
         
         {/* IP Menus */}
         {activeTab === 'ip-addresses' && renderIPAddresses()}
@@ -2519,6 +2896,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         {activeTab === 'system-scripts' && renderSystemScripts()}
         {activeTab === 'system-backup' && renderSystemBackup()}
         {activeTab === 'system-reset' && renderSystemReset()}
+        {activeTab === 'system-snmp-comm' && renderSNMPCommunities()}
+        {activeTab === 'system-settings' && renderGeneralSettings()}
 
         {/* New IP Menus */}
         {activeTab === 'ip-pools' && renderIPPools()}
@@ -2533,6 +2912,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         {activeTab === 'bridge-vlans' && renderBridgeVLANs()}
 
         {/* New Routing Menus */}
+        {activeTab === 'routing-bfd' && renderRoutingBfd()}
         {activeTab === 'routing-rules' && renderRoutingRules()}
         {activeTab === 'routing-filters' && renderRoutingFilters()}
         {activeTab === 'routing-ospf' && renderOSPF()}
@@ -2542,6 +2922,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         {activeTab === 'routing-vrf' && renderVRF()}
 
         {/* New Firewall Menus */}
+        {activeTab === 'firewall-tracking' && renderConnectionTracking()}
         {activeTab === 'firewall-layer7' && renderLayer7Protocols()}
 
         {/* New Queues Menus */}

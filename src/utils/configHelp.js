@@ -31,6 +31,20 @@ export const configHelp = {
     nextSteps: ['IP → Addresses', 'Bridge'],
   },
 
+  'interfaces-ethernet': {
+    title: 'Ethernet Interfaces',
+    summary: 'Daftar antarmuka fisik berbasis kabel (Ethernet) pada router. Menampilkan parameter layer 2 seperti negosiasi otomatis (auto-negotiation), kecepatan (speed), full/half duplex, dan MAC address.',
+    impact: [
+      'Menentukan kecepatan maksimal transmisi data fisik (misalnya 100Mbps, 1Gbps, 10Gbps).',
+      'Mematikan (disable) port ethernet akan memutuskan sambungan kabel secara logistik dan mematikan link layer.',
+      'Auto-negotiation yang gagal atau dimatikan (forced speed) dapat menyebabkan masalah duplex mismatch dengan perangkat lawan (misal: switch atau modem), mengakibatkan packet loss yang parah.',
+      'MAC Address diperlukan untuk komunikasi Layer 2 dan ARP, serta dapat di-spoof jika diubah.',
+    ],
+    relations: ['Network Interfaces', 'Bridge → Ports', 'Interface Graphing'],
+    prerequisites: [],
+    nextSteps: ['IP → Addresses', 'Bridge'],
+  },
+
   'interfaces-lists': {
     title: 'Interface Lists',
     summary: 'Kumpulan interface yang diberi nama sebagai grup logis, misalnya "WAN", "LAN", atau "LB". Berfungsi sebagai target shorthand dalam aturan Firewall, NAT, dan Routing.',
@@ -1161,5 +1175,87 @@ export const configHelp = {
     ],
     relations: ['System → Identity', 'IP → Services'],
   },
+
+  'interfaces-lte': {
+    title: 'LTE APN Profiles',
+    summary: 'Profil Access Point Name (APN) untuk autentikasi dan koneksi ke jaringan operator seluler.',
+    impact: [
+      'Menentukan IP Public/Private yang didapat dari operator penyedia.',
+      'Salah konfigurasi APN mengakibatkan modem tidak bisa mendapat sinyal data LTE.',
+      'Dapat dikonfigurasi dengan username/password khusus sesuai prasyarat M2M/Corporate.',
+    ],
+    relations: ['Network Interfaces', 'IP → Routes'],
+  },
+
+  'system-snmp-comm': {
+    title: 'SNMP Communities',
+    summary: 'Data community string untuk Simple Network Management Protocol yang berperan sebagai kredensial autentikasi sistem NMS (Zabbix, PRTG, dll).',
+    impact: [
+      'Community public yang terekspos ke internet sangat berbahaya karena isi router dapat dibaca oleh siapa saja.',
+      'Pengaturan pembatasan IP (addresses) pada community wajib diaktifkan agar hanya server monitoring yang dapat mengambil data.',
+    ],
+    relations: ['SNMP', 'Firewall Filter'],
+  },
+
+  'system-settings': {
+    title: 'General IP & System Settings',
+    summary: 'Pengaturan parameter global tingkat rendah di router termasuk IP Settings, IPv6 Settings, dan deteksi otomatis akses Internet.',
+    impact: [
+      'Termasuk batas neighbor tracking, time-to-live, dan status aktif IPv6.',
+      'Detect Internet memakan resource jika dipasang di banyak interface.',
+      'Optimasi TCP/IP stack yang memengaruhi seberapa banyak CPU yang dialokasikan.',
+    ],
+    relations: ['Network Interfaces', 'Firewall Filter'],
+  },
+
+  'vpn-ipsec': {
+    title: 'IPsec Profiles',
+    summary: 'Konfigurasi fase enkripsi dan autentikasi Layer 3 untuk tunnel IPsec murni maupun IPsec over L2TP.',
+    impact: [
+      'Tingkat enkripsi profil memengaruhi beban CPU secara langsung (misalnya AES-256 vs 3DES).',
+      'Masalah di profil IKE/IPsec menyebabkan gagalnya fase 1 atau fase 2 proses tunnel creation (tunnel tidak bisa up).',
+    ],
+    relations: ['VPN', 'Firewall Filter', 'Firewall → NAT'],
+  },
+
+  'routing-bfd': {
+    title: 'Routing BFD',
+    summary: 'Bidirectional Forwarding Detection (BFD) untuk mendeteksi kegagalan link forwarding secara nyaris instan (sub-second) agar routing dinamis cepat berpindah path.',
+    impact: [
+      'Meningkatkan tingkat kehandalan layanan saat memakai BGP atau OSPF.',
+      'Akan memakan CPU tambahan jika dipasang untuk banyak interface dengan interval waktu milidetik.',
+    ],
+    relations: ['Routing Tables', 'IP → Routes'],
+  },
+
+  'routing-rules': {
+    title: 'Routing Rules',
+    summary: 'Aturan khusus (Policy Based Routing) yang secara spesifik menentukan tabel routing mana yang harus digunakan koneksi berdasarkan kriteria Src/Dst IP tertentu.',
+    impact: [
+      'Biasa dipakai untuk Traffic Engineering, misal memutus IP LAN agar diarahkan via rute ISP ke-2 (Backup).',
+      'Aturan diproses sebelum membedah routing table utuh.'
+    ],
+    relations: ['Routing Tables', 'IP → Routes', 'Firewall → Mangle'],
+  },
+
+  'firewall-tracking': {
+    title: 'Connection Tracking',
+    summary: 'Engine pemantau state koneksi (established, related, new) di kernel Firewall. Jika dimatikan, NAT tidak bekerja, stateful firewall mati, dan router menjadi stateless.',
+    impact: [
+      'UDP/TCP timeout akan berpengaruh pada tabel RAM. Router yang sibuk perlu mengurangi timeout ini agar RAM tidak tersita P2P/torrent tracking.',
+      'Jika di nonaktifkan, throughput melonjak naik namun NAT lumpuh.',
+    ],
+    relations: ['Firewall Filter', 'Firewall → NAT', 'Firewall → Mangle'],
+  },
+
+  'vpn-ovpn-server': {
+    title: 'OpenVPN Server',
+    summary: 'Layanan router sebagai pusat/server penerima koneksi tunnel OpenVPN dari client luar (seperti Windows, HP, atau router cabang).',
+    impact: [
+      'Memerlukan certificate dan IP Pool yang valid sebagai alamat client.',
+      'OpenVPN Mikrotik saat ini mendukung protokol TCP dan UDP (v7.x).',
+    ],
+    relations: ['VPN', 'IP → Addresses', 'IP → Pools'],
+  }
 };
 

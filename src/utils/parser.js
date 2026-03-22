@@ -20,7 +20,9 @@ export const parseMikroTikConfig = (fileContent) => {
       l2tp: [],
       pptp: [],
       ovpn: [],
+      ovpnServers: [],
       wireguard: [],
+      wireguardPeers: []
     },
     firewall: {
       filter: [],
@@ -28,6 +30,7 @@ export const parseMikroTikConfig = (fileContent) => {
       mangle: [],
       raw: [],
       addressLists: [],
+      connectionTracking: {}
     },
     vlans: [],
     bridgeVlans: [],
@@ -71,13 +74,34 @@ export const parseMikroTikConfig = (fileContent) => {
     tools: {
       graphingInterfaces: []
     },
+    lteApns: [],
+    snmpCommunities: [],
+    settings: {},
+    ipv6Settings: {},
+    detectInternet: {},
+    ipsecProfiles: [],
+    routingBfd: [],
+    routingRules: [],
     rawSections: {}
   };
 
   let currentPath = '';
+  
+  // Pre-process lines for continuations (\ at the end of line)
+  const mergedLines = [];
+  let currentMergedLine = '';
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    if (line.endsWith('\\')) {
+      currentMergedLine += line.slice(0, -1); // remove slash, DO NOT add extra space
+    } else {
+      currentMergedLine += line;
+      if (currentMergedLine) mergedLines.push(currentMergedLine);
+      currentMergedLine = '';
+    }
+  }
 
-  for (let line of lines) {
-    line = line.trim();
+  for (let line of mergedLines) {
     if (!line || line === '#') continue;
 
     // Parse Metadata from comments
@@ -99,7 +123,7 @@ export const parseMikroTikConfig = (fileContent) => {
     }
 
     // Accumulate commands in rawSections
-    if (currentPath && (line.startsWith('add ') || line.startsWith('set '))) {
+    if (currentPath && (line.startsWith('add ') || line.startsWith('set ') || line.startsWith('add') || line.startsWith('set'))) {
       const parsedCommand = parseCommandArgs(line);
       config.rawSections[currentPath].push({
         type: line.startsWith('add') ? 'add' : 'set',
@@ -247,6 +271,26 @@ const mapToStructuredData = (path, attrs, config) => {
     config.cloud = attrs;
   } else if (path === '/tool graphing interface') {
     config.tools.graphingInterfaces.push(attrs);
+  } else if (path === '/interface lte apn') {
+    config.lteApns.push(attrs);
+  } else if (path === '/snmp community') {
+    config.snmpCommunities.push(attrs);
+  } else if (path === '/ip settings') {
+    config.settings = attrs;
+  } else if (path === '/ipv6 settings') {
+    config.ipv6Settings = attrs;
+  } else if (path === '/interface detect-internet') {
+    config.detectInternet = attrs;
+  } else if (path === '/ip ipsec profile') {
+    config.ipsecProfiles.push(attrs);
+  } else if (path === '/routing bfd configuration') {
+    config.routingBfd.push(attrs);
+  } else if (path === '/routing rule') {
+    config.routingRules.push(attrs);
+  } else if (path === '/ip firewall connection tracking') {
+    config.firewall.connectionTracking = attrs;
+  } else if (path === '/interface ovpn-server server') {
+    config.vpn.ovpnServers.push(attrs);
   } else if (path === '/ip dns') {
     if (attrs.servers) config.dns.servers = attrs.servers.split(',');
   } else if (path === '/ip dns static') {
@@ -255,6 +299,36 @@ const mapToStructuredData = (path, attrs, config) => {
 };
 
 const enrichDashboardData = (config) => {
+  // Pass 0: Implicitly discover interfaces that might not be explicitly defined in /interface sections but are used
+  const discoverInterface = (ifaceName) => {
+    if (!ifaceName) return;
+    const exists = config.interfaces.find(i => i.name === ifaceName || i.defaultName === ifaceName);
+    if (!exists) {
+      let type = 'unknown';
+      if (ifaceName.match(/^(ether|sfp|combo|sfpplus|qsfp)/i)) type = 'ethernet';
+      else if (ifaceName.match(/^wlan/i)) type = 'wireless';
+      else if (ifaceName.match(/^bridge/i)) type = 'bridge';
+      else if (ifaceName.match(/^vlan/i)) type = 'vlan';
+      else if (ifaceName.match(/^pppoe/i)) type = 'pppoe';
+      
+      config.interfaces.push({
+        name: ifaceName,
+        defaultName: ifaceName,
+        type: type,
+        active: true,
+        disabled: 'no',
+        _implicit: true // Mark as implicitly discovered
+      });
+    }
+  };
+
+  config.ipAddresses.forEach(ip => discoverInterface(ip.interface));
+  config.bridgePorts.forEach(bp => discoverInterface(bp.interface));
+  config.dhcp.servers.forEach(ds => discoverInterface(ds.interface));
+  config.dhcp.clients.forEach(dc => discoverInterface(dc.interface));
+  config.routes.forEach(r => discoverInterface(r.gateway)); // some routes specify iface as gateway
+  if (config.tools.graphingInterfaces) config.tools.graphingInterfaces.forEach(g => discoverInterface(g.interface));
+
   // First pass: Active status and naming for interfaces
   config.interfaces.forEach(i => {
     i.active = i.disabled !== 'yes';
