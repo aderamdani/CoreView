@@ -211,6 +211,42 @@ export const generateItemExplanation = (type, item) => {
       return `Layanan penerima OpenVPN Server bernama '${item.name}', membutuhkan autentikasi ${item.auth || 'standar'}.`;
     }
 
+    case 'pppoe-server': {
+      return `Layanan PPPoE Server "${item['service-name'] || 'service'}" menyediakan akses akun klien di antarmuka ${item.interface || 'unknown'}.`;
+    }
+      
+    case 'routing-table': {
+      return `Tabel rute khusus bermana "${item.name}" untuk memisahkan tabel lalu lintas paket data utama.`;
+    }
+
+    case 'routing-bgp-tmpl': {
+      return `BGP Template "${item.name || 'default'}" untuk routing dengan Remote AS ${item.as || 'unknown'}.`;
+    }
+
+    case 'routing-bgp-conn': {
+      return `Sesi interkoneksi eBGP/iBGP ke alamat IP peer ${item['remote.address'] || 'unknown'} (Dengan AS tujuan ${item['remote.as'] || 'unknown'}).`;
+    }
+
+    case 'routing-filter': {
+      return `Filter BGP/OSPF pada chain/arah "${item.chain || 'unknown'}" dengan kebijakan: ${item.rule || 'accept'}.`;
+    }
+
+    case 'queue-type': {
+      return `Mengatur algoritma antrian khusus bernama "${item.name || 'default'}" yang berjenis ${item.kind || 'unknown'}.`;
+    }
+
+    case 'queue-simple': {
+      return `Membatasi kecepatan traffic "${item.name || 'rule'}" target ${item.target || 'any'} dengan max-limit terkonfigurasi pada ${item['max-limit'] || 'unlimited'}.`;
+    }
+
+    case 'log-action': {
+      return `Pengiriman data rekam jejak logging router ini ke tujuan ${item.target || 'memory'}.`;
+    }
+
+    case 'system-logging': {
+      return `Merekam aktivitas aktivitas router tipe topik "${item.topics || 'all'}" menggunakan mekanisme action "${item.action || 'memory'}".`;
+    }
+
     default:
       return 'Konfigurasi belum ada penjelasan spesifik.';
   }

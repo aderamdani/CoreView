@@ -1256,6 +1256,85 @@ export const configHelp = {
       'OpenVPN Mikrotik saat ini mendukung protokol TCP dan UDP (v7.x).',
     ],
     relations: ['VPN', 'IP → Addresses', 'IP → Pools'],
+  },
+
+  'ppp-pppoe-server': {
+    title: 'PPPoE Server',
+    summary: 'Sistem server Point-to-Point Protocol over Ethernet untuk distribusi layanan internet kepada client (biasanya digunakan oleh ISP/RT-RW Net).',
+    impact: [
+      'Menangani autentikasi, enkripsi, dan pembatasan bandwidth secara per-user profile.',
+      'Bergantung pada konfigurasi PPP Profiles dan PPP Secrets.',
+    ],
+    relations: ['Interfaces → VLAN', 'PPP → Secrets', 'Queue → Simple'],
+  },
+
+  'routing-bgp': {
+    title: 'Border Gateway Protocol (BGP)',
+    summary: 'Protokol routing eksterior standar internet. Digunakan untuk bertukar informasi routing (AS path) antar provider atau dengan IP Transit utama.',
+    impact: [
+      'Kebijakan routing (Template, Connections, Filters) sangat kritis. Kesalahan filter bisa membocorkan rute internal atau membebani router BGP lain.',
+      'Sangat intensif memori jika menerima tabel full-route. Filter yang tepat sangat dibutuhkan.',
+    ],
+    relations: ['Routing → Filters', 'IP → Route'],
+  },
+
+  'routing-table': {
+    title: 'Routing Table (FIB)',
+    summary: 'Tabel Forwarding Information Base terpisah untuk Policy-Based Routing (PBR) atau pemisahan jalur traffic (seperti load-balancing atau failover).',
+    impact: [
+      'Setiap tabel baru memerlukan Routing Rules atau Mangle untuk mengarahkan rute spesifik.',
+      'Tanpa routing table khusus, seluruh paket akan diteruskan ke tabel \'main\'.',
+    ],
+    relations: ['Routing → Rules', 'IP → Firewall Mangle'],
+  },
+
+  'routing-filters': {
+    title: 'Routing Filter Rules',
+    summary: 'Aturan kuat (menggunakan syntax if-then) untuk menyaring rute yang dikirim (OUT) atau diterima (IN) oleh protokol dinamik seperti BGP dan OSPF.',
+    impact: [
+      'Wajib digunakan pada koneksi BGP eBGP external untuk mencegah kebocoran jangkauan prefix.',
+      'Berguna merubah atribut rute (seperti AS-Path prepend, MED, atau Local-Pref).',
+    ],
+    relations: ['Routing → BGP'],
+  },
+
+  'queues-type': {
+    title: 'Queue Type (FQ-CoDel, PCQ, dll)',
+    summary: 'Jenis dan algoritma pengantrean paket untuk memanajemen bandwidth dan mengurangi bufferbloat (seperti menggunakan FQ-Codel atau Per Connection Queue for mikrotik).',
+    impact: [
+      'Tipe Queue kustom ini dapat digunakan sebagai landasan limitasi di Simple Queues atau Queue Trees yang lebih efisien.',
+      'Menurunkan latency ping tinggi yang terjadi saat ada antrean bandwidth penuh (bufferbloat).',
+    ],
+    relations: ['Queues → Simple Queues', 'Queues → Interface Queues'],
+  },
+
+  'queues-simple': {
+    title: 'Simple Queues',
+    summary: 'Pembatasan kecepatan dan pengelolaan traffic yang mudah dipahami (Global Bandwidth, Per-IP, dll).',
+    impact: [
+      'Prioritas simple queues memproses dari list baris paing atas ke bawah secara sekuensial.',
+      'Membatasi bandwidth pengguna akhir agar pemakaian keseluruhan tetap stabil.',
+    ],
+    relations: ['IP → Addresses', 'Queues → Type'],
+  },
+
+  'system-logging-action': {
+    title: 'Logging Actions',
+    summary: 'Destinasi penyimpanan data log. Bisa diarahkan ke memory sementara (RAM), disk internal, disebarkan ke server syslog eksternal, atau output ke email.',
+    impact: [
+      'Pengiriman syslog ke eksternal sangat dianjurkan untuk router produksi demi keamanan apabila log lokal terhapus jika router reboot.',
+    ],
+    relations: ['System → Logging'],
+  },
+
+  'system-logging': {
+    title: 'System Logging Rules',
+    summary: 'Aturan penjurnalan yang menangkap tipe topik (error, info, kritis) tertentu dan mengirimnya ke action/lokasi spesifik (misalnya dikirim ke disk atau server Syslog monitoring Zabbix).',
+    impact: [
+      'Terlalu banyak rule debug yang di set logging Memory/Disk bisa membahayakan masa umur NAND storage router.',
+      'Diperlukan untuk memonitor aktivitas koneksi, VPN, port state, atau ancaman ddos.',
+    ],
+    relations: ['System → Logging Actions'],
   }
 };
 

@@ -24,6 +24,9 @@ export const parseMikroTikConfig = (fileContent) => {
       wireguard: [],
       wireguardPeers: []
     },
+    ppp: {
+      pppoeServers: []
+    },
     firewall: {
       filter: [],
       nat: [],
@@ -56,6 +59,7 @@ export const parseMikroTikConfig = (fileContent) => {
       clock: {},
       logging: []
     },
+    systemLogActions: [],
     snmp: {},
     ports: [],
     services: [],
@@ -82,6 +86,9 @@ export const parseMikroTikConfig = (fileContent) => {
     ipsecProfiles: [],
     routingBfd: [],
     routingRules: [],
+    routingBgpTmpl: [],
+    routingBgpConn: [],
+    routingFilterRules: [],
     rawSections: {}
   };
 
@@ -247,6 +254,8 @@ const mapToStructuredData = (path, attrs, config) => {
     config.queues.types.push(attrs);
   } else if (path === '/queue tree') {
     config.queues.trees.push(attrs);
+  } else if (path === '/queue simple') {
+    config.queues.simple.push(attrs);
   } else if (path === '/routing table') {
     config.routingTables.push(attrs);
   } else if (path === '/interface list') {
@@ -260,6 +269,8 @@ const mapToStructuredData = (path, attrs, config) => {
   } else if (path === '/system clock') {
     config.system.clock = attrs;
   } else if (path === '/system logging action') {
+    config.systemLogActions.push(attrs);
+  } else if (path === '/system logging') {
     config.system.logging.push(attrs);
   } else if (path === '/snmp') {
     config.snmp = attrs;
@@ -287,6 +298,14 @@ const mapToStructuredData = (path, attrs, config) => {
     config.routingBfd.push(attrs);
   } else if (path === '/routing rule') {
     config.routingRules.push(attrs);
+  } else if (path === '/routing bgp template') {
+    config.routingBgpTmpl.push(attrs);
+  } else if (path === '/routing bgp connection') {
+    config.routingBgpConn.push(attrs);
+  } else if (path === '/routing filter rule') {
+    config.routingFilterRules.push(attrs);
+  } else if (path === '/interface pppoe-server server') {
+    config.ppp.pppoeServers.push(attrs);
   } else if (path === '/ip firewall connection tracking') {
     config.firewall.connectionTracking = attrs;
   } else if (path === '/interface ovpn-server server') {

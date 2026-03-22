@@ -355,6 +355,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         label: 'PPP', 
         icon: <Lock size={15} />,
         submenus: [
+          { id: 'ppp-pppoe-server', label: 'PPPoE Servers' },
           { id: 'ppp-profiles', label: 'Profiles' },
           { id: 'ppp-secrets', label: 'Secrets' },
           { id: 'ppp-active', label: 'Active Connections' }
@@ -2338,31 +2339,67 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     <div className="glass-panel config-section animate-fade-in">
       <div className="section-header">
         <Terminal className="summary-card-icon" />
-        <h2 className="section-title">Logging Actions</h2>
+        <h2 className="section-title">System Logging</h2>
       </div>
       <HelpPanel id="system-logging" onNavigate={setActiveTab} />
-
-
+      
       <div className="data-table-container">
+        <h3>Logging Actions</h3>
         <table className="data-table">
           <thead>
             <tr>
-              <th>ID/Action</th>
-              <th>Disk File Name</th>
+              <th>Name</th>
               <th>Target</th>
+              <th>Aksi</th>
+              <th>Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.systemLogActions.length === 0 ? (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No custom logging actions defined.</td></tr>
+            ) : (
+              config.systemLogActions.map((act, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{act.name || '-'}</td>
+                  <td>{act.target || 'memory'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(act)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('log-action', act)}</td>
+                </tr>
+              ))
+            )}
+           </tbody>
+        </table>
+      </div>
+
+      <div className="data-table-container" style={{ marginTop: '20px' }}>
+        <h3>Logging Rules</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Topics</th>
+              <th>Action (Target)</th>
+              <th>Aksi</th>
               <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
             {config.system.logging.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No specific logging actions defined.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No specific logging rules defined.</td></tr>
             ) : (
               config.system.logging.map((log, idx) => (
                 <tr key={idx}>
-                  <td style={{ fontWeight: 600 }}>Action {idx + 1}</td>
-                  <td>{log['disk-file-name'] || '-'}</td>
-                  <td>{log.target || 'disk'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('system-logging', log)}</td>
+                  <td style={{ fontWeight: 600 }}>{log.topics || 'all'}</td>
+                  <td>{log.action || 'memory'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(log)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('log-rule', log)}</td>
                 </tr>
               ))
             )}
@@ -2761,10 +2798,170 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   );
 
   // Routing Menu Placeholders
-  const renderRoutingFilters = () => renderPlaceholder('Routing Filters', 'routing-filters');
+  const renderRoutingFilters = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Route className="summary-card-icon" />
+        <h2 className="section-title">Routing Filters</h2>
+      </div>
+      <HelpPanel id="routing-filters" onNavigate={setActiveTab} />
+      
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Chain</th>
+              <th>Action</th>
+              <th>Aksi</th>
+              <th>Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.routingFilterRules.length === 0 ? (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routing filter rules defined.</td></tr>
+            ) : (
+              config.routingFilterRules.map((flt, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{flt.chain || 'unknown'}</td>
+                  <td>{flt.action || 'accept'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(flt)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('routing-filter', flt)}</td>
+                </tr>
+              ))
+            )}
+           </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   const renderOSPF = () => renderPlaceholder('OSPF', 'routing-ospf');
   const renderRIP = () => renderPlaceholder('RIP', 'routing-rip');
-  const renderBGP = () => renderPlaceholder('BGP', 'routing-bgp');
+
+  const renderBGP = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Route className="summary-card-icon" />
+        <h2 className="section-title">Border Gateway Protocol (BGP)</h2>
+      </div>
+      <HelpPanel id="routing-bgp" onNavigate={setActiveTab} />
+      
+      <div className="data-table-container">
+        <h3>BGP Templates</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>AS Number</th>
+              <th>Router ID</th>
+              <th>Aksi</th>
+              <th>Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.routingBgpTmpl.length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No BGP templates defined.</td></tr>
+            ) : (
+              config.routingBgpTmpl.map((bgp, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{bgp.name || 'default'}</td>
+                  <td>{bgp.as || '-'}</td>
+                  <td>{bgp['router-id'] || 'auto'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(bgp)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('routing-bgp-tmpl', bgp)}</td>
+                </tr>
+              ))
+            )}
+           </tbody>
+        </table>
+      </div>
+
+      <div className="data-table-container" style={{ marginTop: '20px' }}>
+        <h3>BGP Connections (Peers)</h3>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Remote Address</th>
+              <th>Remote AS</th>
+              <th>Aksi</th>
+              <th>Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.routingBgpConn.length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No BGP connections defined.</td></tr>
+            ) : (
+              config.routingBgpConn.map((conn, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{conn.name || `peer-${idx}`}</td>
+                  <td>{conn['remote.address'] || '-'}</td>
+                  <td>{conn['remote.as'] || '-'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(conn)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('routing-bgp-conn', conn)}</td>
+                </tr>
+              ))
+            )}
+           </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderPPPoEServers = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Lock className="summary-card-icon" />
+        <h2 className="section-title">PPPoE Servers</h2>
+      </div>
+      <HelpPanel id="ppp-pppoe-server" onNavigate={setActiveTab} />
+      
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Service Name</th>
+              <th>Interface</th>
+              <th>Default Profile</th>
+              <th>Aksi</th>
+              <th>Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.ppp.pppoeServers.length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No PPPoE Servers defined.</td></tr>
+            ) : (
+              config.ppp.pppoeServers.map((srv, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{srv['service-name'] || 'service1'}</td>
+                  <td>{srv.interface || '-'}</td>
+                  <td>{srv['default-profile'] || 'default'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(srv)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('pppoe-server', srv)}</td>
+                </tr>
+              ))
+            )}
+           </tbody>
+        </table>
+      </div>
+    </div>
+  );
   const renderMPLS = () => renderPlaceholder('MPLS', 'routing-mpls');
   const renderVRF = () => renderPlaceholder('VRF', 'routing-vrf');
 
@@ -2772,7 +2969,48 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderLayer7Protocols = () => renderPlaceholder('Layer7 Protocols', 'firewall-layer7');
 
   // Queues Menu Placeholders
-  const renderSimpleQueues = () => renderPlaceholder('Simple Queues', 'queues-simple');
+  const renderSimpleQueues = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Activity className="summary-card-icon" />
+        <h2 className="section-title">Simple Queues</h2>
+      </div>
+      <HelpPanel id="queues-simple" onNavigate={setActiveTab} />
+      
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Target</th>
+              <th>Max Limit</th>
+              <th>Aksi</th>
+              <th>Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.queues.simple.length === 0 ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Simple Queues defined.</td></tr>
+            ) : (
+              config.queues.simple.map((sq, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{sq.name || `queue-${idx}`}</td>
+                  <td>{sq.target || '-'}</td>
+                  <td>{sq['max-limit'] || 'unlimited'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sq)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('queue-simple', sq)}</td>
+                </tr>
+              ))
+            )}
+           </tbody>
+        </table>
+      </div>
+    </div>
+  );
   const renderInterfaceQueues = () => renderPlaceholder('Interface Queues', 'queues-interfaces');
 
   // Tools Menu Placeholders
@@ -2951,6 +3189,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         {activeTab === 'wireless-connect-list' && renderWirelessConnectList()}
 
         {/* New PPP Menus */}
+        {activeTab === 'ppp-pppoe-server' && renderPPPoEServers()}
         {activeTab === 'ppp-profiles' && renderPPPProfiles()}
         {activeTab === 'ppp-secrets' && renderPPPSecrets()}
         {activeTab === 'ppp-active' && renderPPPActive()}
