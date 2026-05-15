@@ -154,7 +154,7 @@ export const generateItemExplanation = (type, item) => {
     }
 
     case 'queue-type': {
-      return `Mendefinisikan jenis antrean (queue) jaringan dengan algoritma ${item.kind}.`;
+      return `Mendefinisikan jenis antrian bernama "${item.name || 'default'}" dengan algoritma ${item.kind || 'unknown'}.`;
     }
 
     case 'vpn-wireguard': {
@@ -178,7 +178,7 @@ export const generateItemExplanation = (type, item) => {
     }
 
     case 'system-logging': {
-      return `Mencatat log jenis '${item.topics || 'default'}' dan menyimpannya ke '${item.target || 'disk'}'.`;
+      return `Mencatat log jenis '${item.topics || 'default'}' dan menyimpannya ke '${item.action || 'memory'}'.`;
     }
 
     case 'port': {
@@ -215,10 +215,6 @@ export const generateItemExplanation = (type, item) => {
       return `Layanan PPPoE Server "${item['service-name'] || 'service'}" menyediakan akses akun klien di antarmuka ${item.interface || 'unknown'}.`;
     }
       
-    case 'routing-table': {
-      return `Tabel rute khusus bermana "${item.name}" untuk memisahkan tabel lalu lintas paket data utama.`;
-    }
-
     case 'routing-bgp-tmpl': {
       return `BGP Template "${item.name || 'default'}" untuk routing dengan Remote AS ${item.as || 'unknown'}.`;
     }
@@ -231,20 +227,12 @@ export const generateItemExplanation = (type, item) => {
       return `Filter BGP/OSPF pada chain/arah "${item.chain || 'unknown'}" dengan kebijakan: ${item.rule || 'accept'}.`;
     }
 
-    case 'queue-type': {
-      return `Mengatur algoritma antrian khusus bernama "${item.name || 'default'}" yang berjenis ${item.kind || 'unknown'}.`;
-    }
-
     case 'queue-simple': {
       return `Membatasi kecepatan traffic "${item.name || 'rule'}" target ${item.target || 'any'} dengan max-limit terkonfigurasi pada ${item['max-limit'] || 'unlimited'}.`;
     }
 
     case 'log-action': {
       return `Pengiriman data rekam jejak logging router ini ke tujuan ${item.target || 'memory'}.`;
-    }
-
-    case 'system-logging': {
-      return `Merekam aktivitas aktivitas router tipe topik "${item.topics || 'all'}" menggunakan mekanisme action "${item.action || 'memory'}".`;
     }
 
     default:

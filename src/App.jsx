@@ -20,7 +20,6 @@ function App() {
 
   const handleFileParsed = (content) => {
     const parsedData = parseMikroTikConfig(content);
-    console.log("Parsed configuration:", parsedData);
     setConfig(parsedData);
   };
 
