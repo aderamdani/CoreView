@@ -2715,13 +2715,173 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     </div>
   );
 
-  // System Menu Placeholders
-  const renderSystemNTPClient = () => renderPlaceholder('NTP Client', 'system-ntp-client');
-  const renderSystemNTPServer = () => renderPlaceholder('NTP Server', 'system-ntp-server');
-  const renderSystemLog = () => renderPlaceholder('System Log', 'system-log');
-  const renderSystemHistory = () => renderPlaceholder('System History', 'system-history');
-  const renderSystemUsers = () => renderPlaceholder('System Users', 'system-users');
-  const renderSystemGroups = () => renderPlaceholder('System Groups', 'system-groups');
+  const renderSystemNTPClient = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Clock className="summary-card-icon" />
+        <h2 className="section-title">NTP Client</h2>
+      </div>
+      <HelpPanel id="system-ntp-client" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <tbody>
+            <tr>
+              <td style={{ width: '220px', fontWeight: 600, color: 'var(--text-muted)' }}>Enabled</td>
+              <td>{config.system?.ntpClient?.enabled === 'yes'
+                ? <span className="badge badge-success">Yes</span>
+                : <span className="badge badge-neutral">No</span>}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Mode</td>
+              <td>{config.system?.ntpClient?.mode || '-'}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Servers</td>
+              <td style={{ fontFamily: 'monospace' }}>
+                {config.system?.ntpClient?.servers ||
+                 config.system?.ntpClient?.['server-dns-names'] ||
+                 (config.system?.ntpClient?.['primary-ntp']
+                   ? `${config.system.ntpClient['primary-ntp']}${config.system.ntpClient['secondary-ntp'] ? `, ${config.system.ntpClient['secondary-ntp']}` : ''}`
+                   : 'Tidak dikonfigurasi')}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {(!config.system?.ntpClient || Object.keys(config.system.ntpClient).length === 0) && (
+        <p style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>NTP Client tidak dikonfigurasi secara eksplisit.</p>
+      )}
+    </div>
+  );
+
+  const renderSystemNTPServer = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Clock className="summary-card-icon" />
+        <h2 className="section-title">NTP Server</h2>
+      </div>
+      <div className="data-table-container">
+        <table className="data-table">
+          <tbody>
+            <tr>
+              <td style={{ width: '220px', fontWeight: 600, color: 'var(--text-muted)' }}>Enabled</td>
+              <td>{config.system?.ntpServer?.enabled === 'yes'
+                ? <span className="badge badge-success">Yes</span>
+                : <span className="badge badge-neutral">No</span>}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Broadcast</td>
+              <td>{config.system?.ntpServer?.broadcast === 'yes' ? 'Yes' : 'No'}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Broadcast Addresses</td>
+              <td style={{ fontFamily: 'monospace' }}>{config.system?.ntpServer?.['broadcast-addresses'] || '-'}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Manycast</td>
+              <td>{config.system?.ntpServer?.manycast === 'yes' ? 'Yes' : 'No'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {(!config.system?.ntpServer || Object.keys(config.system.ntpServer).length === 0) && (
+        <p style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>NTP Server tidak dikonfigurasi.</p>
+      )}
+    </div>
+  );
+
+  // System Menu Placeholders (kept)
+  const renderLiveData = (title) => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Activity className="summary-card-icon" />
+        <h2 className="section-title">{title}</h2>
+      </div>
+      <div style={{ textAlign: 'center', padding: '3rem 2rem', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.5 }}>📡</div>
+        <h3 style={{ color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Data Live Router</h3>
+        <p style={{ fontSize: '0.9rem', lineHeight: 1.6, maxWidth: '400px', margin: '0 auto' }}>
+          <strong>{title}</strong> menampilkan data real-time dari router yang sedang aktif.
+          Informasi ini tidak tersedia dalam file ekspor konfigurasi <code>.rsc</code>.
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderSystemLog = () => renderLiveData('System Log');
+  const renderSystemHistory = () => renderLiveData('System History');
+
+  const renderSystemUsers = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Key className="summary-card-icon" />
+        <h2 className="section-title">System Users</h2>
+      </div>
+      <HelpPanel id="system-users" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Group</th>
+              <th>Allowed Addresses</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.system?.users || config.system.users.length === 0) ? (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada user custom. (User 'admin' default tidak tereksport ke .rsc)</td></tr>
+            ) : (
+              config.system.users.map((u, idx) => (
+                <tr key={idx} style={{ opacity: u.disabled === 'yes' ? 0.6 : 1 }}>
+                  <td style={{ fontWeight: 600 }}>{u.name || '-'}</td>
+                  <td><span className="badge badge-info">{u.group || 'read'}</span></td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{u.address || 'All'}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{u.comment || '-'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderSystemGroups = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Key className="summary-card-icon" />
+        <h2 className="section-title">System Groups</h2>
+      </div>
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Policy</th>
+              <th>Skin</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.system?.groups || config.system.groups.length === 0) ? (
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada group custom. (Group default tidak tereksport)</td></tr>
+            ) : (
+              config.system.groups.map((g, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{g.name || '-'}</td>
+                  <td style={{ fontSize: '0.8rem', maxWidth: '300px', wordBreak: 'break-word' }}>{g.policy || '-'}</td>
+                  <td>{g.skin || 'default'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   const renderSystemPasswords = () => renderPlaceholder('System Passwords', 'system-passwords');
   const renderSystemSSH = () => renderPlaceholder('SSH', 'system-ssh');
   const renderSystemTelnet = () => renderPlaceholder('Telnet', 'system-telnet');
@@ -2729,13 +2889,140 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderSystemAPI = () => renderPlaceholder('API', 'system-api');
   const renderSystemFTP = () => renderPlaceholder('FTP', 'system-ftp');
   const renderSystemPackages = () => renderPlaceholder('Packages', 'system-packages');
-  const renderSystemResources = () => renderPlaceholder('Resources', 'system-resources');
-  const renderSystemRouterBoard = () => renderPlaceholder('RouterBoard', 'system-routerboard');
-  const renderSystemHealth = () => renderPlaceholder('Health', 'system-health');
+  const renderSystemResources = () => renderLiveData('Resources');
+  const renderSystemRouterBoard = () => renderLiveData('RouterBoard Info');
+  const renderSystemHealth = () => renderLiveData('Health Monitor');
   const renderSystemLEDs = () => renderPlaceholder('LEDs', 'system-leds');
-  const renderSystemWatchdog = () => renderPlaceholder('Watchdog', 'system-watchdog');
-  const renderSystemScheduler = () => renderPlaceholder('Scheduler', 'system-scheduler');
-  const renderSystemScripts = () => renderPlaceholder('Scripts', 'system-scripts');
+
+  const renderSystemWatchdog = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Activity className="summary-card-icon" />
+        <h2 className="section-title">Watchdog</h2>
+      </div>
+      {(!config.system?.watchdog || Object.keys(config.system.watchdog).length === 0) ? (
+        <p style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          Watchdog tidak dikonfigurasi secara eksplisit (menggunakan pengaturan default sistem).
+        </p>
+      ) : (
+        <div className="data-table-container">
+          <table className="data-table">
+            <tbody>
+              <tr>
+                <td style={{ width: '220px', fontWeight: 600, color: 'var(--text-muted)' }}>Auto Send Supout</td>
+                <td>{config.system.watchdog['auto-send-supout'] === 'yes' ? <span className="badge badge-success">Yes</span> : <span className="badge badge-neutral">No</span>}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Auto Update</td>
+                <td>{config.system.watchdog['auto-update'] === 'yes' ? <span className="badge badge-success">Yes</span> : <span className="badge badge-neutral">No</span>}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Watch Address</td>
+                <td style={{ fontFamily: 'monospace' }}>{config.system.watchdog['watch-address'] || 'Tidak dikonfigurasi'}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Watchdog Timer</td>
+                <td>{config.system.watchdog['watchdog-timer'] === 'yes' ? <span className="badge badge-success">Active</span> : <span className="badge badge-neutral">Inactive</span>}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSystemScheduler = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Clock className="summary-card-icon" />
+        <h2 className="section-title">Scheduler</h2>
+      </div>
+      <HelpPanel id="system-scheduler" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Start Time</th>
+              <th>Interval</th>
+              <th>On Event</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.system?.scheduler || config.system.scheduler.length === 0) ? (
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Scheduler yang dikonfigurasi.</td></tr>
+            ) : (
+              config.system.scheduler.map((sch, idx) => (
+                <tr key={idx} style={{ opacity: sch.disabled === 'yes' ? 0.6 : 1 }}>
+                  <td style={{ fontWeight: 600 }}>{sch.name || '-'}</td>
+                  <td>{sch['start-time'] || 'startup'}</td>
+                  <td>{sch.interval || '-'}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {sch['on-event'] || '-'}
+                  </td>
+                  <td>
+                    {sch.disabled === 'yes'
+                      ? <span className="badge badge-neutral">Disabled</span>
+                      : <span className="badge badge-success">Active</span>}
+                  </td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sch)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderSystemScripts = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Terminal className="summary-card-icon" />
+        <h2 className="section-title">Scripts</h2>
+      </div>
+      <HelpPanel id="system-scripts" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Policy</th>
+              <th>Source (preview)</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.system?.scripts || config.system.scripts.length === 0) ? (
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Script yang dikonfigurasi.</td></tr>
+            ) : (
+              config.system.scripts.map((sc, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{sc.name || '-'}</td>
+                  <td style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{sc.policy || 'default'}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {sc.source || '-'}
+                  </td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sc)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   const renderSystemBackup = () => renderPlaceholder('Backup', 'system-backup');
   const renderSystemReset = () => renderPlaceholder('Reset Configuration', 'system-reset');
 
@@ -2965,8 +3252,45 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderMPLS = () => renderPlaceholder('MPLS', 'routing-mpls');
   const renderVRF = () => renderPlaceholder('VRF', 'routing-vrf');
 
-  // Firewall Menu Placeholders
-  const renderLayer7Protocols = () => renderPlaceholder('Layer7 Protocols', 'firewall-layer7');
+  const renderLayer7Protocols = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Shield className="summary-card-icon" />
+        <h2 className="section-title">Layer7 Protocols</h2>
+      </div>
+      <HelpPanel id="firewall-layer7" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Regexp (preview)</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.firewall?.layer7 || config.firewall.layer7.length === 0) ? (
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Layer7 Protocol yang dikonfigurasi.</td></tr>
+            ) : (
+              config.firewall.layer7.map((l7, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{l7.name || '-'}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {l7.regexp || '-'}
+                  </td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(l7)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   // Queues Menu Placeholders
   const renderSimpleQueues = () => (
@@ -3011,7 +3335,43 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
       </div>
     </div>
   );
-  const renderInterfaceQueues = () => renderPlaceholder('Interface Queues', 'queues-interfaces');
+  const renderInterfaceQueues = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <DownloadCloud className="summary-card-icon" />
+        <h2 className="section-title">Interface Queues</h2>
+      </div>
+      <HelpPanel id="queues-interfaces" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Interface</th>
+              <th>Queue Type</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.queues?.interfaceQueues || config.queues.interfaceQueues.length === 0) ? (
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Interface Queue. (Menggunakan pengaturan default per interface)</td></tr>
+            ) : (
+              config.queues.interfaceQueues.map((q, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{safeStr(q.name || q.interface)}</td>
+                  <td>{safeStr(q['queue-type'] || 'default-small')}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(q)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   // Tools Menu Placeholders
   const renderPing = () => renderPlaceholder('Ping', 'tools-ping');
@@ -3028,16 +3388,281 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderMACWinbox = () => renderPlaceholder('MAC Winbox', 'tools-mac-winbox');
   const renderWinboxSettings = () => renderPlaceholder('Winbox Settings', 'tools-winbox');
 
-  // Wireless Menu Placeholders
-  const renderWirelessInterfaces = () => renderPlaceholder('Wireless Interfaces', 'wireless-interfaces');
-  const renderWirelessSecurity = () => renderPlaceholder('Wireless Security Profiles', 'wireless-security');
-  const renderWirelessAccessList = () => renderPlaceholder('Wireless Access List', 'wireless-access-list');
-  const renderWirelessConnectList = () => renderPlaceholder('Wireless Connect List', 'wireless-connect-list');
+  const renderWirelessInterfaces = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Wifi className="summary-card-icon" />
+        <h2 className="section-title">Wireless Interfaces</h2>
+      </div>
+      <HelpPanel id="wireless-interfaces" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>SSID</th>
+              <th>Mode</th>
+              <th>Band</th>
+              <th>Frequency</th>
+              <th>Security Profile</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.wireless?.interfaces || config.wireless.interfaces.length === 0) ? (
+              <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Wireless Interface.</td></tr>
+            ) : (
+              config.wireless.interfaces.map((iface, idx) => (
+                <tr key={idx} style={{ opacity: iface.disabled === 'yes' ? 0.6 : 1 }}>
+                  <td style={{ fontWeight: 600 }}>{iface.name || iface['default-name'] || '-'}</td>
+                  <td>{iface.ssid || '-'}</td>
+                  <td><span className="badge badge-info">{iface.mode || '-'}</span></td>
+                  <td>{iface.band || '-'}</td>
+                  <td>{iface.frequency || iface.channel || '-'}</td>
+                  <td>{iface['security-profile'] || 'default'}</td>
+                  <td>
+                    {iface.disabled === 'yes'
+                      ? <span className="badge badge-neutral">Disabled</span>
+                      : <span className="badge badge-success">Active</span>}
+                  </td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(iface)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
-  // PPP Menu Placeholders
-  const renderPPPProfiles = () => renderPlaceholder('PPP Profiles', 'ppp-profiles');
-  const renderPPPSecrets = () => renderPlaceholder('PPP Secrets', 'ppp-secrets');
-  const renderPPPActive = () => renderPlaceholder('PPP Active Connections', 'ppp-active');
+  const renderWirelessSecurity = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Shield className="summary-card-icon" />
+        <h2 className="section-title">Wireless Security Profiles</h2>
+      </div>
+      <HelpPanel id="wireless-security" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mode</th>
+              <th>Auth Types</th>
+              <th>Unicast Ciphers</th>
+              <th>Group Ciphers</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.wireless?.securityProfiles || config.wireless.securityProfiles.length === 0) ? (
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Security Profile yang dikonfigurasi.</td></tr>
+            ) : (
+              config.wireless.securityProfiles.map((sp, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{sp.name || '-'}</td>
+                  <td><span className="badge badge-info">{sp.mode || 'none'}</span></td>
+                  <td>{sp['authentication-types'] || '-'}</td>
+                  <td>{sp['unicast-ciphers'] || '-'}</td>
+                  <td>{sp['group-ciphers'] || '-'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sp)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderWirelessAccessList = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Wifi className="summary-card-icon" />
+        <h2 className="section-title">Wireless Access List</h2>
+      </div>
+      <HelpPanel id="wireless-access-list" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>MAC Address</th>
+              <th>Interface</th>
+              <th>Action</th>
+              <th>Signal Range</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.wireless?.accessList || config.wireless.accessList.length === 0) ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Access List.</td></tr>
+            ) : (
+              config.wireless.accessList.map((item, idx) => (
+                <tr key={idx} style={{ opacity: item.disabled === 'yes' ? 0.6 : 1 }}>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item['mac-address'] || 'any'}</td>
+                  <td>{item.interface || 'any'}</td>
+                  <td>
+                    <span className={`badge ${item.action === 'accept' ? 'badge-success' : item.action === 'reject' ? 'badge-error' : 'badge-neutral'}`}>
+                      {item.action || 'accept'}
+                    </span>
+                  </td>
+                  <td>{item['signal-range'] ? `${item['signal-range']} dBm` : '-'}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{item.comment || '-'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderWirelessConnectList = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Wifi className="summary-card-icon" />
+        <h2 className="section-title">Wireless Connect List</h2>
+      </div>
+      <HelpPanel id="wireless-connect-list" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>SSID</th>
+              <th>MAC Address</th>
+              <th>Interface</th>
+              <th>Security Profile</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.wireless?.connectList || config.wireless.connectList.length === 0) ? (
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Connect List.</td></tr>
+            ) : (
+              config.wireless.connectList.map((item, idx) => (
+                <tr key={idx} style={{ opacity: item.disabled === 'yes' ? 0.6 : 1 }}>
+                  <td style={{ fontWeight: 600 }}>{item.ssid || 'any'}</td>
+                  <td style={{ fontFamily: 'monospace' }}>{item['mac-address'] || 'any'}</td>
+                  <td>{item.interface || 'any'}</td>
+                  <td>{item['security-profile'] || 'default'}</td>
+                  <td>
+                    {item.disabled === 'yes'
+                      ? <span className="badge badge-neutral">Disabled</span>
+                      : <span className="badge badge-success">Active</span>}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderPPPProfiles = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Lock className="summary-card-icon" />
+        <h2 className="section-title">PPP Profiles</h2>
+      </div>
+      <HelpPanel id="ppp-profiles" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Local Address</th>
+              <th>Remote Address</th>
+              <th>Rate Limit</th>
+              <th>DNS Server</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.ppp?.profiles || config.ppp.profiles.length === 0) ? (
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada PPP Profile yang dikonfigurasi.</td></tr>
+            ) : (
+              config.ppp.profiles.map((p, idx) => (
+                <tr key={idx}>
+                  <td style={{ fontWeight: 600 }}>{p.name || '-'}</td>
+                  <td style={{ fontFamily: 'monospace' }}>{p['local-address'] || '-'}</td>
+                  <td style={{ fontFamily: 'monospace' }}>{p['remote-address'] || '-'}</td>
+                  <td>{p['rate-limit'] || 'unlimited'}</td>
+                  <td style={{ fontFamily: 'monospace' }}>{p['dns-server'] || '-'}</td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(p)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderPPPSecrets = () => (
+    <div className="glass-panel config-section animate-fade-in">
+      <div className="section-header">
+        <Key className="summary-card-icon" />
+        <h2 className="section-title">PPP Secrets</h2>
+      </div>
+      <HelpPanel id="ppp-secrets" onNavigate={setActiveTab} />
+      <div className="data-table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Service</th>
+              <th>Profile</th>
+              <th>Local Address</th>
+              <th>Remote Address</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(!config.ppp?.secrets || config.ppp.secrets.length === 0) ? (
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada PPP Secret yang dikonfigurasi.</td></tr>
+            ) : (
+              config.ppp.secrets.map((s, idx) => (
+                <tr key={idx} style={{ opacity: s.disabled === 'yes' ? 0.6 : 1 }}>
+                  <td style={{ fontWeight: 600 }}>{s.name || '-'}</td>
+                  <td><span className="badge badge-info">{s.service || 'any'}</span></td>
+                  <td>{s.profile || 'default'}</td>
+                  <td style={{ fontFamily: 'monospace' }}>{s['local-address'] || '-'}</td>
+                  <td style={{ fontFamily: 'monospace' }}>{s['remote-address'] || '-'}</td>
+                  <td>
+                    {s.disabled === 'yes'
+                      ? <span className="badge badge-neutral">Disabled</span>
+                      : <span className="badge badge-success">Active</span>}
+                  </td>
+                  <td>
+                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(s)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                      <Activity size={14} /> Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderPPPActive = () => renderLiveData('PPP Active Connections');
 
   // Files Menu Placeholders
   const renderFilesList = () => renderPlaceholder('Files List', 'files-list');
@@ -3054,18 +3679,14 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderCAPsMANAccessList = () => renderPlaceholder('CAPsMAN Access List', 'capsman-access-list');
   const renderCAPsMANConfiguration = () => renderPlaceholder('CAPsMAN Configuration', 'capsman-configuration');
 
-  // LTE Menu Placeholders
   const renderLTEInterfaces = () => renderPlaceholder('LTE Interfaces', 'lte-interfaces');
   const renderLTEAPN = () => renderPlaceholder('LTE APN Profiles', 'lte-apn');
-  const renderLTEInfo = () => renderPlaceholder('LTE Info', 'lte-info');
-
-  // GPS Menu Placeholders
+  const renderLTEInfo = () => renderLiveData('LTE Info');
   const renderGPSSettings = () => renderPlaceholder('GPS Settings', 'gps-settings');
-  const renderGPSMonitor = () => renderPlaceholder('GPS Monitor', 'gps-monitor');
+  const renderGPSMonitor = () => renderLiveData('GPS Monitor');
 
-  // Standalone Menu Placeholders
-  const renderNeighbors = () => renderPlaceholder('Neighbors', 'neighbors');
-  const renderLog = () => renderPlaceholder('Log', 'log');
+  const renderNeighbors = () => renderLiveData('Neighbors (LLDP/CDP)');
+  const renderLog = () => renderLiveData('Log');
   const renderSkin = () => renderPlaceholder('Skin', 'skin');
 
   return (

@@ -16,6 +16,12 @@ export const parseMikroTikConfig = (fileContent) => {
     ipAddresses: [],
     pools: [],
     routes: [],
+    wireless: {
+      interfaces: [],
+      securityProfiles: [],
+      accessList: [],
+      connectList: []
+    },
     vpn: {
       l2tp: [],
       pptp: [],
@@ -25,7 +31,9 @@ export const parseMikroTikConfig = (fileContent) => {
       wireguardPeers: []
     },
     ppp: {
-      pppoeServers: []
+      pppoeServers: [],
+      profiles: [],
+      secrets: []
     },
     firewall: {
       filter: [],
@@ -33,7 +41,8 @@ export const parseMikroTikConfig = (fileContent) => {
       mangle: [],
       raw: [],
       addressLists: [],
-      connectionTracking: {}
+      connectionTracking: {},
+      layer7: []
     },
     vlans: [],
     bridgeVlans: [],
@@ -50,14 +59,22 @@ export const parseMikroTikConfig = (fileContent) => {
     queues: {
       types: [],
       trees: [],
-      simple: []
+      simple: [],
+      interfaceQueues: []
     },
     routingTables: [],
     interfaceLists: [],
     interfaceListMembers: [],
     system: {
       clock: {},
-      logging: []
+      logging: [],
+      users: [],
+      groups: [],
+      ntpClient: {},
+      ntpServer: {},
+      scheduler: [],
+      scripts: [],
+      watchdog: {}
     },
     systemLogActions: [],
     snmp: {},
@@ -314,6 +331,39 @@ const mapToStructuredData = (path, attrs, config) => {
     if (attrs.servers) config.dns.servers = attrs.servers.split(',');
   } else if (path === '/ip dns static') {
     config.dns.static.push(attrs);
+  } else if (path === '/interface wireless') {
+    config.wireless.interfaces.push({...attrs, type: 'wireless'});
+    if (!config.interfaces.find(i => i.name === attrs.name || i.defaultName === attrs['default-name'])) {
+      config.interfaces.push({...attrs, type: 'wireless'});
+    }
+  } else if (path === '/interface wireless security-profiles') {
+    config.wireless.securityProfiles.push(attrs);
+  } else if (path === '/interface wireless access-list') {
+    config.wireless.accessList.push(attrs);
+  } else if (path === '/interface wireless connect-list') {
+    config.wireless.connectList.push(attrs);
+  } else if (path === '/ppp profile') {
+    config.ppp.profiles.push(attrs);
+  } else if (path === '/ppp secret') {
+    config.ppp.secrets.push(attrs);
+  } else if (path === '/user') {
+    config.system.users.push(attrs);
+  } else if (path === '/user group') {
+    config.system.groups.push(attrs);
+  } else if (path === '/system ntp client') {
+    config.system.ntpClient = {...config.system.ntpClient, ...attrs};
+  } else if (path === '/system ntp server') {
+    config.system.ntpServer = {...config.system.ntpServer, ...attrs};
+  } else if (path === '/system scheduler') {
+    config.system.scheduler.push(attrs);
+  } else if (path === '/system script') {
+    config.system.scripts.push(attrs);
+  } else if (path === '/system watchdog') {
+    config.system.watchdog = {...config.system.watchdog, ...attrs};
+  } else if (path === '/ip firewall layer7-protocol') {
+    config.firewall.layer7.push(attrs);
+  } else if (path === '/queue interface') {
+    config.queues.interfaceQueues.push(attrs);
   }
 };
 
