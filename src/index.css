@@ -539,6 +539,34 @@ html.light .react-flow__controls-button {
   fill: var(--text-primary) !important;
 }
 
+/* ─── Search match highlight ─────────────────────────────────── */
+.search-match {
+  background: rgba(234,179,8,0.25);
+  color: var(--text-primary);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ─── Search active banner ───────────────────────────────────── */
+.search-active-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(99,102,241,0.08);
+  border-bottom: 1px solid rgba(99,102,241,0.2);
+  font-size: 0.78rem;
+  color: var(--accent-light);
+}
+
+/* ─── Sticky table header ────────────────────────────────────── */
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-surface);
+  z-index: 1;
+}
+
 /* ==========================================================================
    Modal Popups
    ========================================================================== */

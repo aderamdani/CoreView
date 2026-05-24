@@ -329,13 +329,15 @@ export const configHelp = {
 
   'system-logging': {
     title: 'System Logging',
-    summary: 'Mengkonfigurasi ke mana pesan log dikirim: disk lokal, memori, remote syslog, atau email.',
+    summary: 'Mengkonfigurasi aturan dan destinasi log: topik mana (error, info, kritis, firewall, dhcp) dikirim ke mana (disk lokal, memori, remote syslog, atau email).',
     impact: [
       'Logging ke "disk" menyimpan log yang bertahan antar reboot — krusial untuk audit, forensik, dan kepatuhan regulasi.',
-      'Remote syslog (action=remote) mengirim log ke server SIEM atau log aggregator terpusat.',
+      'Remote syslog (action=remote) mengirim log ke server SIEM atau log aggregator terpusat seperti Zabbix.',
+      'Terlalu banyak rule debug yang di-set ke Memory/Disk bisa membahayakan masa umur NAND storage router.',
       'Topic log (firewall, dhcp, system) mengontrol detail log — logging terlalu granular pada traffic tinggi bisa memenuhi disk dengan cepat.',
+      'Diperlukan untuk memonitor aktivitas koneksi, VPN, port state, atau ancaman DDoS.',
     ],
-    relations: ['System → Identity', 'System → Clock', 'Firewall Filter'],
+    relations: ['System → Identity', 'System → Clock', 'Firewall Filter', 'System → Logging Actions'],
   },
 
   'system-snmp': {
@@ -682,22 +684,25 @@ export const configHelp = {
   },
 
   'routing-rules': {
-    title: 'Routing Rules',
-    summary: 'Aturan policy routing yang menentukan traffic tertentu harus lookup ke routing table tertentu.',
+    title: 'Routing Rules (Policy Based Routing)',
+    summary: 'Aturan policy routing (PBR) yang menentukan traffic tertentu harus lookup ke routing table tertentu berdasarkan kriteria Src/Dst IP.',
     impact: [
       'Mengarahkan subnet/pengguna tertentu ke jalur WAN berbeda tanpa mengubah default route global.',
+      'Biasa dipakai untuk Traffic Engineering, misal memutus IP LAN agar diarahkan via rute ISP ke-2 (Backup).',
       'Rule yang terlalu umum dapat menimpa alur routing normal.',
-      'Urutan rule penting: rule pertama yang match akan diterapkan.',
+      'Urutan rule penting: rule pertama yang match akan diterapkan, diproses sebelum membedah routing table utuh.',
     ],
     relations: ['Routing Tables', 'IP → Routes', 'Firewall → Mangle'],
   },
 
   'routing-filters': {
-    title: 'Routing Filters',
-    summary: 'Filter kebijakan untuk menerima, memodifikasi, atau menolak route dari protokol routing dinamis.',
+    title: 'Routing Filter Rules',
+    summary: 'Filter kebijakan (if-then syntax) untuk menerima, memodifikasi, atau menolak route yang dikirim (OUT) atau diterima (IN) oleh protokol routing dinamis seperti BGP dan OSPF.',
     impact: [
       'Mencegah route tidak diinginkan masuk ke tabel routing.',
+      'Wajib digunakan pada koneksi eBGP external untuk mencegah kebocoran prefix ke internet.',
       'Filter yang terlalu ketat bisa membuat route valid tidak pernah terpasang.',
+      'Berguna merubah atribut rute (seperti AS-Path prepend, MED, atau Local-Pref).',
       'Sangat penting pada lingkungan BGP/OSPF skala menengah-besar.',
     ],
     relations: ['Routing Tables', 'IP → Routes', 'routing-bgp', 'routing-ospf'],
@@ -771,13 +776,14 @@ export const configHelp = {
 
   'queues-simple': {
     title: 'Simple Queues',
-    summary: 'Manajemen bandwidth cepat berbasis target host/subnet tanpa struktur hierarki kompleks.',
+    summary: 'Manajemen bandwidth cepat berbasis target host/subnet tanpa struktur hierarki kompleks. Pembatasan kecepatan per-IP atau per-subnet yang mudah dipahami.',
     impact: [
-      'Mudah diterapkan for limit per-user atau per-subnet.',
+      'Mudah diterapkan untuk limit per-user atau per-subnet.',
+      'Prioritas simple queues memproses dari baris paling atas ke bawah secara sekuensial — urutan penting.',
+      'Membatasi bandwidth pengguna akhir agar pemakaian keseluruhan tetap stabil.',
       'Pada skala besar, performa bisa kalah dibanding Queue Tree + packet mark.',
-      'Urutan simple queue memengaruhi evaluasi and hasil shaping.',
     ],
-    relations: ['Queue Types', 'Queue Tree', 'Firewall → Mangle'],
+    relations: ['Queue Types', 'Queue Tree', 'Firewall → Mangle', 'IP → Addresses'],
   },
 
   'queues-interfaces': {
@@ -1228,16 +1234,6 @@ export const configHelp = {
     relations: ['Routing Tables', 'IP → Routes'],
   },
 
-  'routing-rules': {
-    title: 'Routing Rules',
-    summary: 'Aturan khusus (Policy Based Routing) yang secara spesifik menentukan tabel routing mana yang harus digunakan koneksi berdasarkan kriteria Src/Dst IP tertentu.',
-    impact: [
-      'Biasa dipakai untuk Traffic Engineering, misal memutus IP LAN agar diarahkan via rute ISP ke-2 (Backup).',
-      'Aturan diproses sebelum membedah routing table utuh.'
-    ],
-    relations: ['Routing Tables', 'IP → Routes', 'Firewall → Mangle'],
-  },
-
   'firewall-tracking': {
     title: 'Connection Tracking',
     summary: 'Engine pemantau state koneksi (established, related, new) di kernel Firewall. Jika dimatikan, NAT tidak bekerja, stateful firewall mati, dan router menjadi stateless.',
@@ -1288,16 +1284,6 @@ export const configHelp = {
     relations: ['Routing → Rules', 'IP → Firewall Mangle'],
   },
 
-  'routing-filters': {
-    title: 'Routing Filter Rules',
-    summary: 'Aturan kuat (menggunakan syntax if-then) untuk menyaring rute yang dikirim (OUT) atau diterima (IN) oleh protokol dinamik seperti BGP dan OSPF.',
-    impact: [
-      'Wajib digunakan pada koneksi BGP eBGP external untuk mencegah kebocoran jangkauan prefix.',
-      'Berguna merubah atribut rute (seperti AS-Path prepend, MED, atau Local-Pref).',
-    ],
-    relations: ['Routing → BGP'],
-  },
-
   'queues-type': {
     title: 'Queue Type (FQ-CoDel, PCQ, dll)',
     summary: 'Jenis dan algoritma pengantrean paket untuk memanajemen bandwidth dan mengurangi bufferbloat (seperti menggunakan FQ-Codel atau Per Connection Queue for mikrotik).',
@@ -1306,16 +1292,6 @@ export const configHelp = {
       'Menurunkan latency ping tinggi yang terjadi saat ada antrean bandwidth penuh (bufferbloat).',
     ],
     relations: ['Queues → Simple Queues', 'Queues → Interface Queues'],
-  },
-
-  'queues-simple': {
-    title: 'Simple Queues',
-    summary: 'Pembatasan kecepatan dan pengelolaan traffic yang mudah dipahami (Global Bandwidth, Per-IP, dll).',
-    impact: [
-      'Prioritas simple queues memproses dari list baris paing atas ke bawah secara sekuensial.',
-      'Membatasi bandwidth pengguna akhir agar pemakaian keseluruhan tetap stabil.',
-    ],
-    relations: ['IP → Addresses', 'Queues → Type'],
   },
 
   'system-logging-action': {
@@ -1327,14 +1303,5 @@ export const configHelp = {
     relations: ['System → Logging'],
   },
 
-  'system-logging': {
-    title: 'System Logging Rules',
-    summary: 'Aturan penjurnalan yang menangkap tipe topik (error, info, kritis) tertentu dan mengirimnya ke action/lokasi spesifik (misalnya dikirim ke disk atau server Syslog monitoring Zabbix).',
-    impact: [
-      'Terlalu banyak rule debug yang di set logging Memory/Disk bisa membahayakan masa umur NAND storage router.',
-      'Diperlukan untuk memonitor aktivitas koneksi, VPN, port state, atau ancaman ddos.',
-    ],
-    relations: ['System → Logging Actions'],
-  }
 };
 

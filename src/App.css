@@ -27,7 +27,67 @@
 }
 
 .header-subtitle {
-  display: none; /* hidden on dashboard view, shown in uploader */
+  display: none;
+}
+
+/* ─── Header Search ──────────────────────────────────────────── */
+.header-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 300px;
+  margin: 0 1.5rem;
+}
+
+.header-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.header-search-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 6px 32px 6px 32px;
+  color: var(--text-primary);
+  font-size: 0.83rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.header-search-input:focus {
+  border-color: var(--accent);
+  background: var(--bg-surface);
+}
+
+.header-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.header-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+
+.header-search-clear:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .main-content {
@@ -62,6 +122,18 @@
 .uploader-sub  { color: var(--text-secondary); font-size: 0.9rem; }
 .file-input    { display: none; }
 .uploader-error { margin-top: 1rem; color: var(--status-error); font-size: 0.9rem; font-weight: 600; }
+.uploader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 1.25rem;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 /* ─── Landing Page ───────────────────────────────────────────── */
 .landing-container {
@@ -312,6 +384,52 @@
   .hero-description { margin-left: auto; margin-right: auto; }
   .hero-actions { align-items: center; }
   .features-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Export button ──────────────────────────────────────────── */
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-export:hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+  background: rgba(99,102,241,0.08);
+}
+
+/* ─── Sidebar count badge ────────────────────────────────────── */
+.sidebar-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  flex-shrink: 0;
+}
+.sidebar-subitem.active .sidebar-count-badge,
+.sidebar-item.active .sidebar-count-badge {
+  background: rgba(99,102,241,0.2);
+  color: var(--accent-light);
 }
 
 /* ─── Dashboard layout (sidebar + main) ──────────────────────── */

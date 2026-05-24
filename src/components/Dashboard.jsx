@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { 
-  Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud,
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft,
   Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText, X
 } from 'lucide-react';
@@ -303,6 +303,62 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     setExpandedMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
   };
 
+  // Close modal on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') setSelectedItemDetail(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // Counts for sidebar badges
+  const dataCounts = {
+    'interfaces-list':       interfaces.length,
+    'interfaces-ethernet':   interfaces.filter(i => i.type === 'ethernet').length,
+    'interfaces-lte':        interfaces.filter(i => i.type === 'lte-apn' || i.type === 'lte').length,
+    'interfaces-lists':      config.interfaceLists?.length || 0,
+    'bridge-list':           config.bridges?.length || 0,
+    'bridge-ports':          config.bridgePorts?.length || 0,
+    'bridge-vlans':          config.bridgeVlans?.length || 0,
+    'wireless-interfaces':   config.wireless?.interfaces?.length || 0,
+    'wireless-security':     config.wireless?.securityProfiles?.length || 0,
+    'wireless-access-list':  config.wireless?.accessList?.length || 0,
+    'vpn':                   totalVpns,
+    'vpn-ipsec':             config.vpn?.ipsec?.length || 0,
+    'ppp-pppoe-server':      config.ppp?.pppoeServers?.length || 0,
+    'ppp-profiles':          config.ppp?.profiles?.length || 0,
+    'ppp-secrets':           config.ppp?.secrets?.length || 0,
+    'ip-addresses':          ipAddresses.length,
+    'ip-routes':             routes.length,
+    'ip-pool':               config.pools?.length || 0,
+    'ip-pools':              config.pools?.length || 0,
+    'ip-dhcp-server':        dhcp.servers?.length || 0,
+    'ip-dhcp-client':        dhcp.clients?.length || 0,
+    'ip-dns':                (config.dns?.servers?.length || 0) + (config.dns?.static?.length || 0),
+    'ip-hotspot':            (config.hotspot?.servers?.length || 0) + (config.hotspot?.users?.length || 0),
+    'ip-services':           config.services?.length || 0,
+    'routing-tables':        config.routingTables?.length || 0,
+    'routing-bgp':           config.bgp?.connections?.length || 0,
+    'firewall-filter':       firewall.filter?.length || 0,
+    'firewall-nat':          firewall.nat?.length || 0,
+    'firewall-mangle':       firewall.mangle?.length || 0,
+    'firewall-raw':          firewall.raw?.length || 0,
+    'firewall-address-lists':firewall.addressLists?.length || 0,
+    'queues-tree':           config.queues?.trees?.length || 0,
+    'queues-simple':         config.queues?.simple?.length || 0,
+    'queues-types':          config.queues?.types?.length || 0,
+    'system-logging':        config.system?.logging?.length || 0,
+  };
+
+  const exportCSV = useCallback((headers, rows, filename) => {
+    const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
   const renderSidebar = () => {
     const menus = [
       { id: 'overview', label: 'Overview', icon: <Server size={15} /> },
@@ -559,7 +615,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
             return (
               <li key={menu.id}>
-                <div 
+                <div
                   className={`sidebar-item ${
                     isActive && !hasSubmenus ? 'active'
                     : isParentActive ? 'parent-active'
@@ -579,6 +635,15 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     {menu.icon}
                     {!sidebarCollapsed && <span>{menu.label}</span>}
                   </div>
+                  {!sidebarCollapsed && (() => {
+                    const parentCount = hasSubmenus
+                      ? menu.submenus.reduce((s, sub) => s + (dataCounts[sub.id] || 0), 0)
+                      : (dataCounts[menu.id] || 0);
+                    if (parentCount > 0 && !hasSubmenus) {
+                      return <span className="sidebar-count-badge">{parentCount}</span>;
+                    }
+                    return null;
+                  })()}
                   {hasSubmenus && !sidebarCollapsed && (
                     <ChevronRight
                       size={13}
@@ -590,13 +655,17 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                 {hasSubmenus && isMenuExpanded && !sidebarCollapsed && (
                   <div className="sidebar-submenus">
                     {menu.submenus.map(sub => (
-                      <div 
+                      <div
                         key={sub.id}
                         className={`sidebar-subitem ${activeTab === sub.id ? 'active' : ''}`}
                         onClick={() => setActiveTab(sub.id)}
                         title={sub.label}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                       >
-                        {sub.label}
+                        <span>{sub.label}</span>
+                        {dataCounts[sub.id] > 0 && (
+                          <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>{dataCounts[sub.id]}</span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -849,6 +918,97 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           </div>
         </div>
 
+        {/* Config Analysis Charts */}
+        {(firewallRules > 0 || totalInterfaces > 0) && (() => {
+          const fwData = [
+            { name: 'Filter', value: firewall.filter?.length || 0, color: '#ef4444' },
+            { name: 'NAT',    value: firewall.nat?.length || 0,    color: '#f59e0b' },
+            { name: 'Mangle', value: firewall.mangle?.length || 0, color: '#6366f1' },
+            { name: 'Raw',    value: firewall.raw?.length || 0,    color: '#64748b' },
+          ].filter(d => d.value > 0);
+
+          const ifaceTypeMap = interfaces.reduce((acc, iface) => {
+            const t = iface.type || 'other';
+            acc[t] = (acc[t] || 0) + 1;
+            return acc;
+          }, {});
+          const ifaceData = Object.entries(ifaceTypeMap).map(([type, count]) => ({ type, count })).sort((a,b) => b.count - a.count).slice(0, 6);
+
+          return (
+            <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
+              <div className="section-header" style={{ marginBottom: '1.5rem' }}>
+                <BarChart2 className="summary-card-icon" />
+                <h2 className="section-title">Analisis Konfigurasi</h2>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+
+                {fwData.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                      Distribusi Firewall Rules ({firewallRules} total)
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                      <ResponsiveContainer width={120} height={120}>
+                        <PieChart>
+                          <Pie data={fwData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50} paddingAngle={2}>
+                            {fwData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                          </Pie>
+                          <Tooltip formatter={(v, n) => [v, n]} contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.8rem' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {fwData.map((d, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
+                            <span style={{ width: 10, height: 10, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
+                            <span style={{ color: 'var(--text-secondary)' }}>{d.name}</span>
+                            <span style={{ color: 'var(--text-primary)', fontWeight: 600, marginLeft: 'auto' }}>{d.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {ifaceData.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                      Interface berdasarkan Tipe
+                    </div>
+                    <ResponsiveContainer width="100%" height={120}>
+                      <BarChart data={ifaceData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                        <XAxis dataKey="type" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
+                        <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} allowDecimals={false} />
+                        <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.8rem' }} />
+                        <Bar dataKey="count" fill="var(--accent)" radius={[4,4,0,0]} name="Jumlah" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                    Ringkasan Cepat
+                  </div>
+                  {[
+                    { label: 'Interface Aktif', value: `${interfaces.filter(i=>i.active).length}/${interfaces.length}`, color: 'var(--green)' },
+                    { label: 'IP Addresses', value: ipAddresses.length, color: 'var(--blue)' },
+                    { label: 'Routes', value: routes.length, color: 'var(--accent-light)' },
+                    { label: 'DHCP Servers', value: dhcp.servers?.length || 0, color: 'var(--yellow)' },
+                    { label: 'VPN Tunnels', value: totalVpns, color: 'var(--accent-secondary)' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', background: 'var(--bg-elevated)', borderRadius: 'var(--r-sm)' }}>
+                      <span style={{ fontSize: '0.83rem', color: 'var(--text-secondary)' }}>{item.label}</span>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: item.color }}>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Interactive Configuration Story */}
         <div className="glass-panel config-section" style={{ minHeight: '400px' }}>
           <div className="section-header" style={{ marginBottom: '2rem' }}>
@@ -953,9 +1113,18 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
   const renderInterfaces = () => (
     <div className="glass-panel config-section animate-fade-in">
-      <div className="section-header">
-        <Activity className="summary-card-icon" />
-        <h2 className="section-title">Network Interfaces</h2>
+      <div className="section-header" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Activity className="summary-card-icon" />
+          <h2 className="section-title">Network Interfaces</h2>
+          <span className="badge badge-neutral">{interfaces.length}</span>
+        </div>
+        <button className="btn-export" onClick={() => exportCSV(
+          ['Status','Name','Type','IP Address','Comment'],
+          interfaces.map(i => [i.active ? 'Active' : 'Disabled', i.name || i.defaultName, i.type, i.ip || '', i.comment || ''])
+          , 'interfaces.csv')}>
+          ↓ CSV
+        </button>
       </div>
       <HelpPanel id="interfaces-list" onNavigate={setActiveTab} />
       
@@ -1232,9 +1401,18 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
   const renderIPAddresses = () => (
     <div className="glass-panel config-section animate-fade-in">
-      <div className="section-header">
-        <Server className="summary-card-icon" />
-        <h2 className="section-title">IP Addresses</h2>
+      <div className="section-header" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Server className="summary-card-icon" />
+          <h2 className="section-title">IP Addresses</h2>
+          <span className="badge badge-neutral">{ipAddresses.length}</span>
+        </div>
+        <button className="btn-export" onClick={() => exportCSV(
+          ['Status','Address','Network','Interface'],
+          ipAddresses.map(ip => [ip.active ? 'Active' : 'Disabled', ip.address, ip.network || '', ip.interface || ''])
+          , 'ip-addresses.csv')}>
+          ↓ CSV
+        </button>
       </div>
       <HelpPanel id="ip-addresses" onNavigate={setActiveTab} />
 
@@ -1437,9 +1615,18 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
   const renderIPRoutes = () => (
     <div className="glass-panel config-section animate-fade-in">
-      <div className="section-header">
-        <Route className="summary-card-icon" />
-        <h2 className="section-title">IP Routes</h2>
+      <div className="section-header" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Route className="summary-card-icon" />
+          <h2 className="section-title">IP Routes</h2>
+          <span className="badge badge-neutral">{routes.length}</span>
+        </div>
+        <button className="btn-export" onClick={() => exportCSV(
+          ['Destination','Gateway','Distance','Comment'],
+          routes.map(r => [r['dst-address'] || '0.0.0.0/0', r.gateway || '', r.distance || '1', r.comment || ''])
+          , 'routes.csv')}>
+          ↓ CSV
+        </button>
       </div>
       <HelpPanel id="ip-routes" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
@@ -1763,9 +1950,18 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
   const renderFirewallFilter = () => (
     <div className="glass-panel config-section animate-fade-in">
-      <div className="section-header">
-        <Shield className="summary-card-icon" />
-        <h2 className="section-title">Firewall Filter Rules</h2>
+      <div className="section-header" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Shield className="summary-card-icon" />
+          <h2 className="section-title">Firewall Filter Rules</h2>
+          <span className="badge badge-neutral">{firewall.filter?.length || 0}</span>
+        </div>
+        <button className="btn-export" onClick={() => exportCSV(
+          ['Action','Chain','Protocol','Src Address','Dst Address','Comment'],
+          (firewall.filter || []).map(r => [r.action || 'accept', r.chain, r.protocol || 'any', r['src-address'] || 'any', r['dst-address'] || 'any', r.comment || ''])
+          , 'firewall-filter.csv')}>
+          ↓ CSV
+        </button>
       </div>
       <HelpPanel id="firewall-filter" onNavigate={setActiveTab} />
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
@@ -3694,6 +3890,15 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
       {renderSidebar()}
       
       <div className="main-view">
+        {searchTerm && (
+          <div className="search-active-banner">
+            <Search size={12} />
+            Mencari: <strong>"{searchTerm}"</strong> — tabel menampilkan baris yang cocok saja
+            <button onClick={() => {}} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: '0.78rem', opacity: 0.7 }}>
+              (gunakan ⌘K atau search bar untuk ubah)
+            </button>
+          </div>
+        )}
         <SectionErrorBoundary>
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'mindmap' && <MindMap config={config} onNavigate={setActiveTab} />}

@@ -39,7 +39,7 @@ export const Landing = ({ onFileParsed }) => {
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
+      processFileWithLoading(e.dataTransfer.files[0]);
     }
   };
 
@@ -53,10 +53,18 @@ export const Landing = ({ onFileParsed }) => {
       onFileParsed(content);
     } catch (err) {
       setError('Gagal memuat demo konfigurasi.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const processFileWithLoading = (file) => {
+    if (!file) return;
+    setLoading(true);
+    setTimeout(() => {
+      processFile(file);
+      setLoading(false);
+    }, 50);
   };
 
   return (
@@ -77,8 +85,8 @@ export const Landing = ({ onFileParsed }) => {
           </p>
           
           <div className="hero-actions">
-            <button className="btn btn-primary btn-lg" onClick={() => document.getElementById('file-upload').click()}>
-              <UploadCloud size={18} /> Mulai Sekarang
+            <button className="btn btn-primary btn-lg" onClick={() => document.getElementById('file-upload').click()} disabled={loading}>
+              <UploadCloud size={18} /> {loading ? 'Memproses...' : 'Mulai Sekarang'}
             </button>
             <div className="demo-group">
               <span className="demo-label">Atau coba demo:</span>
@@ -110,10 +118,14 @@ export const Landing = ({ onFileParsed }) => {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          onClick={() => document.getElementById('file-upload').click()}
+          onClick={() => !loading && document.getElementById('file-upload').click()}
         >
-          <UploadCloud className="uploader-icon" />
-          <h3 className="uploader-title">Seret & Lepas File Konfigurasi</h3>
+          {loading ? (
+            <div className="uploader-spinner" />
+          ) : (
+            <UploadCloud className="uploader-icon" />
+          )}
+          <h3 className="uploader-title">{loading ? 'Memproses konfigurasi...' : 'Seret & Lepas File Konfigurasi'}</h3>
           <p className="uploader-sub">Mendukung format .rsc atau .txt hasil dari /export</p>
           
           <input 
@@ -121,7 +133,7 @@ export const Landing = ({ onFileParsed }) => {
             type="file" 
             className="file-input" 
             accept=".rsc,.txt,text/plain"
-            onChange={(e) => processFile(e.target.files[0])}
+            onChange={(e) => processFileWithLoading(e.target.files[0])}
           />
           
           {error && <div className="uploader-error">{error}</div>}
