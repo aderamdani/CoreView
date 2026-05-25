@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud,
   Lock, Globe, Cpu, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft,
-  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText, X
+  Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText, X,
+  Heart, AlertTriangle, Info, TrendingUp, BookOpen, Lightbulb, Zap
 } from 'lucide-react';
 import { configHelp } from '../utils/configHelp';
 import { generateItemExplanation } from '../utils/itemExplainer';
+import { analyzeConfig } from '../utils/configAnalyzer';
 import { MindMap } from './MindMap';
 import { OsiTcpView } from './OsiTcpView';
+import { NetworkTopology } from './NetworkTopology';
+import { PacketTracer } from './PacketTracer';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
@@ -35,6 +39,24 @@ class SectionErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+/* ─── Animated number counter ──────────────────────────────────── */
+const CountUp = ({ target, duration = 700, suffix = '' }) => {
+  const [count, setCount] = React.useState(0);
+  React.useEffect(() => {
+    if (target === 0) { setCount(0); return; }
+    let frame = 0;
+    const totalFrames = Math.round(duration / 16);
+    const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    const timer = setInterval(() => {
+      frame++;
+      setCount(Math.round(ease(frame / totalFrames) * target));
+      if (frame >= totalFrames) { setCount(target); clearInterval(timer); }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration]);
+  return <>{count}{suffix}</>;
+};
 
 /* ─── Relation label → sidebar tab ID mapping ──────────────────── */
 const RELATION_TO_TAB = {
@@ -349,6 +371,19 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     'system-logging':        config.system?.logging?.length || 0,
   };
 
+  const healthAnalysis = useMemo(() => analyzeConfig(config), [config]);
+
+  // ── Toast notification ─────────────────────────────────────────────────────
+  const [toast, setToast] = useState(null);
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2400);
+  }, []);
+  const copyCell = useCallback((value) => {
+    if (!value || value === '-') return;
+    navigator.clipboard?.writeText(String(value)).then(() => showToast(`Disalin: ${value}`));
+  }, [showToast]);
+
   const exportCSV = useCallback((headers, rows, filename) => {
     const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
@@ -362,6 +397,18 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderSidebar = () => {
     const menus = [
       { id: 'overview', label: 'Overview', icon: <Server size={15} /> },
+      {
+        id: 'health-check',
+        label: 'Cek Kesehatan',
+        icon: <Heart size={15} />,
+        badge: healthAnalysis.criticalCount > 0
+          ? { count: healthAnalysis.criticalCount, color: '#ef4444' }
+          : healthAnalysis.warningCount > 0
+            ? { count: healthAnalysis.warningCount, color: '#f97316' }
+            : null,
+      },
+      { id: 'network-topology', label: 'Topologi Jaringan', icon: <Globe size={15} /> },
+      { id: 'packet-tracer',    label: 'Packet Tracer',    icon: <Zap size={15} /> },
       { id: 'mindmap', label: 'Mind Map', icon: <Share2 size={15} /> },
       { id: 'osi-tcp', label: 'OSI & TCP/IP', icon: <Layers size={15} /> },
       { 
@@ -636,6 +683,13 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     {!sidebarCollapsed && <span>{menu.label}</span>}
                   </div>
                   {!sidebarCollapsed && (() => {
+                    if (menu.badge) {
+                      return (
+                        <span className="sidebar-count-badge" style={{ background: menu.badge.color, color: '#fff' }}>
+                          {menu.badge.count}
+                        </span>
+                      );
+                    }
                     const parentCount = hasSubmenus
                       ? menu.submenus.reduce((s, sub) => s + (dataCounts[sub.id] || 0), 0)
                       : (dataCounts[menu.id] || 0);
@@ -678,6 +732,209 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     );
   };
 
+
+  const renderHealthCheck = () => {
+    const { score, grade, gradeColor, gradeLabel, issues, criticalCount, warningCount, infoCount, plainSummary } = healthAnalysis;
+
+    const severityConfig = {
+      critical: { label: 'KRITIS',   color: '#ef4444', bg: 'rgba(239,68,68,0.08)',   border: 'rgba(239,68,68,0.25)',   icon: <AlertCircle size={18} /> },
+      warning:  { label: 'PERINGATAN', color: '#f97316', bg: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.25)', icon: <AlertTriangle size={18} /> },
+      info:     { label: 'SARAN',    color: '#6366f1', bg: 'rgba(99,102,241,0.08)',  border: 'rgba(99,102,241,0.25)', icon: <Info size={18} /> },
+    };
+
+    return (
+      <div className="animate-fade-in">
+        {/* Header + Score */}
+        <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
+          <div className="section-header" style={{ marginBottom: '1.5rem' }}>
+            <Heart className="summary-card-icon" />
+            <h2 className="section-title">Cek Kesehatan Jaringan</h2>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+            Halaman ini menganalisis konfigurasi router dan memberikan rekomendasi dalam bahasa yang mudah dipahami.
+            Cocok untuk Anda yang baru belajar networking atau ingin memastikan router sudah dikonfigurasi dengan aman.
+          </p>
+
+          {/* Score Circle + Stats */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
+            <div style={{
+              width: 120, height: 120, borderRadius: '50%', flexShrink: 0,
+              border: `6px solid ${gradeColor}`,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: `${gradeColor}15`, position: 'relative',
+            }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 900, color: gradeColor, lineHeight: 1 }}>{grade}</span>
+              <span style={{ fontSize: '0.75rem', color: gradeColor, fontWeight: 600 }}><CountUp target={score} /> / 100</span>
+            </div>
+            <div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: gradeColor, marginBottom: '4px' }}>{gradeLabel}</div>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '8px' }}>
+                {[
+                  { count: criticalCount, label: 'Kritis',    color: '#ef4444' },
+                  { count: warningCount,  label: 'Peringatan', color: '#f97316' },
+                  { count: infoCount,     label: 'Saran',     color: '#6366f1' },
+                ].map((s, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: s.color }}>{s.count}</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{s.label}</span>
+                  </div>
+                ))}
+              </div>
+              {issues.length === 0 && (
+                <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontWeight: 600 }}>
+                  <CheckCircle2 size={18} /> Tidak ada masalah terdeteksi!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Plain Language Summary */}
+        <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
+          <div className="section-header" style={{ marginBottom: '1rem' }}>
+            <BookOpen className="summary-card-icon" />
+            <h2 className="section-title">Dalam Bahasa Sederhana</h2>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.8, background: 'var(--bg-elevated)', padding: '1rem 1.25rem', borderRadius: 'var(--r-md)', borderLeft: '3px solid var(--accent)' }}>
+            {plainSummary}
+          </p>
+
+          {/* What do these numbers mean */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '12px' }}>
+              Apa arti angka-angka ini?
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+              {[
+                { icon: '🛡️', term: 'Firewall Rules', desc: 'Aturan penjaga yang memutuskan traffic mana yang boleh masuk/keluar, seperti satpam yang memeriksa tamu.' },
+                { icon: '📡', term: 'DHCP Server', desc: 'Layanan pembagi alamat IP otomatis ke perangkat, seperti resepsionis yang memberi nomor kamar.' },
+                { icon: '🗺️', term: 'Routes', desc: 'Peta jalan untuk data — memberitahu router harus kirim paket ke mana.' },
+                { icon: '🔒', term: 'VPN Tunnel', desc: 'Terowongan terenkripsi untuk koneksi aman dari jauh, seperti lorong rahasia antara dua gedung.' },
+                { icon: '🔄', term: 'NAT / Masquerade', desc: 'Menerjemahkan IP lokal ke IP publik agar semua perangkat bisa berbagi satu koneksi internet.' },
+                { icon: '📝', term: 'Logging', desc: 'Buku catatan aktivitas router — siapa login, traffic apa, error apa. Penting untuk investigasi insiden.' },
+              ].map((item, i) => (
+                <div key={i} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--r-sm)', padding: '0.75rem', border: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{item.icon}</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>{item.term}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* All Good */}
+        {issues.length === 0 && (
+          <div className="glass-panel config-section" style={{ textAlign: 'center', padding: '3rem' }}>
+            <CheckCircle2 size={48} style={{ color: '#22c55e', margin: '0 auto 1rem' }} />
+            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#22c55e', marginBottom: '8px' }}>Konfigurasi Terlihat Baik!</div>
+            <div style={{ color: 'var(--text-secondary)', maxWidth: 400, margin: '0 auto' }}>
+              Tidak ada masalah keamanan atau konfigurasi yang terdeteksi. Router Anda sudah dikonfigurasi sesuai praktik yang baik.
+            </div>
+          </div>
+        )}
+
+        {/* Issues List */}
+        {issues.length > 0 && (
+          <div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '12px' }}>
+              {issues.length} Masalah Ditemukan — diurutkan dari yang paling penting
+            </div>
+            {['critical', 'warning', 'info'].map(sev => {
+              const sevIssues = issues.filter(i => i.severity === sev);
+              if (sevIssues.length === 0) return null;
+              const cfg = severityConfig[sev];
+              return (
+                <div key={sev} style={{ marginBottom: '1rem' }}>
+                  {sevIssues.map((issue, idx) => (
+                    <div key={idx} style={{
+                      background: cfg.bg, border: `1px solid ${cfg.border}`,
+                      borderRadius: 'var(--r-md)', padding: '1.25rem 1.5rem', marginBottom: '0.75rem',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: '1.5rem', flexShrink: 0 }}>{issue.icon}</div>
+                        <div style={{ flex: 1, minWidth: 200 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                            <span style={{
+                              fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.06em',
+                              padding: '2px 8px', borderRadius: '99px',
+                              background: cfg.color, color: '#fff',
+                            }}>{cfg.label}</span>
+                            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{issue.title}</span>
+                          </div>
+                          <p style={{ fontSize: '0.87rem', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 12px' }}>
+                            {issue.description}
+                          </p>
+                          <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--r-sm)', padding: '10px 14px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                            <Lightbulb size={14} style={{ color: '#eab308', flexShrink: 0, marginTop: 2 }} />
+                            <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                              <strong style={{ color: 'var(--text-primary)' }}>Cara memperbaiki: </strong>
+                              {issue.fix}
+                            </div>
+                          </div>
+                          {issue.commands && issue.commands.length > 0 && (
+                            <div style={{ marginTop: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)' }}>
+                                  Perintah CLI (RouterOS Terminal)
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    const cmds = issue.commands.filter(c => !c.startsWith('#') && c.trim()).join('\n');
+                                    navigator.clipboard?.writeText(cmds).then(() => showToast('Semua perintah disalin!'));
+                                  }}
+                                  style={{ padding: '3px 10px', borderRadius: 'var(--r-sm)', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.35)', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+                                >
+                                  Salin Semua
+                                </button>
+                              </div>
+                              <div style={{ background: '#0d0f14', borderRadius: 'var(--r-sm)', padding: '10px 14px', fontFamily: 'monospace', fontSize: '0.78rem', lineHeight: 1.8, overflowX: 'auto' }}>
+                                {issue.commands.map((cmd, ci) => (
+                                  <div
+                                    key={ci}
+                                    onClick={() => cmd && !cmd.startsWith('#') && copyCell(cmd)}
+                                    title={!cmd.startsWith('#') ? 'Klik untuk salin baris ini' : ''}
+                                    style={{
+                                      color: cmd.startsWith('#') ? '#6b7280' : '#a5b4fc',
+                                      cursor: cmd && !cmd.startsWith('#') ? 'copy' : 'default',
+                                      padding: '1px 0',
+                                      transition: 'color 0.1s',
+                                    }}
+                                    onMouseEnter={e => { if (!cmd.startsWith('#') && cmd) e.currentTarget.style.color = '#e0e7ff'; }}
+                                    onMouseLeave={e => { if (!cmd.startsWith('#') && cmd) e.currentTarget.style.color = '#a5b4fc'; }}
+                                  >
+                                    {cmd || <>&nbsp;</>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {issue.tab && (
+                          <button
+                            onClick={() => setActiveTab(issue.tab)}
+                            style={{
+                              flexShrink: 0, padding: '6px 14px', borderRadius: 'var(--r-sm)',
+                              background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer',
+                              fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap',
+                              display: 'flex', alignItems: 'center', gap: '5px',
+                            }}
+                          >
+                            Buka <ChevronRight size={12} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderOverview = () => {
     // Interactive Config Story Logic - Detailed Step by Step
@@ -892,7 +1149,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               INTERFACES
             </div>
             <div className="summary-card-value">
-              {activeInterfaces} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/ {totalInterfaces} Active</span>
+              <CountUp target={activeInterfaces} />
+              <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}> / <CountUp target={totalInterfaces} /> Active</span>
             </div>
           </div>
           <div className="glass-panel summary-card card-hover delay-100" onClick={() => setActiveTab('vpn')} style={{cursor: 'pointer'}}>
@@ -900,23 +1158,64 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <Lock className="summary-card-icon" size={20} />
               VPN CONNECTIONS
             </div>
-            <div className="summary-card-value">{totalVpns}</div>
+            <div className="summary-card-value"><CountUp target={totalVpns} /></div>
           </div>
           <div className="glass-panel summary-card card-hover delay-200" onClick={() => setActiveTab('routing-tables')} style={{cursor: 'pointer'}}>
             <div className="summary-card-header">
               <Route className="summary-card-icon" size={20} />
               ROUTES
             </div>
-            <div className="summary-card-value">{totalRoutes}</div>
+            <div className="summary-card-value"><CountUp target={totalRoutes} /></div>
           </div>
           <div className="glass-panel summary-card card-hover delay-300" onClick={() => setActiveTab('firewall-filter')} style={{cursor: 'pointer'}}>
             <div className="summary-card-header">
               <Shield className="summary-card-icon" size={20} />
               FIREWALL RULES
             </div>
-            <div className="summary-card-value">{firewallRules}</div>
+            <div className="summary-card-value"><CountUp target={firewallRules} /></div>
           </div>
         </div>
+
+        {/* Health Score Mini Card */}
+        {(() => {
+          const { score, grade, gradeColor, gradeLabel, criticalCount, warningCount, issues } = healthAnalysis;
+          return (
+            <div
+              className="glass-panel card-hover"
+              onClick={() => setActiveTab('health-check')}
+              style={{
+                marginBottom: '1.5rem', cursor: 'pointer', padding: '1.25rem 1.5rem',
+                borderLeft: `4px solid ${gradeColor}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%', flexShrink: 0,
+                  border: `3px solid ${gradeColor}`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  background: `${gradeColor}18`,
+                }}>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: gradeColor, lineHeight: 1 }}>{grade}</span>
+                  <span style={{ fontSize: '0.55rem', color: gradeColor, fontWeight: 600 }}>{score}/100</span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem' }}>Kesehatan Jaringan: {gradeLabel}</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    {issues.length === 0
+                      ? 'Tidak ada masalah terdeteksi — konfigurasi terlihat baik!'
+                      : `${criticalCount > 0 ? `${criticalCount} kritis, ` : ''}${warningCount} peringatan, ${healthAnalysis.infoCount} saran — klik untuk detail`}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: gradeColor, fontSize: '0.83rem', fontWeight: 600 }}>
+                <Heart size={14} />
+                Lihat Laporan Lengkap
+                <ChevronRight size={14} />
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Config Analysis Charts */}
         {(firewallRules > 0 || totalInterfaces > 0) && (() => {
@@ -1442,8 +1741,16 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                         : <span className="badge badge-neutral"><AlertCircle size={12} style={{marginRight: '4px'}}/> Disabled</span>
                       }
                     </td>
-                    <td style={{ fontWeight: 600 }}>{ip.address}</td>
-                    <td>{ip.network || '-'}</td>
+                    <td
+                      style={{ fontWeight: 600, cursor: 'copy' }}
+                      onClick={() => copyCell(ip.address)}
+                      title="Klik untuk salin"
+                    >{ip.address}</td>
+                    <td
+                      style={{ cursor: 'copy', fontFamily: 'monospace', fontSize: '0.83rem' }}
+                      onClick={() => copyCell(ip.network)}
+                      title="Klik untuk salin"
+                    >{ip.network || '-'}</td>
                     <td>{ip.interface || '-'}</td>
                     <td>
                       {hasDHCP && <span className="badge badge-info" style={{marginRight: '4px'}}>DHCP Server</span>}
@@ -3886,6 +4193,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const renderSkin = () => renderPlaceholder('Skin', 'skin');
 
   return (
+    <>
     <div className="dashboard-layout">
       {renderSidebar()}
       
@@ -3900,6 +4208,9 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           </div>
         )}
         <SectionErrorBoundary>
+        {activeTab === 'health-check' && renderHealthCheck()}
+        {activeTab === 'network-topology' && <NetworkTopology config={config} onNavigate={setActiveTab} />}
+        {activeTab === 'packet-tracer' && <PacketTracer config={config} onNavigate={setActiveTab} />}
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'mindmap' && <MindMap config={config} onNavigate={setActiveTab} />}
         {activeTab === 'osi-tcp' && <OsiTcpView config={config} onNavigate={setActiveTab} />}
@@ -4071,5 +4382,23 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         </SectionErrorBoundary>
       </div>
     </div>
+
+    {/* Toast notification */}
+    {toast && (
+      <div style={{
+        position: 'fixed', bottom: 28, right: 28, zIndex: 9999,
+        background: 'var(--bg-elevated)', border: '1px solid var(--accent)',
+        borderRadius: 'var(--r-md)', padding: '10px 18px',
+        color: 'var(--text-primary)', fontSize: '0.84rem', fontWeight: 500,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        display: 'flex', alignItems: 'center', gap: '10px',
+        animation: 'fadeIn 0.18s ease',
+        maxWidth: 320,
+      }}>
+        <CheckCircle2 size={15} style={{ color: 'var(--accent-light)', flexShrink: 0 }} />
+        {toast}
+      </div>
+    )}
+    </>
   );
 };
