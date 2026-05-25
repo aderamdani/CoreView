@@ -12,6 +12,12 @@ import { MindMap } from './MindMap';
 import { OsiTcpView } from './OsiTcpView';
 import { NetworkTopology } from './NetworkTopology';
 import { PacketTracer } from './PacketTracer';
+import { FirewallSwimlane } from './FirewallSwimlane';
+import { DHCPRangeVisualizer } from './DHCPRangeVisualizer';
+import { GlossaryTip } from './GlossaryTip';
+import { FirewallConflicts } from './FirewallConflicts';
+import { detectConflicts, detectDuplicates } from '../utils/detectConflicts';
+import { ConfigComparison } from './ConfigComparison';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
@@ -302,6 +308,19 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const [expandedMenus, setExpandedMenus] = useState({ firewall: true });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedItemDetail, setSelectedItemDetail] = useState(null);
+  const [firewallViewMode, setFirewallViewMode] = useState('table');
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('coreview-favorites') || '[]'); } catch { return []; }
+  });
+  const toggleFavorite = useCallback((id, e) => {
+    e?.stopPropagation();
+    setFavorites(prev => {
+      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
+      localStorage.setItem('coreview-favorites', JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   // A helper function to filter arrays based on searchTerm
   const applyFilter = (arr) => {
@@ -325,12 +344,37 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     setExpandedMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
   };
 
-  // Close modal on Escape
+  // Keyboard shortcuts
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') setSelectedItemDetail(null); };
+    const handler = (e) => {
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      const inInput = tag === 'input' || tag === 'textarea' || tag === 'select';
+      if (e.key === 'Escape') {
+        setSelectedItemDetail(null);
+        setShowShortcuts(false);
+        return;
+      }
+      if (e.key === '?' && !inInput) { setShowShortcuts(v => !v); return; }
+      if (inInput) return;
+      const shortcuts = {
+        'o': 'overview', 'h': 'health-check', 't': 'network-topology',
+        'p': 'packet-tracer', 'f': 'firewall-filter', 'n': 'firewall-nat',
+        'r': 'ip-routes', 'd': 'ip-dhcp-server', 'c': 'config-compare',
+        'x': 'firewall-conflicts',
+      };
+      if (shortcuts[e.key.toLowerCase()]) {
+        e.preventDefault();
+        setActiveTab(shortcuts[e.key.toLowerCase()]);
+      }
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
+
+  const conflictAnalysis = useMemo(() => ({
+    conflicts:  detectConflicts(firewall.filter  || []),
+    duplicates: detectDuplicates(firewall.filter || []),
+  }), [firewall.filter]);
 
   // Counts for sidebar badges
   const dataCounts = {
@@ -361,6 +405,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     'routing-tables':        config.routingTables?.length || 0,
     'routing-bgp':           config.bgp?.connections?.length || 0,
     'firewall-filter':       firewall.filter?.length || 0,
+    'firewall-conflicts':    conflictAnalysis.conflicts.length + conflictAnalysis.duplicates.length,
     'firewall-nat':          firewall.nat?.length || 0,
     'firewall-mangle':       firewall.mangle?.length || 0,
     'firewall-raw':          firewall.raw?.length || 0,
@@ -371,7 +416,37 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     'system-logging':        config.system?.logging?.length || 0,
   };
 
-  const healthAnalysis = useMemo(() => analyzeConfig(config), [config]);
+  const healthAnalysis   = useMemo(() => analyzeConfig(config), [config]);
+
+  // ── Column filters ─────────────────────────────────────────────────────────
+  const [tableColFilters, setTableColFilters] = useState({
+    'firewall-filter': { action: '', chain: '', protocol: '' },
+    'firewall-nat':    { action: '', chain: '', protocol: '' },
+    'ip-routes':       { status: '' },
+  });
+  const setColFilter = useCallback((table, col, val) => {
+    setTableColFilters(prev => ({ ...prev, [table]: { ...prev[table], [col]: val } }));
+  }, []);
+  const resetColFilters = useCallback((table) => {
+    setTableColFilters(prev => {
+      const blank = Object.fromEntries(Object.keys(prev[table]).map(k => [k, '']));
+      return { ...prev, [table]: blank };
+    });
+  }, []);
+  const applyColFilter = useCallback((table, arr) => {
+    const cols = tableColFilters[table] || {};
+    return arr.filter(item => {
+      if (cols.action   && (item.action   || 'accept') !== cols.action)   return false;
+      if (cols.chain    && item.chain !== cols.chain)                       return false;
+      if (cols.protocol && (item.protocol || '') !== cols.protocol)        return false;
+      if (cols.status) {
+        const active = item.disabled !== 'yes';
+        if (cols.status === 'active'   && !active)  return false;
+        if (cols.status === 'disabled' &&  active)  return false;
+      }
+      return true;
+    });
+  }, [tableColFilters]);
 
   // ── Toast notification ─────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
@@ -383,6 +458,123 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     if (!value || value === '-') return;
     navigator.clipboard?.writeText(String(value)).then(() => showToast(`Disalin: ${value}`));
   }, [showToast]);
+
+  const exportHTMLReport = useCallback(() => {
+    const { score, grade, gradeColor, gradeLabel, issues, criticalCount, warningCount, infoCount, plainSummary } = healthAnalysis;
+    const identity = config?.system?.identity?.name || config?.metadata?.identity || 'Router';
+    const now = new Date().toLocaleString('id-ID');
+
+    const severityBg = { critical: '#fef2f2', warning: '#fff7ed', info: '#eef2ff' };
+    const severityBorder = { critical: '#ef4444', warning: '#f97316', info: '#6366f1' };
+
+    const issueRows = issues.map(iss => `
+      <div style="margin-bottom:12px;padding:12px 16px;background:${severityBg[iss.severity]};border-left:4px solid ${severityBorder[iss.severity]};border-radius:6px;">
+        <div style="font-weight:700;font-size:14px;color:${severityBorder[iss.severity]}">${iss.icon} ${iss.title}</div>
+        <div style="color:#374151;margin-top:4px;font-size:13px">${iss.description}</div>
+        <div style="color:#6b7280;margin-top:4px;font-size:12px"><strong>Solusi:</strong> ${iss.fix}</div>
+        ${iss.commands?.length ? `<pre style="background:#1f2937;color:#d1fae5;padding:8px 12px;border-radius:4px;font-size:11px;margin-top:6px;overflow-x:auto">${iss.commands.join('\n')}</pre>` : ''}
+      </div>`).join('');
+
+    const filterRows = (firewall.filter || []).map((r, i) => `
+      <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#fff'}">
+        <td style="${tdStyle}">${i + 1}</td>
+        <td style="${tdStyle}"><span style="padding:2px 8px;border-radius:4px;background:${r.action === 'accept' ? '#dcfce7' : r.action === 'drop' ? '#fee2e2' : '#e0e7ff'};color:${r.action === 'accept' ? '#166534' : r.action === 'drop' ? '#991b1b' : '#3730a3'};font-size:12px;font-weight:600">${r.action || 'accept'}</span></td>
+        <td style="${tdStyle}">${r.chain || '-'}</td>
+        <td style="${tdStyle}">${r.protocol || 'any'}</td>
+        <td style="${tdStyle}">${r['src-address'] || 'any'}</td>
+        <td style="${tdStyle}">${r['dst-address'] || 'any'}</td>
+        <td style="${tdStyle}">${r.comment || '-'}</td>
+      </tr>`).join('');
+
+    const natRows = (firewall.nat || []).map((r, i) => `
+      <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#fff'}">
+        <td style="${tdStyle}">${r.action || '-'}</td>
+        <td style="${tdStyle}">${r.chain || '-'}</td>
+        <td style="${tdStyle}">${r.protocol || 'any'}</td>
+        <td style="${tdStyle}">${r['to-addresses'] || '-'}</td>
+        <td style="${tdStyle}">${r.comment || '-'}</td>
+      </tr>`).join('');
+
+    const tdStyle = 'padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;';
+    const thStyle = 'padding:8px 12px;background:#f3f4f6;font-size:12px;font-weight:700;text-align:left;border-bottom:2px solid #d1d5db;';
+
+    const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Konfigurasi — ${identity}</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; max-width: 900px; margin: 0 auto; padding: 32px 24px; background: #f9fafb; }
+  h1 { font-size: 28px; font-weight: 900; color: #1f2937; margin: 0 0 4px; }
+  h2 { font-size: 18px; font-weight: 700; color: #374151; margin: 24px 0 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 24px; }
+  .score-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .score-card { padding: 16px 24px; border-radius: 10px; background: #fff; border: 2px solid ${gradeColor}; text-align: center; min-width: 100px; }
+  .grade { font-size: 36px; font-weight: 900; color: ${gradeColor}; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat { padding: 10px 16px; background: #fff; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center; min-width: 80px; }
+  .stat-val { font-size: 22px; font-weight: 700; }
+  .stat-lbl { font-size: 11px; color: #9ca3af; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 16px; }
+  .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<h1>📋 Laporan Konfigurasi Router</h1>
+<div class="meta">Router: <strong>${identity}</strong> &nbsp;·&nbsp; Dibuat: ${now} &nbsp;·&nbsp; CoreView</div>
+
+<h2>🏥 Kesehatan Jaringan</h2>
+<div class="score-row">
+  <div class="score-card">
+    <div class="grade">${grade}</div>
+    <div style="font-size:13px;color:${gradeColor};font-weight:600">${score}/100</div>
+    <div style="font-size:12px;color:#6b7280;margin-top:4px">${gradeLabel}</div>
+  </div>
+  <div style="flex:1;min-width:200px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e5e7eb;">
+    <div style="font-size:13px;color:#374151;line-height:1.7">${plainSummary}</div>
+  </div>
+</div>
+<div class="stat-row">
+  <div class="stat"><div class="stat-val" style="color:#ef4444">${criticalCount}</div><div class="stat-lbl">Kritis</div></div>
+  <div class="stat"><div class="stat-val" style="color:#f97316">${warningCount}</div><div class="stat-lbl">Peringatan</div></div>
+  <div class="stat"><div class="stat-val" style="color:#6366f1">${infoCount}</div><div class="stat-lbl">Saran</div></div>
+  <div class="stat"><div class="stat-val">${(firewall.filter || []).length}</div><div class="stat-lbl">Filter Rules</div></div>
+  <div class="stat"><div class="stat-val">${(firewall.nat || []).length}</div><div class="stat-lbl">NAT Rules</div></div>
+  <div class="stat"><div class="stat-val">${routes.length}</div><div class="stat-lbl">Routes</div></div>
+  <div class="stat"><div class="stat-val">${dhcp.servers.length}</div><div class="stat-lbl">DHCP Servers</div></div>
+</div>
+
+${issues.length > 0 ? `<h2>⚠️ Temuan (${issues.length})</h2>${issueRows}` : '<div style="color:#22c55e;font-weight:600;margin-bottom:20px">✅ Tidak ada masalah terdeteksi!</div>'}
+
+<h2>🛡️ Firewall Filter Rules (${(firewall.filter || []).length})</h2>
+${(firewall.filter || []).length > 0 ? `
+<table>
+  <thead><tr><th style="${thStyle}">#</th><th style="${thStyle}">Action</th><th style="${thStyle}">Chain</th><th style="${thStyle}">Protocol</th><th style="${thStyle}">Src</th><th style="${thStyle}">Dst</th><th style="${thStyle}">Comment</th></tr></thead>
+  <tbody>${filterRows}</tbody>
+</table>` : '<p style="color:#9ca3af">Tidak ada filter rules.</p>'}
+
+<h2>🔄 NAT Rules (${(firewall.nat || []).length})</h2>
+${(firewall.nat || []).length > 0 ? `
+<table>
+  <thead><tr><th style="${thStyle}">Action</th><th style="${thStyle}">Chain</th><th style="${thStyle}">Protocol</th><th style="${thStyle}">To</th><th style="${thStyle}">Comment</th></tr></thead>
+  <tbody>${natRows}</tbody>
+</table>` : '<p style="color:#9ca3af">Tidak ada NAT rules.</p>'}
+
+<div class="footer">Dibuat oleh CoreView — MikroTik Config Visualizer &nbsp;·&nbsp; ${now}</div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `laporan-${(identity || 'router').replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0,10)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Laporan HTML berhasil diekspor!');
+  }, [healthAnalysis, config, firewall, routes, dhcp, showToast]);
 
   const exportCSV = useCallback((headers, rows, filename) => {
     const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -409,6 +601,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
       },
       { id: 'network-topology', label: 'Topologi Jaringan', icon: <Globe size={15} /> },
       { id: 'packet-tracer',    label: 'Packet Tracer',    icon: <Zap size={15} /> },
+      { id: 'config-compare',   label: 'Config Comparison', icon: <BarChart2 size={15} /> },
       { id: 'mindmap', label: 'Mind Map', icon: <Share2 size={15} /> },
       { id: 'osi-tcp', label: 'OSI & TCP/IP', icon: <Layers size={15} /> },
       { 
@@ -508,6 +701,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         icon: <Shield size={15} />,
         submenus: [
           { id: 'firewall-filter', label: 'Filter Rules' },
+          { id: 'firewall-conflicts', label: 'Conflict Detector' },
           { id: 'firewall-nat', label: 'NAT' },
           { id: 'firewall-mangle', label: 'Mangle' },
           { id: 'firewall-raw', label: 'Raw' },
@@ -654,11 +848,45 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         </div>
 
         <ul className="sidebar-menu">
+          {/* Favorites section */}
+          {!sidebarCollapsed && favorites.length > 0 && (() => {
+            const allItems = menus.flatMap(m => [
+              { id: m.id, label: m.label, isTop: !m.submenus },
+              ...(m.submenus || []).map(s => ({ id: s.id, label: s.label, isTop: false })),
+            ]);
+            const favItems = favorites.map(fid => allItems.find(i => i.id === fid)).filter(Boolean);
+            return (
+              <li key="__favorites__">
+                <div style={{ padding: '6px 12px 2px', fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  ⭐ Favorit
+                </div>
+                <div className="sidebar-submenus" style={{ paddingTop: 0 }}>
+                  {favItems.map(item => (
+                    <div
+                      key={item.id}
+                      className={`sidebar-subitem ${activeTab === item.id ? 'active' : ''}`}
+                      onClick={() => setActiveTab(item.id)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                    >
+                      <span>⭐ {item.label}</span>
+                      <button onClick={(e) => toggleFavorite(item.id, e)} title="Hapus dari favorit"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', padding: '0 2px', lineHeight: 1, fontSize: '0.78rem' }}>
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ height: '1px', background: 'var(--border)', margin: '4px 12px 6px' }} />
+              </li>
+            );
+          })()}
+
           {menus.map(menu => {
             const hasSubmenus = !!menu.submenus;
             const isMenuExpanded = expandedMenus[menu.id];
             const isParentActive = hasSubmenus && menu.submenus.some(s => s.id === activeTab);
             const isActive = activeTab === menu.id;
+            const isFav = favorites.includes(menu.id);
 
             return (
               <li key={menu.id}>
@@ -698,6 +926,12 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                     }
                     return null;
                   })()}
+                  {!sidebarCollapsed && !hasSubmenus && (
+                    <button onClick={(e) => toggleFavorite(menu.id, e)} title={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: isFav ? '#f59e0b' : 'var(--text-muted)', padding: '0 2px', lineHeight: 1, fontSize: '0.85rem', opacity: isFav ? 1 : 0.4, transition: 'opacity 0.2s' }}>
+                      {isFav ? '⭐' : '☆'}
+                    </button>
+                  )}
                   {hasSubmenus && !sidebarCollapsed && (
                     <ChevronRight
                       size={13}
@@ -708,20 +942,29 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
                 {hasSubmenus && isMenuExpanded && !sidebarCollapsed && (
                   <div className="sidebar-submenus">
-                    {menu.submenus.map(sub => (
-                      <div
-                        key={sub.id}
-                        className={`sidebar-subitem ${activeTab === sub.id ? 'active' : ''}`}
-                        onClick={() => setActiveTab(sub.id)}
-                        title={sub.label}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                      >
-                        <span>{sub.label}</span>
-                        {dataCounts[sub.id] > 0 && (
-                          <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>{dataCounts[sub.id]}</span>
-                        )}
-                      </div>
-                    ))}
+                    {menu.submenus.map(sub => {
+                      const isSubFav = favorites.includes(sub.id);
+                      return (
+                        <div
+                          key={sub.id}
+                          className={`sidebar-subitem ${activeTab === sub.id ? 'active' : ''}`}
+                          onClick={() => setActiveTab(sub.id)}
+                          title={sub.label}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                        >
+                          <span>{sub.label}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            {dataCounts[sub.id] > 0 && (
+                              <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>{dataCounts[sub.id]}</span>
+                            )}
+                            <button onClick={(e) => toggleFavorite(sub.id, e)} title={isSubFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: isSubFav ? '#f59e0b' : 'var(--text-muted)', padding: '0 2px', lineHeight: 1, fontSize: '0.78rem', opacity: isSubFav ? 1 : 0.35, transition: 'opacity 0.2s' }}>
+                              {isSubFav ? '⭐' : '☆'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </li>
@@ -1113,9 +1356,14 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     return (
       <div className="animate-fade-in delay-100">
         <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
-          <div className="section-header">
-            <Server className="summary-card-icon" />
-            <h2 className="section-title">Device Information</h2>
+          <div className="section-header" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Server className="summary-card-icon" />
+              <h2 className="section-title">Device Information</h2>
+            </div>
+            <button className="btn-export" onClick={exportHTMLReport} title="Ekspor laporan lengkap sebagai HTML">
+              📄 Export Laporan HTML
+            </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
             <div>
@@ -1782,10 +2030,10 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           <thead>
             <tr>
               <th>Name / Status</th>
-              <th>Interface</th>
-              <th>Address Pool</th>
-              <th>Network segment</th>
-              <th>Gateway</th>
+              <th><GlossaryTip term="Interface">Interface</GlossaryTip></th>
+              <th><GlossaryTip term="DHCP">Address Pool</GlossaryTip></th>
+              <th><GlossaryTip term="Subnet">Network segment</GlossaryTip></th>
+              <th><GlossaryTip term="Gateway">Gateway</GlossaryTip></th>
               <th>Penjelasan</th>
             </tr>
           </thead>
@@ -1794,24 +2042,33 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
               <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Servers configured.</td></tr>
             ) : (
               dhcp.servers.map((server, idx) => (
-                <tr key={idx} style={{ opacity: server.active ? 1 : 0.6 }}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{server.name}</div>
-                    <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>
-                      {server.active 
-                        ? <span className="badge badge-success">Running</span>
-                        : <span className="badge badge-neutral">Stopped</span>}
-                    </div>
-                  </td>
-                  <td>{server.interface || '-'}</td>
-                  <td>
-                    {server['address-pool'] || '-'}
-                    {server.poolObj && <div style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px'}}>{server.poolObj.ranges}</div>}
-                  </td>
-                  <td>{server.networkObj?.address || '-'}</td>
-                  <td>{server.networkObj?.gateway || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('dhcp-server', server)}</td>
-                </tr>
+                <React.Fragment key={idx}>
+                  <tr style={{ opacity: server.active ? 1 : 0.6 }}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{server.name}</div>
+                      <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>
+                        {server.active
+                          ? <span className="badge badge-success">Running</span>
+                          : <span className="badge badge-neutral">Stopped</span>}
+                      </div>
+                    </td>
+                    <td>{server.interface || '-'}</td>
+                    <td>
+                      {server['address-pool'] || '-'}
+                      {server.poolObj && <div style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px'}}>{server.poolObj.ranges}</div>}
+                    </td>
+                    <td>{server.networkObj?.address || '-'}</td>
+                    <td>{server.networkObj?.gateway || '-'}</td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('dhcp-server', server)}</td>
+                  </tr>
+                  {server.poolObj?.ranges && (
+                    <tr style={{ background: 'var(--bg-base)' }}>
+                      <td colSpan="6" style={{ padding: '0 12px 12px' }}>
+                        <DHCPRangeVisualizer server={server} />
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))
             )}
           </tbody>
@@ -1920,6 +2177,37 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     </div>
   );
 
+  const renderColFilterBar = (tableKey, fieldDefs) => {
+    const filters = tableColFilters[tableKey] || {};
+    const hasAny = Object.values(filters).some(v => v !== '');
+    const selectStyle = {
+      padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border)',
+      background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+      fontSize: '0.82rem', cursor: 'pointer',
+    };
+    return (
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1rem', padding: '10px 14px', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, marginRight: '4px' }}>FILTER:</span>
+        {fieldDefs.map(({ key, label, options }) => (
+          <select key={key} value={filters[key] || ''} onChange={e => setColFilter(tableKey, key, e.target.value)} style={selectStyle}>
+            <option value="">{label}: Semua</option>
+            {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        ))}
+        {hasAny && (
+          <button onClick={() => resetColFilters(tableKey)} style={{ ...selectStyle, background: 'var(--accent)', color: '#fff', border: 'none', cursor: 'pointer' }}>
+            × Reset
+          </button>
+        )}
+        {hasAny && (
+          <span style={{ fontSize: '0.78rem', color: 'var(--accent)', marginLeft: 'auto' }}>
+            Filter aktif
+          </span>
+        )}
+      </div>
+    );
+  };
+
   const renderIPRoutes = () => (
     <div className="glass-panel config-section animate-fade-in">
       <div className="section-header" style={{ justifyContent: 'space-between' }}>
@@ -1936,26 +2224,30 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         </button>
       </div>
       <HelpPanel id="ip-routes" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
         Routing table determining path selection for IP traffic.
       </p>
+      {renderColFilterBar('ip-routes', [
+        { key: 'status', label: 'Status', options: ['active', 'disabled'] },
+      ])}
 
       <div className="data-table-container">
         <table className="data-table">
           <thead>
             <tr>
-              <th>Destination</th>
-              <th>Gateway</th>
+              <th><GlossaryTip term="Subnet">Destination</GlossaryTip></th>
+              <th><GlossaryTip term="Gateway">Gateway</GlossaryTip></th>
               <th>Distance</th>
               <th>Notes / Comment</th>
               <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
-            {routes.length === 0 ? (
-               <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routes configured.</td></tr>
-            ) : (
-              routes.map((rt, idx) => (
+            {(() => {
+              const filtered = applyColFilter('ip-routes', applyFilter(routes));
+              return filtered.length === 0 ? (
+                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routes match filter.</td></tr>
+              ) : filtered.map((rt, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600, color: rt['dst-address'] === '0.0.0.0/0' ? 'var(--status-info)' : 'inherit' }}>
                     {rt['dst-address'] || '0.0.0.0/0'}
@@ -1968,8 +2260,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   </td>
                   <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('route', rt)}</td>
                 </tr>
-              ))
-            )}
+              ));
+            })()}
           </tbody>
         </table>
       </div>
@@ -2263,54 +2555,90 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
           <h2 className="section-title">Firewall Filter Rules</h2>
           <span className="badge badge-neutral">{firewall.filter?.length || 0}</span>
         </div>
-        <button className="btn-export" onClick={() => exportCSV(
-          ['Action','Chain','Protocol','Src Address','Dst Address','Comment'],
-          (firewall.filter || []).map(r => [r.action || 'accept', r.chain, r.protocol || 'any', r['src-address'] || 'any', r['dst-address'] || 'any', r.comment || ''])
-          , 'firewall-filter.csv')}>
-          ↓ CSV
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: '8px', padding: '3px', gap: '3px' }}>
+            <button
+              onClick={() => setFirewallViewMode('table')}
+              style={{
+                padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+                background: firewallViewMode === 'table' ? 'var(--accent)' : 'transparent',
+                color: firewallViewMode === 'table' ? '#fff' : 'var(--text-secondary)',
+                transition: 'all 0.2s',
+              }}>
+              ☰ Tabel
+            </button>
+            <button
+              onClick={() => setFirewallViewMode('swimlane')}
+              style={{
+                padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+                background: firewallViewMode === 'swimlane' ? 'var(--accent)' : 'transparent',
+                color: firewallViewMode === 'swimlane' ? '#fff' : 'var(--text-secondary)',
+                transition: 'all 0.2s',
+              }}>
+              🏊 Swimlane
+            </button>
+          </div>
+          <button className="btn-export" onClick={() => exportCSV(
+            ['Action','Chain','Protocol','Src Address','Dst Address','Comment'],
+            (firewall.filter || []).map(r => [r.action || 'accept', r.chain, r.protocol || 'any', r['src-address'] || 'any', r['dst-address'] || 'any', r.comment || ''])
+            , 'firewall-filter.csv')}>
+            ↓ CSV
+          </button>
+        </div>
       </div>
       <HelpPanel id="firewall-filter" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Filter rules determine whether traffic is allowed or dropped based on various conditions.
-      </p>
-      
-      <div className="data-table-container">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Action</th>
-              <th>Chain</th>
-              <th>Protocol / Port</th>
-              <th>Src Address</th>
-              <th>Dst Address</th>
-              <th>Comment</th>
-              <th>Penjelasan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {applyFilter(firewall.filter).length === 0 ? (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules match search.</td></tr>
-            ) : (
-              applyFilter(firewall.filter).map((rule, idx) => (
-                <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
-                  <td>
-                    <span className={`badge ${rule.action === 'accept' ? 'badge-success' : rule.action === 'drop' ? 'badge-error' : 'badge-neutral'}`}>
-                      {rule.action || 'accept'}
-                    </span>
-                  </td>
-                  <td>{rule.chain}</td>
-                  <td>{rule.protocol && rule['dst-port'] ? `${rule.protocol}:${rule['dst-port']}` : 'Any'}</td>
-                  <td>{rule['src-address'] || 'Any'}</td>
-                  <td>{rule['dst-address'] || 'Any'}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-filter', rule)}</td>
+
+      {firewallViewMode === 'swimlane' ? (
+        <FirewallSwimlane rules={applyFilter(firewall.filter)} onNavigate={setActiveTab} />
+      ) : (
+        <>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+            Filter rules determine whether traffic is allowed or dropped based on various conditions.
+          </p>
+          {renderColFilterBar('firewall-filter', [
+            { key: 'action',   label: 'Action',   options: ['accept', 'drop', 'reject', 'log', 'passthrough', 'add-src-to-address-list', 'add-dst-to-address-list'] },
+            { key: 'chain',    label: 'Chain',    options: ['input', 'forward', 'output'] },
+            { key: 'protocol', label: 'Protokol', options: ['tcp', 'udp', 'icmp', 'gre', 'ipsec-esp', 'ipsec-ah'] },
+          ])}
+          <div className="data-table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th><GlossaryTip term="Accept">Action</GlossaryTip></th>
+                  <th><GlossaryTip term="Chain">Chain</GlossaryTip></th>
+                  <th>Protocol / Port</th>
+                  <th><GlossaryTip term="CIDR">Src Address</GlossaryTip></th>
+                  <th><GlossaryTip term="CIDR">Dst Address</GlossaryTip></th>
+                  <th>Comment</th>
+                  <th>Penjelasan</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {(() => {
+                  const filtered = applyColFilter('firewall-filter', applyFilter(firewall.filter));
+                  return filtered.length === 0 ? (
+                    <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules match.</td></tr>
+                  ) : filtered.map((rule, idx) => (
+                    <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
+                      <td>
+                        <span className={`badge ${rule.action === 'accept' ? 'badge-success' : rule.action === 'drop' ? 'badge-error' : 'badge-neutral'}`}>
+                          {rule.action || 'accept'}
+                        </span>
+                      </td>
+                      <td>{rule.chain}</td>
+                      <td>{rule.protocol && rule['dst-port'] ? `${rule.protocol}:${rule['dst-port']}` : 'Any'}</td>
+                      <td>{rule['src-address'] || 'Any'}</td>
+                      <td>{rule['dst-address'] || 'Any'}</td>
+                      <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
+                      <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-filter', rule)}</td>
+                    </tr>
+                  ));
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -2321,27 +2649,32 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         <h2 className="section-title">Firewall NAT Rules</h2>
       </div>
       <HelpPanel id="firewall-nat" onNavigate={setActiveTab} />
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
         Network Address Translation modifies IP addresses of passing packets.
       </p>
-      
+      {renderColFilterBar('firewall-nat', [
+        { key: 'action',   label: 'Action',   options: ['masquerade', 'dst-nat', 'src-nat', 'netmap', 'redirect', 'accept'] },
+        { key: 'chain',    label: 'Chain',    options: ['srcnat', 'dstnat'] },
+        { key: 'protocol', label: 'Protokol', options: ['tcp', 'udp', 'icmp'] },
+      ])}
       <div className="data-table-container">
         <table className="data-table">
           <thead>
             <tr>
-              <th>Action</th>
-              <th>Chain</th>
+              <th><GlossaryTip term="Masquerade">Action</GlossaryTip></th>
+              <th><GlossaryTip term="Chain">Chain</GlossaryTip></th>
               <th>Protocol / Port</th>
-              <th>To Addresses</th>
+              <th><GlossaryTip term="NAT">To Addresses</GlossaryTip></th>
               <th>Comment</th>
               <th>Penjelasan</th>
             </tr>
           </thead>
           <tbody>
-            {applyFilter(firewall.nat).length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules match search.</td></tr>
-            ) : (
-              applyFilter(firewall.nat).map((rule, idx) => (
+            {(() => {
+              const filtered = applyColFilter('firewall-nat', applyFilter(firewall.nat));
+              return filtered.length === 0 ? (
+                <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules match.</td></tr>
+              ) : filtered.map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td>
                     <span className={`badge ${rule.action === 'masquerade' ? 'badge-info' : 'badge-warning'}`}>
@@ -2354,8 +2687,8 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
                   <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
                   <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{generateItemExplanation('firewall-nat', rule)}</td>
                 </tr>
-              ))
-            )}
+              ));
+            })()}
           </tbody>
         </table>
       </div>
@@ -4207,10 +4540,35 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
             </button>
           </div>
         )}
+        {/* Keyboard shortcut hint button */}
+        <button onClick={() => setShowShortcuts(true)} title="Keyboard shortcuts (?)"
+          style={{
+            position: 'fixed', bottom: 28, left: sidebarCollapsed ? '76px' : '268px',
+            zIndex: 100, background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+            borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.75rem',
+            color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)', transition: 'left 0.2s',
+          }}>
+          <kbd style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--accent)' }}>?</kbd>
+          Shortcuts
+        </button>
+
         <SectionErrorBoundary>
         {activeTab === 'health-check' && renderHealthCheck()}
         {activeTab === 'network-topology' && <NetworkTopology config={config} onNavigate={setActiveTab} />}
         {activeTab === 'packet-tracer' && <PacketTracer config={config} onNavigate={setActiveTab} />}
+        {activeTab === 'config-compare' && (
+          <div className="glass-panel config-section animate-fade-in">
+            <div className="section-header" style={{ marginBottom: '1.5rem' }}>
+              <BarChart2 className="summary-card-icon" />
+              <h2 className="section-title">Config Comparison</h2>
+            </div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+              Bandingkan dua file konfigurasi MikroTik (.rsc) dan lihat apa yang berubah — berguna untuk review sebelum upgrade atau audit perubahan konfigurasi.
+            </p>
+            <ConfigComparison />
+          </div>
+        )}
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'mindmap' && <MindMap config={config} onNavigate={setActiveTab} />}
         {activeTab === 'osi-tcp' && <OsiTcpView config={config} onNavigate={setActiveTab} />}
@@ -4365,6 +4723,23 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
         {/* Firewall Menus */}
         {activeTab === 'firewall-filter' && renderFirewallFilter()}
+        {activeTab === 'firewall-conflicts' && (
+          <div className="glass-panel config-section animate-fade-in">
+            <div className="section-header" style={{ justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Shield className="summary-card-icon" />
+                <h2 className="section-title">Firewall Conflict Detector</h2>
+                {(conflictAnalysis.conflicts.length + conflictAnalysis.duplicates.length) > 0 && (
+                  <span className="badge badge-error">{conflictAnalysis.conflicts.length + conflictAnalysis.duplicates.length} masalah</span>
+                )}
+              </div>
+            </div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.7 }}>
+              Alat ini mendeteksi firewall rules yang <strong>tidak akan pernah dieksekusi</strong> karena tertutup oleh rule sebelumnya, dan rules <strong>duplikat</strong> yang perlu dibersihkan.
+            </p>
+            <FirewallConflicts rules={firewall.filter || []} onNavigate={setActiveTab} />
+          </div>
+        )}
         {activeTab === 'firewall-nat' && renderFirewallNAT()}
         {activeTab === 'firewall-mangle' && renderFirewallMangle()}
         {activeTab === 'firewall-raw' && renderFirewallRaw()}
@@ -4382,6 +4757,53 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
         </SectionErrorBoundary>
       </div>
     </div>
+
+    {/* Keyboard shortcuts panel */}
+    {showShortcuts && (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        onClick={() => setShowShortcuts(false)}>
+        <div style={{
+          background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+          borderRadius: '16px', padding: '28px 32px', minWidth: '360px', maxWidth: '480px',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+        }} onClick={e => e.stopPropagation()}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>⌨️ Keyboard Shortcuts</h3>
+            <button onClick={() => setShowShortcuts(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.2rem' }}>×</button>
+          </div>
+          <div style={{ display: 'grid', gap: '6px' }}>
+            {[
+              ['O', 'Overview'],
+              ['H', 'Cek Kesehatan (Health Check)'],
+              ['T', 'Topologi Jaringan'],
+              ['P', 'Packet Tracer'],
+              ['F', 'Firewall Filter Rules'],
+              ['X', 'Firewall Conflict Detector'],
+              ['N', 'Firewall NAT'],
+              ['R', 'IP Routes'],
+              ['D', 'DHCP Server'],
+              ['C', 'Config Comparison'],
+              ['?', 'Tampilkan/Sembunyikan panel ini'],
+              ['Esc', 'Tutup modal / panel'],
+            ].map(([key, label]) => (
+              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '6px 10px', borderRadius: '6px', background: 'var(--bg-base)' }}>
+                <kbd style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  minWidth: '36px', padding: '2px 8px', borderRadius: '4px',
+                  background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+                  color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'monospace',
+                  boxShadow: '0 2px 0 var(--border)',
+                }}>{key}</kbd>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '16px', fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+            Shortcuts tidak aktif ketika cursor ada di dalam input field
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* Toast notification */}
     {toast && (
