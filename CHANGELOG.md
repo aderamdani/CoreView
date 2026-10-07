@@ -29,6 +29,9 @@ catatan di bawah merangkum kondisi awal sekaligus perbaikan yang menyertainya.
 - Tes otomatis di `tests/parser.test.js`, dijalankan dengan `node --test`.
 - Alur CI di `.github/workflows/ci.yml`: lint, tes, dan build.
 - Panduan migrasi domain di `DEPLOYMENT-DOMAIN.md`.
+- Chip versi di header dan panel catatan rilis. Isinya dibaca dari
+  `CHANGELOG.md` saat build, bukan disalin ke berkas terpisah, sehingga panel
+  dan berkas changelog tidak bisa saling menyimpang.
 
 ### Diperbaiki
 
@@ -108,3 +111,6 @@ catatan di bawah merangkum kondisi awal sekaligus perbaikan yang menyertainya.
 - Perbaikan parser memangkas waktu parse konfigurasi berukuran 16.000 entri dari
   sekitar 3,0 detik menjadi sekitar 88 milidetik, dan mengubah pertumbuhannya
   dari kuadratis menjadi linear.
+- Seluruh teks pada panel rilis diukur terhadap ambang kontras WCAG AA, dengan
+  rasio terendah 6,01:1 pada kedua tema. Elemen yang gagal ambang itu diperbaiki
+  sebelum rilis.
