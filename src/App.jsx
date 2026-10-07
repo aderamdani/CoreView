@@ -64,11 +64,15 @@ function App() {
               type="text"
               placeholder="Cari konfigurasi... (⌘K)"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="header-search-input"
             />
             {searchTerm && (
-              <button className="header-search-clear" onClick={() => setSearchTerm('')} title="Hapus pencarian">
+              <button
+                className="header-search-clear"
+                onClick={() => setSearchTerm('')}
+                title="Hapus pencarian"
+              >
                 <X size={12} />
               </button>
             )}
@@ -84,10 +88,10 @@ function App() {
               color: 'var(--text-secondary)',
               display: 'flex',
               alignItems: 'center',
-              transition: 'color 0.2s'
+              transition: 'color 0.2s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
             title="View on GitHub"
           >
             <Github size={20} />
@@ -95,12 +99,16 @@ function App() {
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-secondary)', display: 'flex', alignItems: 'center',
-              transition: 'color 0.2s'
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'color 0.2s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
             title="Toggle Theme"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}

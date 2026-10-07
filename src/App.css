@@ -54,7 +54,9 @@
   font-size: 0.83rem;
   font-family: var(--font);
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .header-search-input:focus {
@@ -78,7 +80,9 @@
   justify-content: center;
   padding: 2px;
   border-radius: 50%;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .header-search-clear:hover {
@@ -111,13 +115,30 @@
 .uploader-container:hover,
 .uploader-container.drag-active {
   border-color: var(--accent);
-  background: rgba(99,102,241,0.04);
+  background: rgba(99, 102, 241, 0.04);
 }
-.uploader-icon { color: var(--accent); margin-bottom: 1.25rem; }
-.uploader-title { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.4rem; }
-.uploader-sub  { color: var(--text-secondary); font-size: 0.9rem; }
-.file-input    { display: none; }
-.uploader-error { margin-top: 1rem; color: var(--status-error); font-size: 0.9rem; font-weight: 600; }
+.uploader-icon {
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+.uploader-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+.uploader-sub {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.file-input {
+  display: none;
+}
+.uploader-error {
+  margin-top: 1rem;
+  color: var(--status-error);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 .uploader-spinner {
   width: 40px;
   height: 40px;
@@ -128,7 +149,9 @@
   margin-bottom: 1.25rem;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Landing Page ───────────────────────────────────────────── */
@@ -240,7 +263,7 @@
 .hero-image {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 20px 50px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.3));
   animation: float 6s ease-in-out infinite;
 }
 
@@ -257,8 +280,13 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 /* Info Section */
@@ -284,13 +312,28 @@
   gap: 1rem;
 }
 
-.feature-icon { margin-bottom: 0.5rem; }
-.feature-icon.success { color: var(--status-success); }
-.feature-icon.accent { color: var(--accent); }
-.feature-icon.blue { color: var(--blue); }
+.feature-icon {
+  margin-bottom: 0.5rem;
+}
+.feature-icon.success {
+  color: var(--status-success);
+}
+.feature-icon.accent {
+  color: var(--accent);
+}
+.feature-icon.blue {
+  color: var(--blue);
+}
 
-.feature-card h4 { font-size: 1.1rem; font-weight: 600; }
-.feature-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+.feature-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.feature-card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
 
 /* Tutorial Section */
 .tutorial-section {
@@ -315,7 +358,9 @@
   text-align: left;
 }
 
-.tutorial-toggle:hover { background: var(--bg-hover); }
+.tutorial-toggle:hover {
+  background: var(--bg-hover);
+}
 
 .tutorial-content {
   padding: 0 2rem 2rem;
@@ -370,16 +415,34 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.animate-slide-down { animation: slideDown 0.3s ease-out forwards; }
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}
 
 @media (max-width: 968px) {
-  .hero-section { grid-template-columns: 1fr; text-align: center; }
-  .hero-description { margin-left: auto; margin-right: auto; }
-  .hero-actions { align-items: center; }
-  .features-grid { grid-template-columns: 1fr; }
+  .hero-section {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-actions {
+    align-items: center;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ─── Export button ──────────────────────────────────────────── */
@@ -403,7 +466,7 @@
 .btn-export:hover {
   border-color: var(--accent);
   color: var(--accent-light);
-  background: rgba(99,102,241,0.08);
+  background: rgba(99, 102, 241, 0.08);
 }
 
 /* ─── Sidebar count badge ────────────────────────────────────── */
@@ -415,7 +478,7 @@
   height: 16px;
   padding: 0 5px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.07);
   color: var(--text-muted);
   font-size: 0.65rem;
   font-weight: 700;
@@ -424,7 +487,7 @@
 }
 .sidebar-subitem.active .sidebar-count-badge,
 .sidebar-item.active .sidebar-count-badge {
-  background: rgba(99,102,241,0.2);
+  background: rgba(99, 102, 241, 0.2);
   color: var(--accent-light);
 }
 
@@ -515,7 +578,9 @@
   font-size: 0.875rem;
   font-weight: 450;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   user-select: none;
   position: relative;
 }
@@ -559,7 +624,7 @@
   white-space: nowrap;
   z-index: 1000;
   border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-left: 8px;
 }
 
@@ -579,7 +644,9 @@
   color: var(--text-muted);
   transition: transform 0.2s;
 }
-.sidebar-chevron.open { transform: rotate(90deg); }
+.sidebar-chevron.open {
+  transform: rotate(90deg);
+}
 
 /* Sub items */
 .sidebar-submenus {
@@ -602,7 +669,9 @@
   color: var(--text-secondary);
   cursor: pointer;
   border-radius: var(--r-sm);
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   user-select: none;
 }
 .sidebar-subitem:hover {
@@ -655,8 +724,12 @@
   line-height: 1;
 }
 
-.card-hover { transition: border-color 0.2s; }
-.card-hover:hover { border-color: var(--border-strong); }
+.card-hover {
+  transition: border-color 0.2s;
+}
+.card-hover:hover {
+  border-color: var(--border-strong);
+}
 
 /* Trailing indicators of a sidebar row, kept adjacent rather than spread. */
 .sidebar-item-trailing {

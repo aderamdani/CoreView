@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, CheckCircle, Terminal, Download, Shield, BarChart2, Zap, Play, HelpCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  UploadCloud,
+  FileText,
+  CheckCircle,
+  Terminal,
+  Download,
+  Shield,
+  BarChart2,
+  Zap,
+  Play,
+  HelpCircle,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 import heroImage from '../assets/hero.png';
 
 export const Landing = ({ onFileParsed }) => {
@@ -20,7 +33,8 @@ export const Landing = ({ onFileParsed }) => {
 
   const processFile = (file) => {
     if (!file) return;
-    const isValidType = file.name.endsWith('.rsc') || file.name.endsWith('.txt') || file.type === 'text/plain';
+    const isValidType =
+      file.name.endsWith('.rsc') || file.name.endsWith('.txt') || file.type === 'text/plain';
     if (!isValidType) {
       setError('Harap unggah file konfigurasi MikroTik (.rsc atau .txt).');
       return;
@@ -82,12 +96,16 @@ export const Landing = ({ onFileParsed }) => {
             Visualisasikan Konfigurasi <span className="text-gradient">MikroTik</span> Anda
           </h1>
           <p className="hero-description">
-            Ubah baris perintah <code>.rsc</code> yang kompleks menjadi dashboard interaktif yang indah. 
+            Ubah baris perintah <code>.rsc</code> yang kompleks menjadi dashboard interaktif yang indah.
             Analisis interface, routing, dan firewall dalam hitungan detik secara lokal di browser Anda.
           </p>
-          
+
           <div className="hero-actions">
-            <button className="btn btn-primary btn-lg" onClick={() => document.getElementById('file-upload').click()} disabled={loading}>
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() => document.getElementById('file-upload').click()}
+              disabled={loading}
+            >
               <UploadCloud size={18} /> {loading ? 'Memproses...' : 'Mulai Sekarang'}
             </button>
             <div className="demo-group">
@@ -103,7 +121,7 @@ export const Landing = ({ onFileParsed }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="hero-visual">
           <div className="hero-image-container">
             <img src={heroImage} alt="CoreView Hero" className="hero-image" />
@@ -114,7 +132,7 @@ export const Landing = ({ onFileParsed }) => {
 
       {/* Upload & Info Section */}
       <section className="info-section">
-        <div 
+        <div
           className={`uploader-container ${isDragging ? 'drag-active' : ''}`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -122,22 +140,20 @@ export const Landing = ({ onFileParsed }) => {
           onDrop={handleDrop}
           onClick={() => !loading && document.getElementById('file-upload').click()}
         >
-          {loading ? (
-            <div className="uploader-spinner" />
-          ) : (
-            <UploadCloud className="uploader-icon" />
-          )}
-          <h3 className="uploader-title">{loading ? 'Memproses konfigurasi...' : 'Seret & Lepas File Konfigurasi'}</h3>
+          {loading ? <div className="uploader-spinner" /> : <UploadCloud className="uploader-icon" />}
+          <h3 className="uploader-title">
+            {loading ? 'Memproses konfigurasi...' : 'Seret & Lepas File Konfigurasi'}
+          </h3>
           <p className="uploader-sub">Mendukung format .rsc atau .txt hasil dari /export</p>
-          
-          <input 
+
+          <input
             id="file-upload"
-            type="file" 
-            className="file-input" 
+            type="file"
+            className="file-input"
             accept=".rsc,.txt,text/plain"
             onChange={(e) => processFileWithLoading(e.target.files[0])}
           />
-          
+
           {error && <div className="uploader-error">{error}</div>}
         </div>
 
@@ -145,7 +161,10 @@ export const Landing = ({ onFileParsed }) => {
           <div className="feature-card">
             <Shield size={24} className="feature-icon success" />
             <h4>Aman & Privat</h4>
-            <p>Semua proses parsing dilakukan 100% lokal di browser Anda. Tidak ada data yang dikirim ke server.</p>
+            <p>
+              Semua proses parsing dilakukan 100% lokal di browser Anda. Tidak ada data yang dikirim ke
+              server.
+            </p>
           </div>
           <div className="feature-card">
             <BarChart2 size={24} className="feature-icon accent" />
@@ -162,10 +181,7 @@ export const Landing = ({ onFileParsed }) => {
 
       {/* Tutorial Accordion */}
       <section className="tutorial-section">
-        <button 
-          className="tutorial-toggle"
-          onClick={() => setShowTutorial(!showTutorial)}
-        >
+        <button className="tutorial-toggle" onClick={() => setShowTutorial(!showTutorial)}>
           <HelpCircle size={20} />
           <span>Cara Export Konfigurasi MikroTik</span>
           {showTutorial ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
@@ -194,16 +210,30 @@ export const Landing = ({ onFileParsed }) => {
                 <div className="step-number">3</div>
                 <div className="step-info">
                   <h5>Unduh File</h5>
-                  <p>Buka menu <strong>Files</strong> di router dan download <code>config-export.rsc</code>.</p>
+                  <p>
+                    Buka menu <strong>Files</strong> di router dan download <code>config-export.rsc</code>.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         )}
       </section>
-      
+
       <footer className="landing-footer">
-        <p>CoreView &copy; 2026 • <a href="https://linkedin.com/in/aderamdani" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }} onMouseEnter={(e) => e.target.style.color = 'var(--accent-light)'} onMouseLeave={(e) => e.target.style.color = 'inherit'}>Dibuat untuk Network Engineer Indonesia</a></p>
+        <p>
+          CoreView &copy; 2026 •{' '}
+          <a
+            href="https://linkedin.com/in/aderamdani"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', textDecoration: 'none' }}
+            onMouseEnter={(e) => (e.target.style.color = 'var(--accent-light)')}
+            onMouseLeave={(e) => (e.target.style.color = 'inherit')}
+          >
+            Dibuat untuk Network Engineer Indonesia
+          </a>
+        </p>
       </footer>
     </div>
   );

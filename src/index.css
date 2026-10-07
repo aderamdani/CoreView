@@ -2,35 +2,35 @@
 
 :root {
   /* Core Palette - Clean dark with a subtle warm tint */
-  --bg-base:       #0d0f14;
-  --bg-surface:    #13161e;
-  --bg-elevated:   #1a1e2a;
-  --bg-hover:      rgba(255,255,255,0.04);
-  --bg-active:     rgba(99,102,241,0.12);
+  --bg-base: #0d0f14;
+  --bg-surface: #13161e;
+  --bg-elevated: #1a1e2a;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-active: rgba(99, 102, 241, 0.12);
 
   /* Accent - Indigo / Violet */
-  --accent:        #6366f1;
-  --accent-light:  #818cf8;
-  --accent-glow:   rgba(99,102,241,0.25);
+  --accent: #6366f1;
+  --accent-light: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.25);
 
   /* Text */
-  --text-primary:   #ffffff;
+  --text-primary: #ffffff;
   --text-secondary: #cbd5e1;
-  --text-muted:     #64748b;
+  --text-muted: #64748b;
 
   /* Borders */
-  --border:         rgba(255,255,255,0.06);
-  --border-strong:  rgba(255,255,255,0.12);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
 
   /* Status */
-  --green:  #22c55e;
+  --green: #22c55e;
   --yellow: #eab308;
-  --red:    #ef4444;
-  --blue:   #38bdf8;
+  --red: #ef4444;
+  --blue: #38bdf8;
   --status-success: var(--green);
   --status-warning: var(--yellow);
-  --status-error:   var(--red);
-  --status-info:    var(--blue);
+  --status-error: var(--red);
+  --status-info: var(--blue);
 
   --accent-secondary: #a78bfa;
 
@@ -38,13 +38,13 @@
   --radius-md: var(--r-md);
   --border-color: var(--border);
 
-  --bg-success-subtle: rgba(34,197,94,0.1);
-  --bg-warning-subtle: rgba(234,179,8,0.1);
-  --bg-success-subtle-hover: rgba(34,197,94,0.2);
-  --bg-warning-subtle-hover: rgba(234,179,8,0.2);
-  
-  --badge-bg: rgba(255,255,255,0.05);
-  --badge-bg-hover: rgba(255,255,255,0.1);
+  --bg-success-subtle: rgba(34, 197, 94, 0.1);
+  --bg-warning-subtle: rgba(234, 179, 8, 0.1);
+  --bg-success-subtle-hover: rgba(34, 197, 94, 0.2);
+  --bg-warning-subtle-hover: rgba(234, 179, 8, 0.2);
+
+  --badge-bg: rgba(255, 255, 255, 0.05);
+  --badge-bg-hover: rgba(255, 255, 255, 0.1);
 
   /* OSI/TCP Layers */
   --layer-app-border: #a78bfa;
@@ -61,31 +61,31 @@
 }
 
 html.light {
-  --bg-base:       #f8fafc;
-  --bg-surface:    #ffffff;
-  --bg-elevated:   #f1f5f9;
-  --bg-hover:      rgba(0,0,0,0.04);
-  --bg-active:     rgba(99,102,241,0.12);
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(99, 102, 241, 0.12);
 
-  --accent:        #4f46e5;
-  --accent-light:  #6366f1;
-  --accent-glow:   rgba(99,102,241,0.2);
+  --accent: #4f46e5;
+  --accent-light: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.2);
 
-  --text-primary:   #0f172a;
+  --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted:     #94a3b8;
+  --text-muted: #94a3b8;
 
-  --border:         rgba(0,0,0,0.08);
-  --border-strong:  rgba(0,0,0,0.15);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
 
-  --green:  #16a34a;
+  --green: #16a34a;
   --yellow: #b45309;
-  --red:    #dc2626;
-  --blue:   #0284c7;
+  --red: #dc2626;
+  --blue: #0284c7;
   --status-success: var(--green);
   --status-warning: var(--yellow);
-  --status-error:   var(--red);
-  --status-info:    var(--blue);
+  --status-error: var(--red);
+  --status-info: var(--blue);
 
   --accent-secondary: #7c3aed;
 
@@ -93,13 +93,13 @@ html.light {
   --radius-md: var(--r-md);
   --border-color: var(--border);
 
-  --bg-success-subtle: rgba(22,163,74,0.15);
-  --bg-warning-subtle: rgba(180,83,9,0.15);
-  --bg-success-subtle-hover: rgba(22,163,74,0.25);
-  --bg-warning-subtle-hover: rgba(180,83,9,0.25);
-  
-  --badge-bg: rgba(0,0,0,0.04);
-  --badge-bg-hover: rgba(0,0,0,0.08);
+  --bg-success-subtle: rgba(22, 163, 74, 0.15);
+  --bg-warning-subtle: rgba(180, 83, 9, 0.15);
+  --bg-success-subtle-hover: rgba(22, 163, 74, 0.25);
+  --bg-warning-subtle-hover: rgba(180, 83, 9, 0.25);
+
+  --badge-bg: rgba(0, 0, 0, 0.04);
+  --badge-bg-hover: rgba(0, 0, 0, 0.08);
 
   --layer-app-border: #6d28d9;
   --layer-trans-border: #1d4ed8;
@@ -107,14 +107,17 @@ html.light {
   --layer-link-border: #b45309;
 }
 
-
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html { font-size: 15px; }
+html {
+  font-size: 15px;
+}
 
 body {
   font-family: var(--font);
@@ -126,20 +129,47 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 /* Animations */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.animate-fade-in { animation: fadeUp 0.3s ease forwards; }
-.delay-100 { animation-delay: 60ms;  opacity: 0; }
-.delay-200 { animation-delay: 120ms; opacity: 0; }
-.delay-300 { animation-delay: 180ms; opacity: 0; }
+.animate-fade-in {
+  animation: fadeUp 0.3s ease forwards;
+}
+.delay-100 {
+  animation-delay: 60ms;
+  opacity: 0;
+}
+.delay-200 {
+  animation-delay: 120ms;
+  opacity: 0;
+}
+.delay-300 {
+  animation-delay: 180ms;
+  opacity: 0;
+}
 
 /* Text gradient */
 .text-gradient {
@@ -180,7 +210,9 @@ body {
 }
 
 /* Section */
-.config-section { padding: 1.75rem; }
+.config-section {
+  padding: 1.75rem;
+}
 
 .section-header {
   display: flex;
@@ -193,10 +225,14 @@ body {
   font-weight: 600;
   color: var(--text-primary);
 }
-.summary-card-icon { color: var(--accent-light); }
+.summary-card-icon {
+  color: var(--accent-light);
+}
 
 /* Tables */
-.data-table-container { overflow-x: auto; }
+.data-table-container {
+  overflow-x: auto;
+}
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -217,9 +253,15 @@ body {
   border-bottom: 1px solid var(--border);
   color: var(--text-secondary);
 }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tbody tr { transition: background 0.15s; }
-.data-table tbody tr:hover { background: var(--bg-hover); }
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+.data-table tbody tr {
+  transition: background 0.15s;
+}
+.data-table tbody tr:hover {
+  background: var(--bg-hover);
+}
 
 /* The single-row "nothing here" cell. It was an inline style repeated in 55
    places, so any change had to be made 55 times. */
@@ -246,12 +288,30 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.badge-success { background: var(--bg-success-subtle); color: var(--green); }
-.badge-warning { background: var(--bg-warning-subtle); color: var(--yellow); }
-.badge-error   { background: rgba(239,68,68,0.1);  color: var(--red); }
-.badge-info    { background: rgba(56,189,248,0.1); color: var(--blue); }
-.badge-neutral { background: rgba(75,85,99,0.25);  color: var(--text-secondary); }
-.badge-primary { background: rgba(99,102,241,0.15); color: var(--accent-light); }
+.badge-success {
+  background: var(--bg-success-subtle);
+  color: var(--green);
+}
+.badge-warning {
+  background: var(--bg-warning-subtle);
+  color: var(--yellow);
+}
+.badge-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+.badge-info {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--blue);
+}
+.badge-neutral {
+  background: rgba(75, 85, 99, 0.25);
+  color: var(--text-secondary);
+}
+.badge-primary {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent-light);
+}
 
 /* Upload / parse failure notice. Uses the same colour language as .badge-error
    so it reads as a problem rather than as informational content. */
@@ -266,7 +326,11 @@ body {
   border-radius: var(--r-md);
   background: rgba(239, 68, 68, 0.08);
 }
-.parse-error-icon { color: var(--red); flex-shrink: 0; margin-top: 2px; }
+.parse-error-icon {
+  color: var(--red);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
 .parse-error-title {
   margin: 0 0 0.25rem;
   font-weight: 600;
@@ -292,7 +356,9 @@ body {
   border-bottom: 1px solid var(--border) !important;
   color: var(--text-primary) !important;
   fill: var(--text-primary) !important;
-  transition: background 0.2s, fill 0.2s !important;
+  transition:
+    background 0.2s,
+    fill 0.2s !important;
 }
 
 .react-flow__controls-button:last-child {
@@ -316,7 +382,7 @@ html.light .react-flow__controls-button {
 
 /* ─── Search match highlight ─────────────────────────────────── */
 .search-match {
-  background: rgba(234,179,8,0.25);
+  background: rgba(234, 179, 8, 0.25);
   color: var(--text-primary);
   border-radius: 2px;
   padding: 0 2px;
@@ -328,8 +394,8 @@ html.light .react-flow__controls-button {
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: rgba(99,102,241,0.08);
-  border-bottom: 1px solid rgba(99,102,241,0.2);
+  background: rgba(99, 102, 241, 0.08);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
   font-size: 0.78rem;
   color: var(--accent-light);
 }
@@ -348,7 +414,10 @@ html.light .react-flow__controls-button {
 
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5); /* slightly lighter dark */
   backdrop-filter: blur(8px);
   z-index: 1000;
@@ -359,13 +428,23 @@ html.light .react-flow__controls-button {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleUp {
-  from { opacity: 0; transform: scale(0.96) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-content {
@@ -447,7 +526,9 @@ html.light .react-flow__controls-button {
   font-size: 0.72rem;
   line-height: 1;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 .version-chip:hover {
   color: var(--text-primary);

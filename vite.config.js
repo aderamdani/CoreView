@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { version } from './package.json'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { version } from './package.json';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,4 +13,4 @@ export default defineConfig({
   build: {
     cssMinify: false, // Disable CSS minification to avoid lightningcss @keyframes issue
   },
-})
+});

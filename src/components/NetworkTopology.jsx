@@ -1,8 +1,13 @@
 import React, { useMemo } from 'react';
 import ReactFlow, {
-  Background, Controls, MiniMap,
-  useNodesState, useEdgesState,
-  MarkerType, Handle, Position,
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+  MarkerType,
+  Handle,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -27,18 +32,36 @@ const baseNode = (extra = {}) => ({
 });
 
 const chip = (text, bg, color = '#fff') => (
-  <div style={{ marginTop: 4, padding: '2px 7px', background: bg, borderRadius: 99, fontSize: 9, color, display: 'inline-block' }}>
+  <div
+    style={{
+      marginTop: 4,
+      padding: '2px 7px',
+      background: bg,
+      borderRadius: 99,
+      fontSize: 9,
+      color,
+      display: 'inline-block',
+    }}
+  >
     {text}
   </div>
 );
 
 /* ── Custom node components ──────────────────────────────────────── */
 const InternetNode = ({ data }) => (
-  <div style={baseNode({ background: 'linear-gradient(135deg,#0d2137,#143352)', borderColor: '#2980b9', color: '#85c1e9' })}>
+  <div
+    style={baseNode({
+      background: 'linear-gradient(135deg,#0d2137,#143352)',
+      borderColor: '#2980b9',
+      color: '#85c1e9',
+    })}
+  >
     <Handle type="source" position={Position.Bottom} style={{ background: '#2980b9' }} />
     <div style={{ fontSize: 26, marginBottom: 4 }}>🌐</div>
     <div style={{ fontWeight: 700, fontSize: 13, color: '#aed6f1' }}>Internet / ISP</div>
-    {data.wanCount > 1 && <div style={{ fontSize: 10, opacity: 0.6, marginTop: 2 }}>{data.wanCount} uplink</div>}
+    {data.wanCount > 1 && (
+      <div style={{ fontSize: 10, opacity: 0.6, marginTop: 2 }}>{data.wanCount} uplink</div>
+    )}
   </div>
 );
 
@@ -46,8 +69,11 @@ const RouterNode = ({ data }) => (
   <div
     onClick={() => data.onNavigate?.('overview')}
     style={baseNode({
-      background: 'linear-gradient(135deg,#1a1e2a,#252a3a)', borderColor: '#6366f1',
-      color: '#c7d2fe', minWidth: 180, cursor: 'pointer',
+      background: 'linear-gradient(135deg,#1a1e2a,#252a3a)',
+      borderColor: '#6366f1',
+      color: '#c7d2fe',
+      minWidth: 180,
+      cursor: 'pointer',
     })}
     title="Klik untuk lihat ringkasan"
   >
@@ -77,7 +103,9 @@ const IfaceNode = ({ data }) => {
       <div style={{ fontSize: 16, marginBottom: 3 }}>{wan ? '📡' : '🔌'}</div>
       <div style={{ fontWeight: 700, fontSize: 12 }}>{data.label}</div>
       {data.ips?.slice(0, 2).map((ip, i) => (
-        <div key={i} style={{ fontSize: 10, opacity: 0.75, marginTop: 1, fontFamily: 'monospace' }}>{ip}</div>
+        <div key={i} style={{ fontSize: 10, opacity: 0.75, marginTop: 1, fontFamily: 'monospace' }}>
+          {ip}
+        </div>
       ))}
       {data.isDhcpClient && chip('DHCP Client', 'rgba(155,89,182,0.25)', '#c39bd3')}
       {!wan && data.hasDhcp && chip('DHCP Server', 'rgba(39,174,96,0.25)', '#82e0aa')}
@@ -90,8 +118,12 @@ const SubnetNode = ({ data }) => (
   <div
     onClick={() => data.onNavigate?.('ip-dhcp-server')}
     style={baseNode({
-      background: 'linear-gradient(135deg,#0a2e18,#0d3d20)', borderColor: '#1e8449',
-      borderStyle: 'dashed', color: '#82e0aa', minWidth: 130, cursor: 'pointer',
+      background: 'linear-gradient(135deg,#0a2e18,#0d3d20)',
+      borderColor: '#1e8449',
+      borderStyle: 'dashed',
+      color: '#82e0aa',
+      minWidth: 130,
+      cursor: 'pointer',
     })}
     title="Klik untuk lihat DHCP Server"
   >
@@ -108,8 +140,11 @@ const VpnNode = ({ data }) => (
   <div
     onClick={() => data.onNavigate?.('vpn')}
     style={baseNode({
-      background: 'linear-gradient(135deg,#1e0a36,#2d0f52)', borderColor: '#9b59b6',
-      borderStyle: 'dashed', color: '#d7bde2', cursor: 'pointer',
+      background: 'linear-gradient(135deg,#1e0a36,#2d0f52)',
+      borderColor: '#9b59b6',
+      borderStyle: 'dashed',
+      color: '#d7bde2',
+      cursor: 'pointer',
     })}
     title="Klik untuk lihat VPN"
   >
@@ -136,37 +171,48 @@ function buildGraph(config, onNavigate) {
   const nodes = [];
   const edges = [];
 
-  const interfaces  = config.interfaces  || [];
+  const interfaces = config.interfaces || [];
   const ipAddresses = config.ipAddresses || [];
-  const routes      = config.routes      || [];
-  const nat         = config.firewall?.nat || [];
-  const dhcpSrvs    = config.dhcp?.servers  || [];
-  const dhcpClis    = config.dhcp?.clients  || [];
-  const wgIfaces    = config.vpn?.wireguard  || [];
-  const wgPeers     = config.vpn?.wireguardPeers || [];
-  const ovpn        = config.vpn?.ovpn || [];
-  const l2tp        = config.vpn?.l2tp || [];
+  const routes = config.routes || [];
+  const nat = config.firewall?.nat || [];
+  const dhcpSrvs = config.dhcp?.servers || [];
+  const dhcpClis = config.dhcp?.clients || [];
+  const wgIfaces = config.vpn?.wireguard || [];
+  const wgPeers = config.vpn?.wireguardPeers || [];
+  const ovpn = config.vpn?.ovpn || [];
+  const l2tp = config.vpn?.l2tp || [];
 
   /* IP map: name → [address, ...] */
   const ipMap = {};
-  ipAddresses.forEach(a => {
+  ipAddresses.forEach((a) => {
     (ipMap[a.interface] = ipMap[a.interface] || []).push(a.address);
   });
 
   /* WAN detection: NAT masquerade out-interface, DHCP clients */
-  const wanByNat  = new Set(nat.filter(r => r.action === 'masquerade').map(r => r['out-interface']).filter(Boolean));
-  const wanByDhcp = new Set(dhcpClis.map(c => c.interface).filter(Boolean));
+  const wanByNat = new Set(
+    nat
+      .filter((r) => r.action === 'masquerade')
+      .map((r) => r['out-interface'])
+      .filter(Boolean),
+  );
+  const wanByDhcp = new Set(dhcpClis.map((c) => c.interface).filter(Boolean));
   let wanSet = new Set([...wanByNat, ...wanByDhcp]);
 
   /* Fallback: use first interface with a default route as WAN */
   if (wanSet.size === 0) {
-    const gwIface = routes.find(r => r['dst-address'] === '0.0.0.0/0')?.gateway;
+    const gwIface = routes.find((r) => r['dst-address'] === '0.0.0.0/0')?.gateway;
     if (gwIface) {
-      const match = interfaces.find(i => i.name === gwIface || ipAddresses.some(a => a.interface === i.name && a.address?.startsWith(gwIface?.split('.').slice(0,3).join('.'))));
+      const match = interfaces.find(
+        (i) =>
+          i.name === gwIface ||
+          ipAddresses.some(
+            (a) => a.interface === i.name && a.address?.startsWith(gwIface?.split('.').slice(0, 3).join('.')),
+          ),
+      );
       if (match) wanSet.add(match.name);
     }
     if (wanSet.size === 0 && interfaces.length > 0) {
-      const conv = interfaces.find(i => /^(ether1|sfp1|sfp-sfpplus|wan|internet|ppp)/i.test(i.name || ''));
+      const conv = interfaces.find((i) => /^(ether1|sfp1|sfp-sfpplus|wan|internet|ppp)/i.test(i.name || ''));
       if (conv) wanSet.add(conv.name);
       else wanSet.add(interfaces[0].name);
     }
@@ -174,34 +220,64 @@ function buildGraph(config, onNavigate) {
 
   /* LAN detection: interfaces with DHCP servers, or static IPs not WAN */
   const dhcpSrvMap = {};
-  dhcpSrvs.forEach(s => { dhcpSrvMap[s.interface] = s; });
-  const lanSet = new Set(
-    Object.keys(ipMap).filter(n => !wanSet.has(n))
-  );
-  dhcpSrvs.forEach(s => { if (!wanSet.has(s.interface)) lanSet.add(s.interface); });
+  dhcpSrvs.forEach((s) => {
+    dhcpSrvMap[s.interface] = s;
+  });
+  const lanSet = new Set(Object.keys(ipMap).filter((n) => !wanSet.has(n)));
+  dhcpSrvs.forEach((s) => {
+    if (!wanSet.has(s.interface)) lanSet.add(s.interface);
+  });
 
   const CX = 420; // center x
 
   /* Internet */
-  nodes.push({ id: 'internet', type: 'internet', position: { x: CX - 70, y: 20 }, data: { wanCount: wanSet.size, onNavigate } });
+  nodes.push({
+    id: 'internet',
+    type: 'internet',
+    position: { x: CX - 70, y: 20 },
+    data: { wanCount: wanSet.size, onNavigate },
+  });
 
   /* WAN interfaces */
   const wanList = [...wanSet].slice(0, 4);
   const wanXs = spreadX(wanList.length, CX, 220);
   wanList.forEach((name, i) => {
-    const iface = interfaces.find(f => f.name === name) || {};
+    const iface = interfaces.find((f) => f.name === name) || {};
     nodes.push({
-      id: `wan-${name}`, type: 'wanIface',
+      id: `wan-${name}`,
+      type: 'wanIface',
       position: { x: wanXs[i] - 70, y: 160 },
-      data: { label: name, ips: ipMap[name] || [], isDhcpClient: wanByDhcp.has(name), active: iface.active, isWan: true, onNavigate },
+      data: {
+        label: name,
+        ips: ipMap[name] || [],
+        isDhcpClient: wanByDhcp.has(name),
+        active: iface.active,
+        isWan: true,
+        onNavigate,
+      },
     });
-    edges.push({ id: `e-inet-${name}`, source: 'internet', target: `wan-${name}`, animated: iface.active !== false, style: { stroke: '#8b5cf6', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' } });
-    edges.push({ id: `e-${name}-r`, source: `wan-${name}`, target: 'router', animated: iface.active !== false, style: { stroke: '#8b5cf6', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' } });
+    edges.push({
+      id: `e-inet-${name}`,
+      source: 'internet',
+      target: `wan-${name}`,
+      animated: iface.active !== false,
+      style: { stroke: '#8b5cf6', strokeWidth: 2 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+    });
+    edges.push({
+      id: `e-${name}-r`,
+      source: `wan-${name}`,
+      target: 'router',
+      animated: iface.active !== false,
+      style: { stroke: '#8b5cf6', strokeWidth: 2 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+    });
   });
 
   /* Router core */
   nodes.push({
-    id: 'router', type: 'router',
+    id: 'router',
+    type: 'router',
     position: { x: CX - 90, y: 320 },
     data: { label: config.metadata?.identity || 'MikroTik', model: config.metadata?.model, onNavigate },
   });
@@ -210,39 +286,71 @@ function buildGraph(config, onNavigate) {
   const lanList = [...lanSet].slice(0, 5);
   const lanXs = spreadX(lanList.length, CX, 220);
   lanList.forEach((name, i) => {
-    const iface = interfaces.find(f => f.name === name) || {};
+    const iface = interfaces.find((f) => f.name === name) || {};
     const srv = dhcpSrvMap[name];
     nodes.push({
-      id: `lan-${name}`, type: 'lanIface',
+      id: `lan-${name}`,
+      type: 'lanIface',
       position: { x: lanXs[i] - 70, y: 480 },
-      data: { label: name, ips: ipMap[name] || [], hasDhcp: !!srv, active: iface.active, isWan: false, onNavigate },
+      data: {
+        label: name,
+        ips: ipMap[name] || [],
+        hasDhcp: !!srv,
+        active: iface.active,
+        isWan: false,
+        onNavigate,
+      },
     });
-    edges.push({ id: `e-r-${name}`, source: 'router', target: `lan-${name}`, style: { stroke: '#27ae60', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#27ae60' } });
+    edges.push({
+      id: `e-r-${name}`,
+      source: 'router',
+      target: `lan-${name}`,
+      style: { stroke: '#27ae60', strokeWidth: 2 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#27ae60' },
+    });
 
     if (srv) {
       const subnet = ipMap[name]?.[0] || name;
       nodes.push({
-        id: `sub-${name}`, type: 'subnet',
+        id: `sub-${name}`,
+        type: 'subnet',
         position: { x: lanXs[i] - 65, y: 640 },
         data: { subnet, pool: srv['address-pool'], onNavigate },
       });
-      edges.push({ id: `e-${name}-sub`, source: `lan-${name}`, target: `sub-${name}`, style: { stroke: '#27ae60', strokeDasharray: '5 3', strokeWidth: 1.5 } });
+      edges.push({
+        id: `e-${name}-sub`,
+        source: `lan-${name}`,
+        target: `sub-${name}`,
+        style: { stroke: '#27ae60', strokeDasharray: '5 3', strokeWidth: 1.5 },
+      });
     }
   });
 
   /* VPN nodes */
   const vpnAll = [
-    ...wgIfaces.map(v => ({ label: v.name, type: 'WireGuard', peers: wgPeers.filter(p => p.interface === v.name).length })),
-    ...ovpn.map(v  => ({ label: v.name || 'OpenVPN', type: 'OpenVPN', peers: 0 })),
-    ...l2tp.map(v  => ({ label: v.name || 'L2TP', type: 'L2TP/IPSec', peers: 0 })),
+    ...wgIfaces.map((v) => ({
+      label: v.name,
+      type: 'WireGuard',
+      peers: wgPeers.filter((p) => p.interface === v.name).length,
+    })),
+    ...ovpn.map((v) => ({ label: v.name || 'OpenVPN', type: 'OpenVPN', peers: 0 })),
+    ...l2tp.map((v) => ({ label: v.name || 'L2TP', type: 'L2TP/IPSec', peers: 0 })),
   ].slice(0, 4);
   vpnAll.forEach((v, i) => {
     nodes.push({
-      id: `vpn-${i}`, type: 'vpn',
+      id: `vpn-${i}`,
+      type: 'vpn',
       position: { x: CX + 280 + i * 10, y: 320 + i * 130 },
       data: { ...v, onNavigate },
     });
-    edges.push({ id: `e-r-vpn-${i}`, source: 'router', target: `vpn-${i}`, sourceHandle: 'right', style: { stroke: '#9b59b6', strokeDasharray: '6 3', strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: '#9b59b6' } });
+    edges.push({
+      id: `e-r-vpn-${i}`,
+      source: 'router',
+      target: `vpn-${i}`,
+      sourceHandle: 'right',
+      style: { stroke: '#9b59b6', strokeDasharray: '6 3', strokeWidth: 1.5 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#9b59b6' },
+    });
   });
 
   return { nodes, edges };
@@ -262,24 +370,48 @@ export const NetworkTopology = ({ config, onNavigate }) => {
           <h2 className="section-title">Topologi Jaringan</h2>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.7 }}>
-          Peta visual jaringan yang dibangun otomatis dari konfigurasi router.
-          Klik node mana saja untuk membuka bagian konfigurasi terkait. Drag untuk menggeser, scroll untuk zoom.
+          Peta visual jaringan yang dibangun otomatis dari konfigurasi router. Klik node mana saja untuk
+          membuka bagian konfigurasi terkait. Drag untuk menggeser, scroll untuk zoom.
         </p>
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '1.5rem',
+            flexWrap: 'wrap',
+            marginTop: '0.75rem',
+            fontSize: '0.78rem',
+            color: 'var(--text-muted)',
+          }}
+        >
           {[
             { color: '#8b5cf6', label: 'Jalur WAN (ke Internet)' },
             { color: '#27ae60', label: 'Jaringan LAN (lokal)' },
             { color: '#9b59b6', label: 'Tunnel VPN', dashed: true },
           ].map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 24, height: 2, background: l.color, borderTop: l.dashed ? '2px dashed' : 'none', borderColor: l.color }} />
+              <div
+                style={{
+                  width: 24,
+                  height: 2,
+                  background: l.color,
+                  borderTop: l.dashed ? '2px dashed' : 'none',
+                  borderColor: l.color,
+                }}
+              />
               {l.label}
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ height: '70vh', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+      <div
+        style={{
+          height: '70vh',
+          borderRadius: 'var(--r-md)',
+          overflow: 'hidden',
+          border: '1px solid var(--border)',
+        }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -293,14 +425,16 @@ export const NetworkTopology = ({ config, onNavigate }) => {
           proOptions={{ hideAttribution: true }}
         >
           <Background color="var(--border)" gap={24} size={1} />
-          <Controls style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8 }} />
+          <Controls
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8 }}
+          />
           <MiniMap
-            nodeColor={n => {
+            nodeColor={(n) => {
               if (n.type === 'internet') return '#2980b9';
-              if (n.type === 'router')   return '#6366f1';
+              if (n.type === 'router') return '#6366f1';
               if (n.type === 'wanIface') return '#8b5cf6';
               if (n.type === 'lanIface') return '#27ae60';
-              if (n.type === 'subnet')   return '#1e8449';
+              if (n.type === 'subnet') return '#1e8449';
               return '#9b59b6';
             }}
             maskColor="rgba(10,12,20,0.7)"

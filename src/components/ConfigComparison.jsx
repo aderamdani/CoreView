@@ -32,37 +32,62 @@ function flattenConfig(config, prefix = '') {
 
 function summarizeConfig(config) {
   return {
-    identity:     config?.system?.identity?.name || config?.metadata?.identity || 'Unknown',
-    filterRules:  config?.firewall?.filter?.length || 0,
-    natRules:     config?.firewall?.nat?.length    || 0,
-    interfaces:   config?.interfaces?.length       || 0,
-    routes:       config?.routes?.length           || 0,
-    dhcpServers:  config?.dhcp?.servers?.length    || 0,
-    pools:        config?.pools?.length            || 0,
-    vpn:          (config?.vpn?.wireguard?.length || 0) + (config?.vpn?.ovpn?.length || 0) + (config?.vpn?.l2tp?.length || 0),
+    identity: config?.system?.identity?.name || config?.metadata?.identity || 'Unknown',
+    filterRules: config?.firewall?.filter?.length || 0,
+    natRules: config?.firewall?.nat?.length || 0,
+    interfaces: config?.interfaces?.length || 0,
+    routes: config?.routes?.length || 0,
+    dhcpServers: config?.dhcp?.servers?.length || 0,
+    pools: config?.pools?.length || 0,
+    vpn:
+      (config?.vpn?.wireguard?.length || 0) +
+      (config?.vpn?.ovpn?.length || 0) +
+      (config?.vpn?.l2tp?.length || 0),
   };
 }
 
 function DiffRow({ path, valA, valB }) {
-  const added   = valA === undefined && valB !== undefined;
+  const added = valA === undefined && valB !== undefined;
   const removed = valA !== undefined && valB === undefined;
   const changed = valA !== undefined && valB !== undefined && valA !== valB;
 
-  const bg     = added   ? 'rgba(34,197,94,0.08)'  : removed ? 'rgba(239,68,68,0.08)'  : 'rgba(99,102,241,0.08)';
-  const border = added   ? 'rgba(34,197,94,0.3)'   : removed ? 'rgba(239,68,68,0.3)'   : 'rgba(99,102,241,0.3)';
-  const label  = added   ? '+ BARU'                 : removed ? '− HILANG'               : '~ BERUBAH';
-  const color  = added   ? '#22c55e'                : removed ? '#ef4444'                : '#818cf8';
+  const bg = added ? 'rgba(34,197,94,0.08)' : removed ? 'rgba(239,68,68,0.08)' : 'rgba(99,102,241,0.08)';
+  const border = added ? 'rgba(34,197,94,0.3)' : removed ? 'rgba(239,68,68,0.3)' : 'rgba(99,102,241,0.3)';
+  const label = added ? '+ BARU' : removed ? '− HILANG' : '~ BERUBAH';
+  const color = added ? '#22c55e' : removed ? '#ef4444' : '#818cf8';
 
-  const tdStyle = { padding: '6px 10px', fontSize: '0.78rem', verticalAlign: 'top', borderBottom: `1px solid ${border}` };
+  const tdStyle = {
+    padding: '6px 10px',
+    fontSize: '0.78rem',
+    verticalAlign: 'top',
+    borderBottom: `1px solid ${border}`,
+  };
 
   return (
     <tr style={{ background: bg }}>
       <td style={{ ...tdStyle, width: '70px' }}>
-        <span style={{ padding: '1px 6px', borderRadius: '3px', background: `${color}25`, color, fontSize: '0.68rem', fontWeight: 700 }}>
+        <span
+          style={{
+            padding: '1px 6px',
+            borderRadius: '3px',
+            background: `${color}25`,
+            color,
+            fontSize: '0.68rem',
+            fontWeight: 700,
+          }}
+        >
           {label}
         </span>
       </td>
-      <td style={{ ...tdStyle, color: 'var(--text-muted)', fontFamily: 'monospace', wordBreak: 'break-all', maxWidth: '280px' }}>
+      <td
+        style={{
+          ...tdStyle,
+          color: 'var(--text-muted)',
+          fontFamily: 'monospace',
+          wordBreak: 'break-all',
+          maxWidth: '280px',
+        }}
+      >
         {path}
       </td>
       <td style={{ ...tdStyle, color: '#ef4444', fontFamily: 'monospace', wordBreak: 'break-all' }}>
@@ -78,9 +103,9 @@ function DiffRow({ path, valA, valB }) {
 export function ConfigComparison() {
   const [configA, setConfigA] = useState(null);
   const [configB, setConfigB] = useState(null);
-  const [nameA, setNameA]     = useState('');
-  const [nameB, setNameB]     = useState('');
-  const [filter, setFilter]   = useState('all'); // all | added | removed | changed
+  const [nameA, setNameA] = useState('');
+  const [nameB, setNameB] = useState('');
+  const [filter, setFilter] = useState('all'); // all | added | removed | changed
   const [searchTerm, setSearch] = useState('');
   const [, setLoading] = useState({ a: false, b: false });
   const [loadError, setLoadError] = useState('');
@@ -92,19 +117,24 @@ export function ConfigComparison() {
     input.onchange = async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      setLoading(prev => ({ ...prev, [side]: true }));
+      setLoading((prev) => ({ ...prev, [side]: true }));
       try {
         const text = await file.text();
         const parsed = parseMikroTikConfig(text);
-        if (side === 'a') { setConfigA(parsed); setNameA(file.name); }
-        else              { setConfigB(parsed); setNameB(file.name); }
+        if (side === 'a') {
+          setConfigA(parsed);
+          setNameA(file.name);
+        } else {
+          setConfigB(parsed);
+          setNameB(file.name);
+        }
         setLoadError('');
       } catch (err) {
         // Without this the rejection escaped as an unhandled promise: the
         // spinner stopped but the user got no message at all.
         setLoadError(err?.message || `Gagal membaca ${side === 'a' ? 'file A' : 'file B'}.`);
       } finally {
-        setLoading(prev => ({ ...prev, [side]: false }));
+        setLoading((prev) => ({ ...prev, [side]: false }));
       }
     };
     input.click();
@@ -117,7 +147,9 @@ export function ConfigComparison() {
     const allKeys = new Set([...Object.keys(flatA), ...Object.keys(flatB)]);
 
     const result = [];
-    let added = 0, removed = 0, changed = 0;
+    let added = 0,
+      removed = 0,
+      changed = 0;
 
     for (const key of Array.from(allKeys).sort()) {
       const vA = flatA[key];
@@ -132,16 +164,23 @@ export function ConfigComparison() {
     return { diffs: result, stats: { added, removed, changed, total: result.length } };
   }, [configA, configB]);
 
-
-
   const filtered = useMemo(() => {
     let d = diffs;
-    if (filter === 'added')   d = d.filter(x => x.valA === undefined);
-    if (filter === 'removed') d = d.filter(x => x.valB === undefined);
-    if (filter === 'changed') d = d.filter(x => x.valA !== undefined && x.valB !== undefined);
+    if (filter === 'added') d = d.filter((x) => x.valA === undefined);
+    if (filter === 'removed') d = d.filter((x) => x.valB === undefined);
+    if (filter === 'changed') d = d.filter((x) => x.valA !== undefined && x.valB !== undefined);
     if (searchTerm) {
       const t = searchTerm.toLowerCase();
-      d = d.filter(x => x.path.toLowerCase().includes(t) || String(x.valA||'').toLowerCase().includes(t) || String(x.valB||'').toLowerCase().includes(t));
+      d = d.filter(
+        (x) =>
+          x.path.toLowerCase().includes(t) ||
+          String(x.valA || '')
+            .toLowerCase()
+            .includes(t) ||
+          String(x.valB || '')
+            .toLowerCase()
+            .includes(t),
+      );
     }
     return d;
   }, [diffs, filter, searchTerm]);
@@ -163,23 +202,55 @@ export function ConfigComparison() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '1.5rem' }}>
         {[
           { side: 'a', config: configA, name: nameA, label: 'Konfigurasi Lama', color: '#ef4444' },
-          { side: 'b', config: configB, name: nameB, label: 'Konfigurasi Baru',  color: '#22c55e' },
+          { side: 'b', config: configB, name: nameB, label: 'Konfigurasi Baru', color: '#22c55e' },
         ].map(({ side, config: cfg, name, label, color }) => (
-          <div key={side} style={{
-            padding: '20px', border: `2px dashed ${cfg ? color : 'var(--border)'}`,
-            borderRadius: '12px', background: cfg ? `${color}08` : 'var(--bg-elevated)',
-            textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s',
-          }} onClick={() => loadFile(side)}>
+          <div
+            key={side}
+            style={{
+              padding: '20px',
+              border: `2px dashed ${cfg ? color : 'var(--border)'}`,
+              borderRadius: '12px',
+              background: cfg ? `${color}08` : 'var(--bg-elevated)',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onClick={() => loadFile(side)}
+          >
             {cfg ? (
               <>
                 <div style={{ fontSize: '1.5rem', marginBottom: '6px' }}>{side === 'a' ? '📂' : '📂'}</div>
                 <div style={{ fontWeight: 700, color, fontSize: '0.9rem' }}>{name}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>{label}: klik untuk ganti</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  {label}: klik untuk ganti
+                </div>
                 {cfg && (
-                  <div style={{ marginTop: '8px', display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {Object.entries(summarizeConfig(cfg)).slice(1).map(([k, v]) => (
-                      <span key={k} style={{ padding: '2px 7px', background: `${color}20`, color, borderRadius: '4px', fontSize: '0.68rem', fontWeight: 600 }}>{k}: {v}</span>
-                    ))}
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      display: 'flex',
+                      gap: '6px',
+                      justifyContent: 'center',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    {Object.entries(summarizeConfig(cfg))
+                      .slice(1)
+                      .map(([k, v]) => (
+                        <span
+                          key={k}
+                          style={{
+                            padding: '2px 7px',
+                            background: `${color}20`,
+                            color,
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {k}: {v}
+                        </span>
+                      ))}
                   </div>
                 )}
               </>
@@ -187,7 +258,9 @@ export function ConfigComparison() {
               <>
                 <div style={{ fontSize: '2rem', marginBottom: '8px' }}>+</div>
                 <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>Klik untuk memuat file .rsc</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Klik untuk memuat file .rsc
+                </div>
               </>
             )}
           </div>
@@ -199,37 +272,68 @@ export function ConfigComparison() {
           Muat dua file konfigurasi untuk melihat perbedaannya.
         </div>
       ) : diffs.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '12px', color: '#22c55e', fontWeight: 600 }}>
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '2rem',
+            background: 'rgba(34,197,94,0.08)',
+            border: '1px solid rgba(34,197,94,0.25)',
+            borderRadius: '12px',
+            color: '#22c55e',
+            fontWeight: 600,
+          }}
+        >
           ✅ Kedua konfigurasi identik. Tidak ada perbedaan.
         </div>
       ) : (
         <>
           {/* Stats bar */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}
+          >
             {[
-              { key: 'all',     label: `Semua (${stats.total})`,      color: 'var(--accent)' },
-              { key: 'added',   label: `+ Baru (${stats.added})`,     color: '#22c55e' },
+              { key: 'all', label: `Semua (${stats.total})`, color: 'var(--accent)' },
+              { key: 'added', label: `+ Baru (${stats.added})`, color: '#22c55e' },
               { key: 'removed', label: `− Hilang (${stats.removed})`, color: '#ef4444' },
-              { key: 'changed', label: `~ Berubah (${stats.changed})`,color: '#818cf8' },
+              { key: 'changed', label: `~ Berubah (${stats.changed})`, color: '#818cf8' },
             ].map(({ key, label, color }) => (
-              <button key={key} onClick={() => setFilter(key)}
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
                 style={{
-                  padding: '5px 12px', borderRadius: '6px', border: `1px solid ${filter === key ? color : 'var(--border)'}`,
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: `1px solid ${filter === key ? color : 'var(--border)'}`,
                   background: filter === key ? `${color}18` : 'transparent',
                   color: filter === key ? color : 'var(--text-muted)',
-                  cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, transition: 'all 0.15s',
-                }}>
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  transition: 'all 0.15s',
+                }}
+              >
                 {label}
               </button>
             ))}
             <input
               placeholder="Cari path / nilai..."
               value={searchTerm}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               style={{
-                marginLeft: 'auto', padding: '5px 12px', borderRadius: '6px',
-                border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-                color: 'var(--text-primary)', fontSize: '0.82rem', minWidth: '180px',
+                marginLeft: 'auto',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-primary)',
+                fontSize: '0.82rem',
+                minWidth: '180px',
               }}
             />
           </div>
@@ -239,8 +343,18 @@ export function ConfigComparison() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'var(--bg-elevated)' }}>
-                  {['Status', 'Field / Path', `Lama (${nameA})`, `Baru (${nameB})`].map(h => (
-                    <th key={h} style={{ padding: '8px 10px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>
+                  {['Status', 'Field / Path', `Lama (${nameA})`, `Baru (${nameB})`].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: '8px 10px',
+                        textAlign: 'left',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: 'var(--text-secondary)',
+                        borderBottom: '1px solid var(--border)',
+                      }}
+                    >
                       {h}
                     </th>
                   ))}
@@ -254,7 +368,9 @@ export function ConfigComparison() {
             </table>
           </div>
           {filtered.length > LIMIT && (
-            <div style={{ textAlign: 'center', padding: '12px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            <div
+              style={{ textAlign: 'center', padding: '12px', color: 'var(--text-muted)', fontSize: '0.8rem' }}
+            >
               Menampilkan {LIMIT} dari {filtered.length} perbedaan.
             </div>
           )}

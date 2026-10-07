@@ -71,6 +71,6 @@ export const parseInline = (text) => {
     .map((part) =>
       part.startsWith('`') && part.endsWith('`') && part.length > 1
         ? { type: 'code', value: part.slice(1, -1) }
-        : { type: 'text', value: part }
+        : { type: 'text', value: part },
     );
 };

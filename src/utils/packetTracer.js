@@ -12,7 +12,7 @@ function ipToInt(ip) {
 function isValidIP(ip) {
   if (!ip) return false;
   const parts = ip.split('.');
-  return parts.length === 4 && parts.every(n => !isNaN(n) && +n >= 0 && +n <= 255);
+  return parts.length === 4 && parts.every((n) => !isNaN(n) && +n >= 0 && +n <= 255);
 }
 
 export function matchesCIDR(testIp, cidr) {
@@ -21,7 +21,10 @@ export function matchesCIDR(testIp, cidr) {
 
   let negated = false;
   let c = cidr.trim();
-  if (c.startsWith('!')) { negated = true; c = c.slice(1).trim(); }
+  if (c.startsWith('!')) {
+    negated = true;
+    c = c.slice(1).trim();
+  }
 
   const [networkStr, prefixStr] = c.includes('/') ? c.split('/') : [c, '32'];
   const prefixLen = parseInt(prefixStr, 10);
@@ -34,28 +37,30 @@ export function matchesPort(testPort, portSpec) {
   if (!portSpec || portSpec === '') return true;
   const p = parseInt(testPort, 10);
   if (isNaN(p)) return false;
-  return String(portSpec).split(',').some(part => {
-    const t = part.trim();
-    if (t.includes('-')) {
-      const [lo, hi] = t.split('-').map(Number);
-      return p >= lo && p <= hi;
-    }
-    return p === parseInt(t, 10);
-  });
+  return String(portSpec)
+    .split(',')
+    .some((part) => {
+      const t = part.trim();
+      if (t.includes('-')) {
+        const [lo, hi] = t.split('-').map(Number);
+        return p >= lo && p <= hi;
+      }
+      return p === parseInt(t, 10);
+    });
 }
 
 /* ── Human-readable condition descriptions ──────────────────────── */
 const FIELD_LABELS = {
-  'src-address':       (v) => `IP sumber harus dalam ${v}`,
-  'dst-address':       (v) => `IP tujuan harus dalam ${v}`,
-  'protocol':          (v) => `Protokol harus ${v.toUpperCase()}`,
-  'dst-port':          (v) => `Port tujuan: ${v}`,
-  'src-port':          (v) => `Port sumber: ${v}`,
-  'in-interface':      (v) => `Masuk via interface "${v}"`,
-  'out-interface':     (v) => `Keluar via interface "${v}"`,
-  'connection-state':  (v) => `Status koneksi: ${v}`,
-  'tcp-flags':         (v) => `TCP flags: ${v}`,
-  'limit':             (v) => `Rate limit: ${v}`,
+  'src-address': (v) => `IP sumber harus dalam ${v}`,
+  'dst-address': (v) => `IP tujuan harus dalam ${v}`,
+  protocol: (v) => `Protokol harus ${v.toUpperCase()}`,
+  'dst-port': (v) => `Port tujuan: ${v}`,
+  'src-port': (v) => `Port sumber: ${v}`,
+  'in-interface': (v) => `Masuk via interface "${v}"`,
+  'out-interface': (v) => `Keluar via interface "${v}"`,
+  'connection-state': (v) => `Status koneksi: ${v}`,
+  'tcp-flags': (v) => `TCP flags: ${v}`,
+  limit: (v) => `Rate limit: ${v}`,
 };
 
 function describeField(field, value) {
@@ -83,14 +88,14 @@ export function tracePacket(packet, filterRules) {
   const steps = [];
 
   // Only active rules in the target chain
-  const activeRules = filterRules.filter(r => r.disabled !== 'yes' && r.disabled !== true);
-  const chainRules  = activeRules.filter(r => r.chain === chain);
+  const activeRules = filterRules.filter((r) => r.disabled !== 'yes' && r.disabled !== true);
+  const chainRules = activeRules.filter((r) => r.chain === chain);
 
   for (let i = 0; i < chainRules.length; i++) {
     const rule = chainRules[i];
     const ruleIndex = activeRules.indexOf(rule) + 1; // 1-based global position
 
-    const conditions  = [];
+    const conditions = [];
     const unknownChecks = [];
     let failed = false;
 
@@ -106,14 +111,14 @@ export function tracePacket(packet, filterRules) {
       if (!matched) failed = true;
     };
 
-    check('src-address',      v => matchesCIDR(srcIp, v));
-    check('dst-address',      v => matchesCIDR(dstIp, v));
-    check('protocol',         v => v.toLowerCase() === protocol.toLowerCase());
-    check('dst-port',         v => protocol === 'icmp' ? false : matchesPort(dstPort, v));
-    check('src-port',         v => protocol === 'icmp' ? false : matchesPort(srcPort, v));
-    check('in-interface',     v => !inInterface || v === inInterface);
-    check('connection-state', v => {
-      const states = v.split(',').map(s => s.trim().toLowerCase());
+    check('src-address', (v) => matchesCIDR(srcIp, v));
+    check('dst-address', (v) => matchesCIDR(dstIp, v));
+    check('protocol', (v) => v.toLowerCase() === protocol.toLowerCase());
+    check('dst-port', (v) => (protocol === 'icmp' ? false : matchesPort(dstPort, v)));
+    check('src-port', (v) => (protocol === 'icmp' ? false : matchesPort(srcPort, v)));
+    check('in-interface', (v) => !inInterface || v === inInterface);
+    check('connection-state', (v) => {
+      const states = v.split(',').map((s) => s.trim().toLowerCase());
       return states.includes(connectionState.toLowerCase());
     });
 
@@ -130,7 +135,14 @@ export function tracePacket(packet, filterRules) {
 
     const matched = !failed;
 
-    const step = { rule, ruleIndex, matched, conditions, unknownChecks, failedFields: conditions.filter(c => !c.matched).map(c => c.field) };
+    const step = {
+      rule,
+      ruleIndex,
+      matched,
+      conditions,
+      unknownChecks,
+      failedFields: conditions.filter((c) => !c.matched).map((c) => c.field),
+    };
     steps.push(step);
 
     if (matched) {

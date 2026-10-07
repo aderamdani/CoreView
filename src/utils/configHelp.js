@@ -5,10 +5,10 @@
  * - relations: array string yang cocok dengan kunci di relationToTab (Dashboard.jsx)
  */
 export const configHelp = {
-
   overview: {
     title: 'Informasi Perangkat',
-    summary: 'Identitas umum dan informasi hardware router MikroTik ini. Metadata ini tersimpan di setiap file konfigurasi yang diekspor.',
+    summary:
+      'Identitas umum dan informasi hardware router MikroTik ini. Metadata ini tersimpan di setiap file konfigurasi yang diekspor.',
     impact: [
       'Nama identity ditampilkan di Winbox, SNMP trap, alert Netwatch, dan log sistem. Pastikan nama ini mudah dikenali.',
       'Informasi model menentukan fitur hardware yang tersedia, seperti port PoE, SFP, atau kapasitas throughput.',
@@ -19,7 +19,8 @@ export const configHelp = {
 
   'interfaces-list': {
     title: 'Network Interfaces',
-    summary: 'Seluruh interface fisik dan virtual pada router ini, termasuk Ethernet, Bridge, VLAN, WireGuard, dan adapter OpenVPN.',
+    summary:
+      'Seluruh interface fisik dan virtual pada router ini, termasuk Ethernet, Bridge, VLAN, WireGuard, dan adapter OpenVPN.',
     impact: [
       'Setiap interface perlu memiliki IP address agar bisa meneruskan lalu lintas Layer 3. Tanpa IP, hanya Layer 2 (bridging) yang aktif.',
       'Status interface (enabled/disabled) langsung mengontrol apakah traffic dapat melewati port tersebut.',
@@ -33,7 +34,8 @@ export const configHelp = {
 
   'interfaces-ethernet': {
     title: 'Ethernet Interfaces',
-    summary: 'Daftar antarmuka fisik berbasis kabel (Ethernet) pada router. Menampilkan parameter layer 2 seperti negosiasi otomatis (auto-negotiation), kecepatan (speed), full/half duplex, dan MAC address.',
+    summary:
+      'Daftar antarmuka fisik berbasis kabel (Ethernet) pada router. Menampilkan parameter layer 2 seperti negosiasi otomatis (auto-negotiation), kecepatan (speed), full/half duplex, dan MAC address.',
     impact: [
       'Menentukan kecepatan maksimal transmisi data fisik (misalnya 100Mbps, 1Gbps, 10Gbps).',
       'Mematikan (disable) port ethernet akan memutuskan sambungan kabel secara logistik dan mematikan link layer.',
@@ -47,7 +49,8 @@ export const configHelp = {
 
   'interfaces-lists': {
     title: 'Interface Lists',
-    summary: 'Kumpulan interface yang diberi nama sebagai grup logis, misalnya "WAN", "LAN", atau "LB". Berfungsi sebagai target shorthand dalam aturan Firewall, NAT, dan Routing.',
+    summary:
+      'Kumpulan interface yang diberi nama sebagai grup logis, misalnya "WAN", "LAN", atau "LB". Berfungsi sebagai target shorthand dalam aturan Firewall, NAT, dan Routing.',
     impact: [
       'Aturan Firewall/NAT yang menargetkan Interface List akan otomatis berlaku untuk semua interface dalam grup tersebut. Menambah interface baru ke list berarti aturan langsung aktif untuknya.',
       'List "WAN" biasa digunakan untuk membatasi masquerade NAT dan memblokir traffic inbound yang tidak diminta dari internet.',
@@ -58,7 +61,8 @@ export const configHelp = {
 
   'bridge-list': {
     title: 'Bridge',
-    summary: 'Virtual Layer 2 switch yang menggabungkan beberapa interface fisik menjadi satu broadcast domain yang sama: seperti switch internal di dalam router.',
+    summary:
+      'Virtual Layer 2 switch yang menggabungkan beberapa interface fisik menjadi satu broadcast domain yang sama: seperti switch internal di dalam router.',
     impact: [
       'Semua port anggota bridge berbagi subnet IP dan ARP table yang sama, sehingga perangkat di port berbeda bisa berkomunikasi langsung tanpa proses routing.',
       'IP address sebaiknya dipasang di interface bridge (bukan di port fisik anggotanya). Ini adalah pola standar LAN gateway di MikroTik.',
@@ -85,7 +89,8 @@ export const configHelp = {
 
   'ip-addresses': {
     title: 'IP Addresses',
-    summary: 'Alamat IPv4 yang dikonfigurasi pada masing-masing interface router. Setiap address mendefinisikan segmen jaringan yang diikuti oleh router.',
+    summary:
+      'Alamat IPv4 yang dikonfigurasi pada masing-masing interface router. Setiap address mendefinisikan segmen jaringan yang diikuti oleh router.',
     impact: [
       'Router menggunakan address ini sebagai default gateway untuk setiap subnet yang terhubung langsung.',
       'DHCP server, aturan firewall, dan static route divalidasi berdasarkan address yang dikonfigurasi pada interface.',
@@ -99,7 +104,8 @@ export const configHelp = {
 
   'ip-dhcp-server': {
     title: 'DHCP Server',
-    summary: 'Secara otomatis mendistribusikan IP address, gateway, dan DNS ke perangkat klien yang terhubung ke segmen LAN.',
+    summary:
+      'Secara otomatis mendistribusikan IP address, gateway, dan DNS ke perangkat klien yang terhubung ke segmen LAN.',
     impact: [
       'Tanpa DHCP server, setiap perangkat harus dikonfigurasi IP statis secara manual: tidak praktis untuk jaringan besar.',
       'Kapasitas address pool menentukan batas maksimum klien yang bisa terlayani secara bersamaan. Pool yang habis membuat perangkat baru tidak mendapat IP.',
@@ -113,7 +119,8 @@ export const configHelp = {
 
   'ip-dhcp-client': {
     title: 'DHCP Client',
-    summary: 'Mengkonfigurasi interface agar menerima IP address secara dinamis dari penyedia upstream, seperti ISP, modem, atau router di atasnya.',
+    summary:
+      'Mengkonfigurasi interface agar menerima IP address secara dinamis dari penyedia upstream, seperti ISP, modem, atau router di atasnya.',
     impact: [
       '"Add Default Route" otomatis menyuntikkan default route 0.0.0.0/0 saat ISP memberikan IP. Ini wajib ada agar internet bisa berjalan.',
       '"Use Peer DNS" menimpa konfigurasi DNS router dengan DNS yang diberikan ISP. Nonaktifkan jika ingin menggunakan DNS kustom.',
@@ -126,7 +133,8 @@ export const configHelp = {
 
   'ip-dns': {
     title: 'DNS',
-    summary: 'Mengontrol recursive DNS resolver bawaan RouterOS. Router ini bisa bertindak sebagai DNS server untuk seluruh klien LAN.',
+    summary:
+      'Mengontrol recursive DNS resolver bawaan RouterOS. Router ini bisa bertindak sebagai DNS server untuk seluruh klien LAN.',
     impact: [
       'Upstream DNS server (misalnya 8.8.8.8, 1.1.1.1) diakses untuk domain yang tidak ada di cache lokal router.',
       'Static DNS entry mengesampingkan resolusi untuk domain tertentu: berguna untuk split-horizon DNS atau pemblokiran domain spesifik.',
@@ -154,7 +162,8 @@ export const configHelp = {
 
   'ip-pool': {
     title: 'IP Pools',
-    summary: 'Rentang alamat IP yang diberi nama dan dialokasikan untuk DHCP server, sesi Hotspot, atau koneksi VPN/PPP.',
+    summary:
+      'Rentang alamat IP yang diberi nama dan dialokasikan untuk DHCP server, sesi Hotspot, atau koneksi VPN/PPP.',
     impact: [
       'Ukuran pool secara langsung membatasi jumlah DHCP lease atau sesi Hotspot yang aktif secara bersamaan.',
       'Rentang pool yang tumpang tindih dengan IP statis perangkat akan menyebabkan konflik IP. Perangkat bisa tidak bisa dijangkau.',
@@ -167,7 +176,8 @@ export const configHelp = {
 
   'ip-cloud': {
     title: 'IP Cloud / MikroTik DDNS',
-    summary: 'Layanan Dynamic DNS (DDNS) bawaan MikroTik. Memberikan hostname statis yang selalu menunjuk ke IP publik router saat ini, meski IP berubah.',
+    summary:
+      'Layanan Dynamic DNS (DDNS) bawaan MikroTik. Memberikan hostname statis yang selalu menunjuk ke IP publik router saat ini, meski IP berubah.',
     impact: [
       'Memungkinkan akses Winbox, SSH, atau VPN jarak jauh meski ISP memberikan IP publik yang berubah-ubah (IP dinamis).',
       '"Update Time" menyinkronkan jam router ke NTP MikroTik. Menonaktifkannya bisa menyebabkan masalah validasi sertifikat SSL/TLS.',
@@ -178,7 +188,8 @@ export const configHelp = {
 
   'ip-hotspot': {
     title: 'Hotspot',
-    summary: 'Sistem captive portal yang mengintersep traffic HTTP dan mengalihkan klien yang belum login ke halaman autentikasi sebelum diberikan akses internet.',
+    summary:
+      'Sistem captive portal yang mengintersep traffic HTTP dan mengalihkan klien yang belum login ke halaman autentikasi sebelum diberikan akses internet.',
     impact: [
       'Hotspot server terikat ke satu interface tertentu. Hanya klien pada interface tersebut yang terkena portal login.',
       'IP Binding memungkinkan MAC/IP tertentu melewati proses login (misalnya printer, server) atau diblokir secara permanen.',
@@ -193,7 +204,8 @@ export const configHelp = {
 
   'ip-services': {
     title: 'IP Services',
-    summary: 'Layanan akses manajemen yang berjalan di router: API, SSH, Telnet, Winbox, FTP, dan HTTP/HTTPS.',
+    summary:
+      'Layanan akses manajemen yang berjalan di router: API, SSH, Telnet, Winbox, FTP, dan HTTP/HTTPS.',
     impact: [
       'Menonaktifkan Winbox (port 8291) memblokir seluruh akses manajemen GUI dari aplikasi Winbox.',
       'Menonaktifkan SSH (port 22) mencegah otomatisasi via script dan akses CLI jarak jauh.',
@@ -206,7 +218,8 @@ export const configHelp = {
 
   'routing-tables': {
     title: 'Routing Tables',
-    summary: 'Tabel routing yang diberi nama untuk keperluan policy-based routing. Traffic bisa diarahkan ke tabel tertentu menggunakan routing mark dari Firewall Mangle.',
+    summary:
+      'Tabel routing yang diberi nama untuk keperluan policy-based routing. Traffic bisa diarahkan ke tabel tertentu menggunakan routing mark dari Firewall Mangle.',
     impact: [
       'Setiap routing table memiliki set route independen. Traffic di tabel "to_isp1" mengikuti gateway ISP1, sementara "to_isp2" mengikuti ISP2.',
       'Esensial untuk skenario multi-WAN dan load balancing. Tanpa tabel terpisah, semua traffic mengikuti satu main table.',
@@ -217,7 +230,8 @@ export const configHelp = {
 
   'firewall-filter': {
     title: 'Firewall Filter Rules',
-    summary: 'Mesin packet filtering stateful. Mengontrol traffic mana yang diterima (ACCEPT), dibuang (DROP), atau ditolak (REJECT) melalui tiga chain: INPUT, OUTPUT, dan FORWARD.',
+    summary:
+      'Mesin packet filtering stateful. Mengontrol traffic mana yang diterima (ACCEPT), dibuang (DROP), atau ditolak (REJECT) melalui tiga chain: INPUT, OUTPUT, dan FORWARD.',
     impact: [
       'Chain INPUT melindungi router itu sendiri. Konfigurasi yang salah di sini bisa mengunci akses manajemen Anda ke router.',
       'Chain FORWARD mengatur traffic LAN→WAN dan WAN→LAN. Di sinilah kebijakan akses internet dan perlindungan dari internet didefinisikan.',
@@ -231,7 +245,8 @@ export const configHelp = {
 
   'firewall-nat': {
     title: 'Firewall NAT Rules',
-    summary: 'Network Address Translation. Chain SRCNAT/Masquerade menulis ulang IP sumber untuk traffic keluar; chain DSTNAT/Port-forwarding menulis ulang IP tujuan untuk traffic masuk.',
+    summary:
+      'Network Address Translation. Chain SRCNAT/Masquerade menulis ulang IP sumber untuk traffic keluar; chain DSTNAT/Port-forwarding menulis ulang IP tujuan untuk traffic masuk.',
     impact: [
       'Aturan Masquerade SRCNAT adalah yang memungkinkan semua perangkat LAN berbagi satu IP publik untuk mengakses internet.',
       'DSTNAT (port forwarding) mengekspos server internal ke internet. Konfigurasi yang salah bisa membuka layanan sensitif secara tidak sengaja.',
@@ -245,7 +260,8 @@ export const configHelp = {
 
   'firewall-mangle': {
     title: 'Firewall Mangle Rules',
-    summary: 'Mesin penandaan paket (packet marking) untuk keperluan QoS, traffic shaping, policy routing, dan connection tracking. Memodifikasi metadata paket tanpa membuang atau meneruskannya.',
+    summary:
+      'Mesin penandaan paket (packet marking) untuk keperluan QoS, traffic shaping, policy routing, dan connection tracking. Memodifikasi metadata paket tanpa membuang atau meneruskannya.',
     impact: [
       'Routing mark mengarahkan traffic ke routing table tertentu: sangat kritis untuk implementasi multi-WAN load balancing dan failover.',
       'Packet mark dikonsumsi oleh Queue Tree untuk menerapkan batas bandwidth berdasarkan jenis traffic.',
@@ -259,7 +275,8 @@ export const configHelp = {
 
   'firewall-raw': {
     title: 'Firewall Raw Rules',
-    summary: 'Tabel pre-connection yang beroperasi sebelum mesin connection tracking dijalankan. Digunakan untuk mitigasi DDoS berkinerja tinggi dan pembuangan paket tidak valid.',
+    summary:
+      'Tabel pre-connection yang beroperasi sebelum mesin connection tracking dijalankan. Digunakan untuk mitigasi DDoS berkinerja tinggi dan pembuangan paket tidak valid.',
     impact: [
       'Aturan di sini melewati connection tracking. Biaya CPU jauh lebih rendah, cocok untuk membuang traffic volume sangat tinggi.',
       'Digunakan untuk membuang sumber serangan yang sudah diketahui, IP spoofed, dan paket tidak valid sebelum mengonsumsi resource routing.',
@@ -270,7 +287,8 @@ export const configHelp = {
 
   'firewall-address-lists': {
     title: 'Firewall Address Lists',
-    summary: 'Kumpulan IP address dan subnet yang diberi nama. Digunakan sebagai blocklist/allowlist statis atau dinamis yang direferensikan oleh aturan Firewall.',
+    summary:
+      'Kumpulan IP address dan subnet yang diberi nama. Digunakan sebagai blocklist/allowlist statis atau dinamis yang direferensikan oleh aturan Firewall.',
     impact: [
       'Aturan firewall yang mencocokkan "src-address-list" atau "dst-address-list" akan mengevaluasi seluruh IP dalam list hanya dengan satu aturan.',
       'Penambahan dinamis: aturan Mangle atau Filter bisa otomatis menambahkan IP pelanggar ke dalam list (misalnya, port scanner).',
@@ -282,7 +300,8 @@ export const configHelp = {
 
   'queues-tree': {
     title: 'Queue Tree',
-    summary: 'Sistem manajemen bandwidth hierarkis. Membatasi dan memprioritaskan traffic per koneksi, pengguna, atau kelas traffic menggunakan packet mark dari Mangle.',
+    summary:
+      'Sistem manajemen bandwidth hierarkis. Membatasi dan memprioritaskan traffic per koneksi, pengguna, atau kelas traffic menggunakan packet mark dari Mangle.',
     impact: [
       'Parent queue menetapkan total batas bandwidth (misal max-limit=100M) yang dibagi bersama oleh semua child queue di bawahnya.',
       'Child queue mereferensikan packet-mark dari Mangle. Traffic wajib diberi tanda (mark) sebelum bisa masuk ke queue.',
@@ -296,7 +315,8 @@ export const configHelp = {
 
   'queues-types': {
     title: 'Queue Types',
-    summary: 'Mendefinisikan algoritma antrean yang dipakai oleh Queue Tree atau Simple Queue (misalnya PCQ, FIFO, RED, SFQ).',
+    summary:
+      'Mendefinisikan algoritma antrean yang dipakai oleh Queue Tree atau Simple Queue (misalnya PCQ, FIFO, RED, SFQ).',
     impact: [
       'PCQ (Per Connection Queue) paling umum digunakan untuk keadilan antar pengguna. Bandwidth tersedia dibagi merata secara otomatis.',
       'FIFO paling sederhana namun tidak adil. Satu pengguna berat bisa menghabiskan semua bandwidth yang ada.',
@@ -308,7 +328,8 @@ export const configHelp = {
 
   'system-identity': {
     title: 'System Identity',
-    summary: 'Nama hostname router ini. Ditampilkan di Winbox, SNMP, Netwatch, log sistem, dan neighbour discovery (MNDP/LLDP).',
+    summary:
+      'Nama hostname router ini. Ditampilkan di Winbox, SNMP, Netwatch, log sistem, dan neighbour discovery (MNDP/LLDP).',
     impact: [
       'Identity disiarkan via CDP/LLDP/MNDP sehingga terlihat oleh perangkat MikroTik lain dan sistem Network Management.',
       'SNMP trap dan syslog menyertakan identity dalam setiap pesan: penting untuk membedakan alert dari beberapa router sekaligus.',
@@ -318,7 +339,8 @@ export const configHelp = {
 
   'system-clock': {
     title: 'System Clock',
-    summary: 'Konfigurasi timezone dan sinkronisasi NTP. Waktu yang akurat sangat penting untuk validitas sertifikat, log yang bisa diandalkan, dan script terjadwal.',
+    summary:
+      'Konfigurasi timezone dan sinkronisasi NTP. Waktu yang akurat sangat penting untuk validitas sertifikat, log yang bisa diandalkan, dan script terjadwal.',
     impact: [
       'Timezone yang salah membuat semua timestamp log tidak sesuai waktu nyata: menyulitkan investigasi insiden keamanan.',
       'Sertifikat TLS/SSL sensitif terhadap waktu. Jam yang salah menyebabkan koneksi HTTPS gagal dengan error "certificate not yet valid".',
@@ -329,7 +351,8 @@ export const configHelp = {
 
   'system-logging': {
     title: 'System Logging',
-    summary: 'Mengkonfigurasi aturan dan destinasi log: topik mana (error, info, kritis, firewall, dhcp) dikirim ke mana (disk lokal, memori, remote syslog, atau email).',
+    summary:
+      'Mengkonfigurasi aturan dan destinasi log: topik mana (error, info, kritis, firewall, dhcp) dikirim ke mana (disk lokal, memori, remote syslog, atau email).',
     impact: [
       'Logging ke "disk" menyimpan log yang bertahan antar reboot: krusial untuk audit, forensik, dan kepatuhan regulasi.',
       'Remote syslog (action=remote) mengirim log ke server SIEM atau log aggregator terpusat seperti Zabbix.',
@@ -342,7 +365,8 @@ export const configHelp = {
 
   'system-snmp': {
     title: 'SNMP',
-    summary: 'Simple Network Management Protocol. Memungkinkan sistem monitoring eksternal seperti Zabbix, PRTG, atau LibreNMS untuk mengambil statistik dari router ini.',
+    summary:
+      'Simple Network Management Protocol. Memungkinkan sistem monitoring eksternal seperti Zabbix, PRTG, atau LibreNMS untuk mengambil statistik dari router ini.',
     impact: [
       'SNMP v2c hanya menggunakan community string sebagai autentikasi. Gunakan string yang tidak mudah ditebak agar tidak dibaca pihak lain.',
       'SNMP v3 menyediakan enkripsi dan autentikasi yang lebih kuat: disarankan untuk lingkungan yang memprioritaskan keamanan.',
@@ -354,7 +378,8 @@ export const configHelp = {
 
   'system-ports': {
     title: 'Serial / Hardware Ports',
-    summary: 'Port konsol serial fisik pada router, digunakan untuk manajemen out-of-band ketika akses jaringan tidak tersedia sama sekali.',
+    summary:
+      'Port konsol serial fisik pada router, digunakan untuk manajemen out-of-band ketika akses jaringan tidak tersedia sama sekali.',
     impact: [
       'Konsol serial adalah pilihan terakhir ketika router tidak bisa dijangkau lewat jaringan, misalnya akibat aturan firewall yang salah atau IP yang terkonfigurasi keliru.',
       'Baud rate harus cocok dengan pengaturan terminal emulator. Ketidakcocokan menghasilkan output yang tidak terbaca (garbled).',
@@ -365,7 +390,8 @@ export const configHelp = {
 
   'tools-graphing': {
     title: 'Interface Graphing',
-    summary: 'Grafik riwayat traffic untuk interface yang dipilih, disimpan di disk atau RAM dan dapat dilihat melalui web interface bawaan router.',
+    summary:
+      'Grafik riwayat traffic untuk interface yang dipilih, disimpan di disk atau RAM dan dapat dilihat melalui web interface bawaan router.',
     impact: [
       'Grafik tersedia dalam rentang 24 jam, 7 hari, dan 30 hari: membantu analisis tren penggunaan bandwidth.',
       '"Store on disk" mempertahankan data grafik antar reboot. Menonaktifkannya berarti semua riwayat hilang setiap kali router restart.',
@@ -377,7 +403,8 @@ export const configHelp = {
 
   vpn: {
     title: 'VPN Connections',
-    summary: 'Tunnel Virtual Private Network: WireGuard (modern, performa tinggi), OpenVPN (kompatibilitas luas), dan L2TP/IPSec (native di Windows).',
+    summary:
+      'Tunnel Virtual Private Network: WireGuard (modern, performa tinggi), OpenVPN (kompatibilitas luas), dan L2TP/IPSec (native di Windows).',
     impact: [
       'WireGuard peer mendefinisikan klien atau site jarak jauh yang boleh terhubung, diverifikasi menggunakan kriptografi public key.',
       'Allowed-address pada setiap WireGuard peer adalah allowlist ketat. Traffic dari IP selain yang terdaftar akan dibuang oleh peer.',
@@ -391,7 +418,8 @@ export const configHelp = {
 
   'bridge-vlans': {
     title: 'Bridge VLANs',
-    summary: 'Konfigurasi VLAN filtering pada bridge untuk segmentasi Layer 2 menggunakan VLAN ID and daftar port tagged/untagged.',
+    summary:
+      'Konfigurasi VLAN filtering pada bridge untuk segmentasi Layer 2 menggunakan VLAN ID and daftar port tagged/untagged.',
     impact: [
       'Jika VLAN filtering aktif tetapi tabel VLAN tidak lengkap, traffic dapat terblokir total pada port tertentu.',
       'Pemilihan tagged/untagged menentukan apakah frame keluar membawa VLAN tag atau tidak.',
@@ -446,7 +474,8 @@ export const configHelp = {
 
   'ip-traffic-flow': {
     title: 'Traffic Flow',
-    summary: 'Ekspor metadata flow (NetFlow/IPFIX style) ke collector untuk analisis traffic and visibilitas jaringan.',
+    summary:
+      'Ekspor metadata flow (NetFlow/IPFIX style) ke collector untuk analisis traffic and visibilitas jaringan.',
     impact: [
       'Membantu analisis top talker, aplikasi dominan, dan pola anomali traffic.',
       'Sampling/timeout yang terlalu detail meningkatkan overhead CPU router.',
@@ -457,7 +486,8 @@ export const configHelp = {
 
   'ip-accounting': {
     title: 'IP Accounting',
-    summary: 'Pencatatan statistik penggunaan traffic per host/per flow untuk kebutuhan audit and billing sederhana.',
+    summary:
+      'Pencatatan statistik penggunaan traffic per host/per flow untuk kebutuhan audit and billing sederhana.',
     impact: [
       'Memberikan visibilitas konsumsi bandwidth antar host.',
       'Pada traffic tinggi, akuntansi detail bisa menambah beban sistem.',
@@ -541,19 +571,13 @@ export const configHelp = {
   'system-telnet': {
     title: 'Telnet',
     summary: 'Akses manajemen CLI tanpa enkripsi (legacy).',
-    impact: [
-      'Kredensial dikirim plaintext, berisiko disadap.',
-      'Disarankan nonaktif di jaringan modern.',
-    ],
+    impact: ['Kredensial dikirim plaintext, berisiko disadap.', 'Disarankan nonaktif di jaringan modern.'],
     relations: ['IP → Services', 'Firewall Filter'],
   },
   'system-www': {
     title: 'WebFig',
     summary: 'Akses manajemen berbasis web ke router MikroTik.',
-    impact: [
-      'Gunakan HTTPS for mengurangi risiko penyadapan.',
-      'Batasi akses berdasarkan IP tepercaya.',
-    ],
+    impact: ['Gunakan HTTPS for mengurangi risiko penyadapan.', 'Batasi akses berdasarkan IP tepercaya.'],
     relations: ['IP → Services', 'Firewall Filter'],
   },
   'system-api': {
@@ -568,10 +592,7 @@ export const configHelp = {
   'system-ftp': {
     title: 'FTP',
     summary: 'Layanan transfer file for backup/restore and manajemen file.',
-    impact: [
-      'FTP klasik tidak terenkripsi secara default.',
-      'Gunakan hanya di jaringan internal tepercaya.',
-    ],
+    impact: ['FTP klasik tidak terenkripsi secara default.', 'Gunakan hanya di jaringan internal tepercaya.'],
     relations: ['IP → Services', 'System → Logging'],
   },
   'files-list': {
@@ -685,7 +706,8 @@ export const configHelp = {
 
   'routing-rules': {
     title: 'Routing Rules (Policy Based Routing)',
-    summary: 'Aturan policy routing (PBR) yang menentukan traffic tertentu harus lookup ke routing table tertentu berdasarkan kriteria Src/Dst IP.',
+    summary:
+      'Aturan policy routing (PBR) yang menentukan traffic tertentu harus lookup ke routing table tertentu berdasarkan kriteria Src/Dst IP.',
     impact: [
       'Mengarahkan subnet/pengguna tertentu ke jalur WAN berbeda tanpa mengubah default route global.',
       'Biasa dipakai untuk Traffic Engineering, misal memutus IP LAN agar diarahkan via rute ISP ke-2 (Backup).',
@@ -697,7 +719,8 @@ export const configHelp = {
 
   'routing-filters': {
     title: 'Routing Filter Rules',
-    summary: 'Filter kebijakan (if-then syntax) untuk menerima, memodifikasi, atau menolak route yang dikirim (OUT) atau diterima (IN) oleh protokol routing dinamis seperti BGP dan OSPF.',
+    summary:
+      'Filter kebijakan (if-then syntax) untuk menerima, memodifikasi, atau menolak route yang dikirim (OUT) atau diterima (IN) oleh protokol routing dinamis seperti BGP dan OSPF.',
     impact: [
       'Mencegah route tidak diinginkan masuk ke tabel routing.',
       'Wajib digunakan pada koneksi eBGP external untuk mencegah kebocoran prefix ke internet.',
@@ -732,7 +755,8 @@ export const configHelp = {
 
   'routing-bgp': {
     title: 'Border Gateway Protocol (BGP)',
-    summary: 'Protokol routing eksterior standar internet. Digunakan untuk bertukar informasi routing (AS path) antar provider atau dengan IP Transit utama.',
+    summary:
+      'Protokol routing eksterior standar internet. Digunakan untuk bertukar informasi routing (AS path) antar provider atau dengan IP Transit utama.',
     impact: [
       'Memungkinkan kontrol traffic engineering inbound/outbound skala besar.',
       'Kesalahan policy BGP bisa mengakibatkan route leak yang berdampak luas.',
@@ -754,7 +778,8 @@ export const configHelp = {
 
   'routing-vrf': {
     title: 'VRF',
-    summary: 'Virtual Routing and Forwarding for memisahkan tabel routing antar tenant/layanan dalam satu router.',
+    summary:
+      'Virtual Routing and Forwarding for memisahkan tabel routing antar tenant/layanan dalam satu router.',
     impact: [
       'Memungkinkan isolasi traffic antar pelanggan/divisi.',
       'Route leaking antar VRF harus dirancang hati-hati agar tidak melanggar isolasi.',
@@ -776,7 +801,8 @@ export const configHelp = {
 
   'queues-simple': {
     title: 'Simple Queues',
-    summary: 'Manajemen bandwidth cepat berbasis target host/subnet tanpa struktur hierarki kompleks. Pembatasan kecepatan per-IP atau per-subnet yang mudah dipahami.',
+    summary:
+      'Manajemen bandwidth cepat berbasis target host/subnet tanpa struktur hierarki kompleks. Pembatasan kecepatan per-IP atau per-subnet yang mudah dipahami.',
     impact: [
       'Mudah diterapkan untuk limit per-user atau per-subnet.',
       'Prioritas simple queues memproses dari baris paling atas ke bawah secara sekuensial. Urutan penting.',
@@ -1195,7 +1221,8 @@ export const configHelp = {
 
   'system-snmp-comm': {
     title: 'SNMP Communities',
-    summary: 'Data community string untuk Simple Network Management Protocol yang berperan sebagai kredensial autentikasi sistem NMS (Zabbix, PRTG, dll).',
+    summary:
+      'Data community string untuk Simple Network Management Protocol yang berperan sebagai kredensial autentikasi sistem NMS (Zabbix, PRTG, dll).',
     impact: [
       'Community public yang terekspos ke internet sangat berbahaya karena isi router dapat dibaca oleh siapa saja.',
       'Pengaturan pembatasan IP (addresses) pada community wajib diaktifkan agar hanya server monitoring yang dapat mengambil data.',
@@ -1205,7 +1232,8 @@ export const configHelp = {
 
   'system-settings': {
     title: 'General IP & System Settings',
-    summary: 'Pengaturan parameter global tingkat rendah di router termasuk IP Settings, IPv6 Settings, dan deteksi otomatis akses Internet.',
+    summary:
+      'Pengaturan parameter global tingkat rendah di router termasuk IP Settings, IPv6 Settings, dan deteksi otomatis akses Internet.',
     impact: [
       'Termasuk batas neighbor tracking, time-to-live, dan status aktif IPv6.',
       'Detect Internet memakan resource jika dipasang di banyak interface.',
@@ -1216,7 +1244,8 @@ export const configHelp = {
 
   'vpn-ipsec': {
     title: 'IPsec Profiles',
-    summary: 'Konfigurasi fase enkripsi dan autentikasi Layer 3 untuk tunnel IPsec murni maupun IPsec over L2TP.',
+    summary:
+      'Konfigurasi fase enkripsi dan autentikasi Layer 3 untuk tunnel IPsec murni maupun IPsec over L2TP.',
     impact: [
       'Tingkat enkripsi profil memengaruhi beban CPU secara langsung (misalnya AES-256 vs 3DES).',
       'Masalah di profil IKE/IPsec menyebabkan gagalnya fase 1 atau fase 2 proses tunnel creation (tunnel tidak bisa up).',
@@ -1226,7 +1255,8 @@ export const configHelp = {
 
   'routing-bfd': {
     title: 'Routing BFD',
-    summary: 'Bidirectional Forwarding Detection (BFD) untuk mendeteksi kegagalan link forwarding secara nyaris instan (sub-second) agar routing dinamis cepat berpindah path.',
+    summary:
+      'Bidirectional Forwarding Detection (BFD) untuk mendeteksi kegagalan link forwarding secara nyaris instan (sub-second) agar routing dinamis cepat berpindah path.',
     impact: [
       'Meningkatkan tingkat kehandalan layanan saat memakai BGP atau OSPF.',
       'Akan memakan CPU tambahan jika dipasang untuk banyak interface dengan interval waktu milidetik.',
@@ -1236,7 +1266,8 @@ export const configHelp = {
 
   'firewall-tracking': {
     title: 'Connection Tracking',
-    summary: 'Engine pemantau state koneksi (established, related, new) di kernel Firewall. Jika dimatikan, NAT tidak bekerja, stateful firewall mati, dan router menjadi stateless.',
+    summary:
+      'Engine pemantau state koneksi (established, related, new) di kernel Firewall. Jika dimatikan, NAT tidak bekerja, stateful firewall mati, dan router menjadi stateless.',
     impact: [
       'UDP/TCP timeout akan berpengaruh pada tabel RAM. Router yang sibuk perlu mengurangi timeout ini agar RAM tidak tersita P2P/torrent tracking.',
       'Jika di nonaktifkan, throughput melonjak naik namun NAT lumpuh.',
@@ -1246,7 +1277,8 @@ export const configHelp = {
 
   'vpn-ovpn-server': {
     title: 'OpenVPN Server',
-    summary: 'Layanan router sebagai pusat/server penerima koneksi tunnel OpenVPN dari client luar (seperti Windows, HP, atau router cabang).',
+    summary:
+      'Layanan router sebagai pusat/server penerima koneksi tunnel OpenVPN dari client luar (seperti Windows, HP, atau router cabang).',
     impact: [
       'Memerlukan certificate dan IP Pool yang valid sebagai alamat client.',
       'OpenVPN Mikrotik saat ini mendukung protokol TCP dan UDP (v7.x).',
@@ -1256,7 +1288,8 @@ export const configHelp = {
 
   'ppp-pppoe-server': {
     title: 'PPPoE Server',
-    summary: 'Sistem server Point-to-Point Protocol over Ethernet untuk distribusi layanan internet kepada client (biasanya digunakan oleh ISP/RT-RW Net).',
+    summary:
+      'Sistem server Point-to-Point Protocol over Ethernet untuk distribusi layanan internet kepada client (biasanya digunakan oleh ISP/RT-RW Net).',
     impact: [
       'Menangani autentikasi, enkripsi, dan pembatasan bandwidth secara per-user profile.',
       'Bergantung pada konfigurasi PPP Profiles dan PPP Secrets.',
@@ -1266,17 +1299,19 @@ export const configHelp = {
 
   'routing-table': {
     title: 'Routing Table (FIB)',
-    summary: 'Tabel Forwarding Information Base terpisah untuk Policy-Based Routing (PBR) atau pemisahan jalur traffic (seperti load-balancing atau failover).',
+    summary:
+      'Tabel Forwarding Information Base terpisah untuk Policy-Based Routing (PBR) atau pemisahan jalur traffic (seperti load-balancing atau failover).',
     impact: [
       'Setiap tabel baru memerlukan Routing Rules atau Mangle untuk mengarahkan rute spesifik.',
-      'Tanpa routing table khusus, seluruh paket akan diteruskan ke tabel \'main\'.',
+      "Tanpa routing table khusus, seluruh paket akan diteruskan ke tabel 'main'.",
     ],
     relations: ['Routing → Rules', 'IP → Firewall Mangle'],
   },
 
   'queues-type': {
     title: 'Queue Type (FQ-CoDel, PCQ, dll)',
-    summary: 'Jenis dan algoritma pengantrean paket untuk memanajemen bandwidth dan mengurangi bufferbloat (seperti menggunakan FQ-Codel atau Per Connection Queue for mikrotik).',
+    summary:
+      'Jenis dan algoritma pengantrean paket untuk memanajemen bandwidth dan mengurangi bufferbloat (seperti menggunakan FQ-Codel atau Per Connection Queue for mikrotik).',
     impact: [
       'Tipe Queue kustom ini dapat digunakan sebagai landasan limitasi di Simple Queues atau Queue Trees yang lebih efisien.',
       'Menurunkan latency ping tinggi yang terjadi saat ada antrean bandwidth penuh (bufferbloat).',
@@ -1286,12 +1321,11 @@ export const configHelp = {
 
   'system-logging-action': {
     title: 'Logging Actions',
-    summary: 'Destinasi penyimpanan data log. Bisa diarahkan ke memory sementara (RAM), disk internal, disebarkan ke server syslog eksternal, atau output ke email.',
+    summary:
+      'Destinasi penyimpanan data log. Bisa diarahkan ke memory sementara (RAM), disk internal, disebarkan ke server syslog eksternal, atau output ke email.',
     impact: [
       'Pengiriman syslog ke eksternal sangat dianjurkan untuk router produksi demi keamanan apabila log lokal terhapus jika router reboot.',
     ],
     relations: ['System → Logging'],
   },
-
 };
-

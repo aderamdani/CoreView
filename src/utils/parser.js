@@ -28,9 +28,7 @@ const joinContinued = (buffer, next) => {
 
 export const parseMikroTikConfig = (fileContent) => {
   if (typeof fileContent !== 'string' || !fileContent.trim()) {
-    throw new ConfigParseError(
-      'File kosong atau tidak terbaca. Pilih file .rsc hasil export dari MikroTik.'
-    );
+    throw new ConfigParseError('File kosong atau tidak terbaca. Pilih file .rsc hasil export dari MikroTik.');
   }
 
   const lines = fileContent.split('\n');
@@ -40,7 +38,7 @@ export const parseMikroTikConfig = (fileContent) => {
       serialNumber: '',
       softwareId: '',
       generatedAt: '',
-      identity: ''
+      identity: '',
     },
     interfaces: [],
     ipAddresses: [],
@@ -50,7 +48,7 @@ export const parseMikroTikConfig = (fileContent) => {
       interfaces: [],
       securityProfiles: [],
       accessList: [],
-      connectList: []
+      connectList: [],
     },
     vpn: {
       l2tp: [],
@@ -58,12 +56,12 @@ export const parseMikroTikConfig = (fileContent) => {
       ovpn: [],
       ovpnServers: [],
       wireguard: [],
-      wireguardPeers: []
+      wireguardPeers: [],
     },
     ppp: {
       pppoeServers: [],
       profiles: [],
-      secrets: []
+      secrets: [],
     },
     firewall: {
       filter: [],
@@ -72,7 +70,7 @@ export const parseMikroTikConfig = (fileContent) => {
       raw: [],
       addressLists: [],
       connectionTracking: {},
-      layer7: []
+      layer7: [],
     },
     vlans: [],
     bridgeVlans: [],
@@ -84,13 +82,13 @@ export const parseMikroTikConfig = (fileContent) => {
       bindings: [],
       servicePorts: [],
       walledGarden: [],
-      walledGardenIp: []
+      walledGardenIp: [],
     },
     queues: {
       types: [],
       trees: [],
       simple: [],
-      interfaceQueues: []
+      interfaceQueues: [],
     },
     routingTables: [],
     interfaceLists: [],
@@ -104,7 +102,7 @@ export const parseMikroTikConfig = (fileContent) => {
       ntpServer: {},
       scheduler: [],
       scripts: [],
-      watchdog: {}
+      watchdog: {},
     },
     systemLogActions: [],
     snmp: {},
@@ -113,17 +111,17 @@ export const parseMikroTikConfig = (fileContent) => {
     dhcp: {
       servers: [],
       networks: [],
-      clients: []
+      clients: [],
     },
     dns: {
       static: [],
-      servers: []
+      servers: [],
     },
     bridges: [],
     bridgePorts: [],
     cloud: {},
     tools: {
-      graphingInterfaces: []
+      graphingInterfaces: [],
     },
     lteApns: [],
     snmpCommunities: [],
@@ -136,7 +134,7 @@ export const parseMikroTikConfig = (fileContent) => {
     routingBgpTmpl: [],
     routingBgpConn: [],
     routingFilterRules: [],
-    rawSections: {}
+    rawSections: {},
   };
 
   let currentPath = '';
@@ -186,7 +184,7 @@ export const parseMikroTikConfig = (fileContent) => {
       const parsedCommand = parseCommandArgs(line);
       config.rawSections[currentPath].push({
         type: line.startsWith('add') ? 'add' : 'set',
-        ...parsedCommand
+        ...parsedCommand,
       });
       mapToStructuredData(currentPath, parsedCommand, config);
       sawCommand = true;
@@ -199,7 +197,7 @@ export const parseMikroTikConfig = (fileContent) => {
   // but minimal router.
   if (!sawCommand && Object.keys(config.rawSections).length === 0) {
     throw new ConfigParseError(
-      'File ini bukan export konfigurasi MikroTik. Tidak ditemukan baris section yang diawali "/" atau perintah add/set.'
+      'File ini bukan export konfigurasi MikroTik. Tidak ditemukan baris section yang diawali "/" atau perintah add/set.',
     );
   }
 
@@ -214,7 +212,7 @@ export const parseMikroTikConfig = (fileContent) => {
 const parseCommandArgs = (line) => {
   const args = {};
   const cleaned = line.replace(/^(add|set)\s+/, '');
-  
+
   // A naive approach: splitting by spaces that are not inside quotes
   const parts = cleaned.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
 
@@ -241,7 +239,7 @@ const parseCommandArgs = (line) => {
 // that a path line such as "/ip address" is never mistaken for an "add".
 const ADD_SET_RE = /^(add|set)(\s|$)/;
 
-const ipToInt = (ip) => ip.split('.').reduce((acc, oct) => (acc << 8 >>> 0) + Number(oct), 0);
+const ipToInt = (ip) => ip.split('.').reduce((acc, oct) => ((acc << 8) >>> 0) + Number(oct), 0);
 
 /**
  * Attach a parent link without making it visible to JSON.stringify.
@@ -257,7 +255,10 @@ const ipToInt = (ip) => ip.split('.').reduce((acc, oct) => (acc << 8 >>> 0) + Nu
  */
 const linkTo = (child, key, parent) => {
   Object.defineProperty(child, key, {
-    value: parent, writable: true, configurable: true, enumerable: false,
+    value: parent,
+    writable: true,
+    configurable: true,
+    enumerable: false,
   });
 };
 
@@ -277,7 +278,10 @@ const interfaceIndex = (config) => {
       if (i.defaultName && !map.has(i.defaultName)) map.set(i.defaultName, i);
     }
     Object.defineProperty(config, '_ifaceIndex', {
-      value: map, writable: true, configurable: true, enumerable: false,
+      value: map,
+      writable: true,
+      configurable: true,
+      enumerable: false,
     });
   }
   return config._ifaceIndex;
@@ -318,7 +322,7 @@ const isIpInCidr = (ip, cidr) => {
   if (!target) return false;
   if (target.prefix === 0) return true;
 
-  const mask = (0xFFFFFFFF << (32 - target.prefix)) >>> 0;
+  const mask = (0xffffffff << (32 - target.prefix)) >>> 0;
   return (ipToInt(host) & mask) === (ipToInt(target.base) & mask);
 };
 
@@ -344,31 +348,31 @@ const mapToStructuredData = (path, attrs, config) => {
       }
       Object.assign(iface, rest);
     } else {
-       const iface = { ...rest, type: 'ethernet' };
-       config.interfaces.push(iface);
-       registerInterface(config, iface);
+      const iface = { ...rest, type: 'ethernet' };
+      config.interfaces.push(iface);
+      registerInterface(config, iface);
     }
   } else if (path === '/interface bridge') {
-    config.interfaces.push({...rest, type: 'bridge'});
+    config.interfaces.push({ ...rest, type: 'bridge' });
     config.bridges.push({ ...rest, ports: [] }); // Initialize with empty ports array
   } else if (path === '/interface bridge port') {
     config.bridgePorts.push(rest);
   } else if (path === '/interface bridge vlan') {
     config.bridgeVlans.push(rest);
   } else if (path === '/interface vlan') {
-    config.interfaces.push({...rest, type: 'vlan'});
+    config.interfaces.push({ ...rest, type: 'vlan' });
     config.vlans.push(rest);
   } else if (path === '/interface wireguard') {
-    config.interfaces.push({...rest, type: 'wireguard'});
-    config.vpn.wireguard.push({...rest, peers: []}); // init empty peers
+    config.interfaces.push({ ...rest, type: 'wireguard' });
+    config.vpn.wireguard.push({ ...rest, peers: [] }); // init empty peers
   } else if (path === '/interface wireguard peers') {
     config.vpn.wireguardPeers = config.vpn.wireguardPeers || [];
     config.vpn.wireguardPeers.push(rest);
   } else if (path === '/interface ovpn-client') {
-    config.interfaces.push({...rest, type: 'ovpn'});
+    config.interfaces.push({ ...rest, type: 'ovpn' });
     config.vpn.ovpn.push(rest);
   } else if (path === '/interface l2tp-client') {
-    config.interfaces.push({...rest, type: 'l2tp'});
+    config.interfaces.push({ ...rest, type: 'l2tp' });
     config.vpn.l2tp.push(rest);
   } else if (path === '/ip address') {
     config.ipAddresses.push(rest);
@@ -476,15 +480,16 @@ const mapToStructuredData = (path, attrs, config) => {
     if (servers) {
       config.dns.servers = servers
         .split(',')
-        .map(s => s.trim())
+        .map((s) => s.trim())
         .filter(Boolean);
     }
   } else if (path === '/ip dns static') {
     config.dns.static.push(rest);
   } else if (path === '/interface wireless') {
-    config.wireless.interfaces.push({...rest, type: 'wireless'});
+    config.wireless.interfaces.push({ ...rest, type: 'wireless' });
     const index = interfaceIndex(config);
-    const known = (rest.name && index.get(rest.name)) || (rest['default-name'] && index.get(rest['default-name']));
+    const known =
+      (rest.name && index.get(rest.name)) || (rest['default-name'] && index.get(rest['default-name']));
     if (!known) {
       const iface = { ...rest, type: 'wireless' };
       config.interfaces.push(iface);
@@ -505,15 +510,15 @@ const mapToStructuredData = (path, attrs, config) => {
   } else if (path === '/user group') {
     config.system.groups.push(rest);
   } else if (path === '/system ntp client') {
-    config.system.ntpClient = {...config.system.ntpClient, ...rest};
+    config.system.ntpClient = { ...config.system.ntpClient, ...rest };
   } else if (path === '/system ntp server') {
-    config.system.ntpServer = {...config.system.ntpServer, ...rest};
+    config.system.ntpServer = { ...config.system.ntpServer, ...rest };
   } else if (path === '/system scheduler') {
     config.system.scheduler.push(rest);
   } else if (path === '/system script') {
     config.system.scripts.push(rest);
   } else if (path === '/system watchdog') {
-    config.system.watchdog = {...config.system.watchdog, ...rest};
+    config.system.watchdog = { ...config.system.watchdog, ...rest };
   } else if (path === '/ip firewall layer7-protocol') {
     config.firewall.layer7.push(rest);
   } else if (path === '/queue interface') {
@@ -543,7 +548,7 @@ const enrichDashboardData = (config) => {
       else if (ifaceName.match(/^bridge/i)) type = 'bridge';
       else if (ifaceName.match(/^vlan/i)) type = 'vlan';
       else if (ifaceName.match(/^pppoe/i)) type = 'pppoe';
-      
+
       addToIndex({
         name: ifaceName,
         defaultName: ifaceName,
@@ -556,36 +561,40 @@ const enrichDashboardData = (config) => {
     }
   };
 
-  config.ipAddresses.forEach(ip => discoverInterface(ip.interface));
-  config.bridgePorts.forEach(bp => discoverInterface(bp.interface));
-  config.dhcp.servers.forEach(ds => discoverInterface(ds.interface));
-  config.dhcp.clients.forEach(dc => discoverInterface(dc.interface));
+  config.ipAddresses.forEach((ip) => discoverInterface(ip.interface));
+  config.bridgePorts.forEach((bp) => discoverInterface(bp.interface));
+  config.dhcp.servers.forEach((ds) => discoverInterface(ds.interface));
+  config.dhcp.clients.forEach((dc) => discoverInterface(dc.interface));
   // `gateway` on a route is always an IP address, never an interface name.
   // Passing it through discoverInterface invented interfaces for every gateway,
   // inflating the interface count, the sidebar badges, and the health summary.
   // RouterOS names the egress interface `interface=`, so that is what is used.
-  config.routes.forEach(r => discoverInterface(r.interface));
-  if (config.tools.graphingInterfaces) config.tools.graphingInterfaces.forEach(g => discoverInterface(g.interface));
+  config.routes.forEach((r) => discoverInterface(r.interface));
+  if (config.tools.graphingInterfaces)
+    config.tools.graphingInterfaces.forEach((g) => discoverInterface(g.interface));
 
   // First pass: Active status and naming for interfaces
-  config.interfaces.forEach(i => {
+  config.interfaces.forEach((i) => {
     i.active = i.disabled !== 'yes';
     i.name = i.name || i.defaultName || 'Unknown';
     i.dhcpServers = []; // Prepare relation
     i.ipAddresses = []; // Prepare relation
   });
 
-  const poolByName = new Map(config.pools.map(p => [p.name, p]));
-  const bridgeByName = new Map(config.bridges.map(b => [b.name, b]));
+  const poolByName = new Map(config.pools.map((p) => [p.name, p]));
+  const bridgeByName = new Map(config.bridges.map((b) => [b.name, b]));
 
-  const dhcpNetworkByName = new Map(config.dhcp.networks.map(n => [n.name, n]));
+  const dhcpNetworkByName = new Map(config.dhcp.networks.map((n) => [n.name, n]));
   // Bucketed by first octet for the CIDR fallback. A /8 or wider network spans
   // every bucket, so those go into `wideNetworks` and are always considered.
   const networksByOctet = new Map();
   const wideNetworks = [];
   for (const n of config.dhcp.networks) {
     const parsed = cidrPrefix(n.address);
-    if (!parsed || parsed.prefix <= 8) { wideNetworks.push(n); continue; }
+    if (!parsed || parsed.prefix <= 8) {
+      wideNetworks.push(n);
+      continue;
+    }
     const octet = parsed.base.split('.')[0];
     if (!networksByOctet.has(octet)) networksByOctet.set(octet, []);
     networksByOctet.get(octet).push(n);
@@ -599,7 +608,7 @@ const enrichDashboardData = (config) => {
   };
 
   // Second pass: Link IP Addresses to Interfaces
-  config.ipAddresses.forEach(ip => {
+  config.ipAddresses.forEach((ip) => {
     ip.active = ip.disabled !== 'yes';
     const iface = ifaceByName.get(ip.interface);
     if (iface) {
@@ -611,7 +620,7 @@ const enrichDashboardData = (config) => {
   });
 
   // Link Bridge Ports to Bridges and Interfaces
-  config.bridgePorts.forEach(bp => {
+  config.bridgePorts.forEach((bp) => {
     const bridge = bridgeByName.get(bp.bridge);
     if (bridge) {
       // Push only the interface name string – not the full object – to avoid React render crashes
@@ -629,13 +638,13 @@ const enrichDashboardData = (config) => {
   // Remaining lookups reuse the maps built above. Only the DHCP network matching
   // still scans, because it needs CIDR containment and longest-prefix
   // comparison rather than an exact name hit.
-  const hotspotProfileByName = new Map(config.hotspot.profiles.map(p => [p.name, p]));
-  const interfaceListByName = new Map(config.interfaceLists.map(l => [l.name, l]));
+  const hotspotProfileByName = new Map(config.hotspot.profiles.map((p) => [p.name, p]));
+  const interfaceListByName = new Map(config.interfaceLists.map((l) => [l.name, l]));
 
   // Link Wireguard Peers into their respective wireguard interfaces
   if (config.vpn.wireguardPeers) {
-    const wgByName = new Map(config.vpn.wireguard.map(w => [w.name, w]));
-    config.vpn.wireguardPeers.forEach(peer => {
+    const wgByName = new Map(config.vpn.wireguard.map((w) => [w.name, w]));
+    config.vpn.wireguardPeers.forEach((peer) => {
       const wg = wgByName.get(peer.interface);
       if (wg) {
         wg.peers.push(peer);
@@ -644,7 +653,7 @@ const enrichDashboardData = (config) => {
   }
 
   // Third pass: Link DHCP Servers to Interfaces, Pools and Networks
-  config.dhcp.servers.forEach(server => {
+  config.dhcp.servers.forEach((server) => {
     server.active = server.disabled !== 'yes';
 
     // Link to Interface
@@ -697,22 +706,22 @@ const enrichDashboardData = (config) => {
   });
 
   // Fourth pass: Link Hotspot Servers/Profiles and Queues
-  config.hotspot.servers.forEach(hs => {
+  config.hotspot.servers.forEach((hs) => {
     hs.active = hs.disabled !== 'yes';
     if (hs['address-pool']) linkTo(hs, 'poolObj', poolByName.get(hs['address-pool']));
     if (hs.interface) linkTo(hs, 'interfaceObj', ifaceByName.get(hs.interface));
     if (hs.profile) linkTo(hs, 'profileObj', hotspotProfileByName.get(hs.profile));
   });
 
-  config.hotspot.userProfiles.forEach(up => {
+  config.hotspot.userProfiles.forEach((up) => {
     if (up['address-pool']) linkTo(up, 'poolObj', poolByName.get(up['address-pool']));
   });
 
   // Link Interface List Members to Lists and Interfaces
-  config.interfaceListMembers.forEach(member => {
+  config.interfaceListMembers.forEach((member) => {
     linkTo(member, 'interfaceObj', ifaceByName.get(member.interface));
     linkTo(member, 'listObj', interfaceListByName.get(member.list));
-    
+
     // Reverse link from Interface to List
     if (member.interfaceObj) {
       if (!member.interfaceObj.lists) member.interfaceObj.lists = [];
@@ -723,12 +732,12 @@ const enrichDashboardData = (config) => {
   // Group Firewall Address Lists by list name natively to make rendering easier
   const listGroups = {};
   config.firewall.addressLists.forEach((al) => {
-     if (!listGroups[al.list]) listGroups[al.list] = [];
-     listGroups[al.list].push(al);
+    if (!listGroups[al.list]) listGroups[al.list] = [];
+    listGroups[al.list].push(al);
   });
   config.firewall.groupedAddressLists = Object.entries(listGroups).map(([name, items]) => ({
-     name,
-     count: items.length,
-     items: items
+    name,
+    count: items.length,
+    items: items,
   }));
 };

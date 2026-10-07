@@ -1,4 +1,3 @@
-
 /**
  * Menu entries that only render the "under development" panel.
  *

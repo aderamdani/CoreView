@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
-import ReactFlow, { 
-  Background, 
-  Controls, 
-  MiniMap, 
-  useNodesState, 
+import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
   useEdgesState,
-  MarkerType
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
@@ -97,11 +97,16 @@ export const MindMap = ({ config, onNavigate }) => {
 
     // Root node
     const routerName = config.metadata?.identity || config.system?.identity?.name || 'Router';
-    createNode('root', routerName, { 
-      background: 'var(--accent)', 
-      color: '#fff',
-      border: 'none',
-    }, { navTarget: 'overview' });
+    createNode(
+      'root',
+      routerName,
+      {
+        background: 'var(--accent)',
+        color: '#fff',
+        border: 'none',
+      },
+      { navTarget: 'overview' },
+    );
 
     // Interfaces Category
     if (config.interfaces && config.interfaces.length > 0) {
@@ -114,7 +119,11 @@ export const MindMap = ({ config, onNavigate }) => {
         createEdge('cat-interfaces', id);
       });
       if (config.interfaces.length > 5) {
-        createNode('iface-more', `+ ${config.interfaces.length - 5} more`, { border: 'none', background: 'transparent', boxShadow: 'none' });
+        createNode('iface-more', `+ ${config.interfaces.length - 5} more`, {
+          border: 'none',
+          background: 'transparent',
+          boxShadow: 'none',
+        });
         createEdge('cat-interfaces', 'iface-more');
       }
     }
@@ -129,7 +138,11 @@ export const MindMap = ({ config, onNavigate }) => {
         createEdge('cat-ip', id);
       });
       if (config.ipAddresses.length > 5) {
-        createNode('ip-more', `+ ${config.ipAddresses.length - 5} more`, { border: 'none', background: 'transparent', boxShadow: 'none' });
+        createNode('ip-more', `+ ${config.ipAddresses.length - 5} more`, {
+          border: 'none',
+          background: 'transparent',
+          boxShadow: 'none',
+        });
         createEdge('cat-ip', 'ip-more');
       }
     }
@@ -147,14 +160,20 @@ export const MindMap = ({ config, onNavigate }) => {
     }
 
     // Firewall Category
-    const fwCount = (config.firewall?.filter?.length || 0) + (config.firewall?.nat?.length || 0) + (config.firewall?.mangle?.length || 0);
+    const fwCount =
+      (config.firewall?.filter?.length || 0) +
+      (config.firewall?.nat?.length || 0) +
+      (config.firewall?.mangle?.length || 0);
     if (fwCount > 0) {
       createNode('cat-firewall', `Firewall (${fwCount} Rules)`, {}, { navTarget: 'firewall-filter' });
       createEdge('root', 'cat-firewall');
     }
 
     // VPN Category
-    const vpnCount = (config.vpn?.wireguard?.length || 0) + (config.vpn?.ovpn?.length || 0) + (config.vpn?.l2tp?.length || 0);
+    const vpnCount =
+      (config.vpn?.wireguard?.length || 0) +
+      (config.vpn?.ovpn?.length || 0) +
+      (config.vpn?.l2tp?.length || 0);
     if (vpnCount > 0) {
       createNode('cat-vpn', `VPN (${vpnCount} Profiles)`, {}, { navTarget: 'vpn' });
       createEdge('root', 'cat-vpn');
@@ -171,19 +190,29 @@ export const MindMap = ({ config, onNavigate }) => {
       });
     }
 
-    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges, 'LR');
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      initialNodes,
+      initialEdges,
+      'LR',
+    );
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
   }, [config, setNodes, setEdges]);
 
-  const onNodeClick = useCallback((event, node) => {
-    if (node.data?.navTarget && onNavigate) {
-      onNavigate(node.data.navTarget);
-    }
-  }, [onNavigate]);
+  const onNodeClick = useCallback(
+    (event, node) => {
+      if (node.data?.navTarget && onNavigate) {
+        onNavigate(node.data.navTarget);
+      }
+    },
+    [onNavigate],
+  );
 
   return (
-    <div className="glass-panel config-section animate-fade-in" style={{ height: 'calc(100vh - 120px)', padding: 0, overflow: 'hidden' }}>
+    <div
+      className="glass-panel config-section animate-fade-in"
+      style={{ height: 'calc(100vh - 120px)', padding: 0, overflow: 'hidden' }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -196,9 +225,15 @@ export const MindMap = ({ config, onNavigate }) => {
         attributionPosition="bottom-right"
       >
         <Background color="var(--text-muted)" gap={16} size={1} />
-        <Controls style={{ background: 'var(--bg-surface)', fill: 'var(--text-primary)', border: '1px solid var(--border)' }} />
-        <MiniMap 
-          nodeColor={(n) => n.style?.background || 'var(--bg-elevated)'} 
+        <Controls
+          style={{
+            background: 'var(--bg-surface)',
+            fill: 'var(--text-primary)',
+            border: '1px solid var(--border)',
+          }}
+        />
+        <MiniMap
+          nodeColor={(n) => n.style?.background || 'var(--bg-elevated)'}
           style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
           maskColor="rgba(0, 0, 0, 0.1)"
         />

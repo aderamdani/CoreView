@@ -9,10 +9,12 @@ const InlineText = ({ text }) => (
   <>
     {parseInline(text).map((seg, i) =>
       seg.type === 'code' ? (
-        <code key={i} className="about-code">{seg.value}</code>
+        <code key={i} className="about-code">
+          {seg.value}
+        </code>
       ) : (
         <React.Fragment key={i}>{seg.value}</React.Fragment>
-      )
+      ),
     )}
   </>
 );
@@ -85,12 +87,7 @@ export function AboutPanel() {
                 </p>
               )}
 
-              <a
-                className="about-link"
-                href={CHANGELOG_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a className="about-link" href={CHANGELOG_URL} target="_blank" rel="noopener noreferrer">
                 Riwayat versi selengkapnya
                 <ExternalLink size={13} />
               </a>

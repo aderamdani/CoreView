@@ -5,9 +5,7 @@ import { readFileSync } from 'node:fs';
 import { sectionFor, parseInline } from '../src/utils/changelog.js';
 
 const raw = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf-8');
-const version = JSON.parse(
-  readFileSync(new URL('../package.json', import.meta.url), 'utf-8')
-).version;
+const version = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version;
 
 test('the shipped version has a changelog section', () => {
   const groups = sectionFor(raw, version);
@@ -18,7 +16,10 @@ test('the shipped version has a changelog section', () => {
 test('the section for the current version never contains another version', () => {
   const groups = sectionFor(raw, version);
   const titles = groups.map((g) => g.title);
-  assert.equal(titles.some((t) => /^\[?\d+\.\d+\.\d+/.test(t)), false);
+  assert.equal(
+    titles.some((t) => /^\[?\d+\.\d+\.\d+/.test(t)),
+    false,
+  );
 });
 
 test('every group has at least one item', () => {
@@ -69,9 +70,7 @@ test('markdown links are reduced to their label', () => {
 });
 
 test('plain text survives untouched and empty input yields nothing', () => {
-  assert.deepEqual(parseInline('tanpa formatasi'), [
-    { type: 'text', value: 'tanpa formatasi' },
-  ]);
+  assert.deepEqual(parseInline('tanpa formatasi'), [{ type: 'text', value: 'tanpa formatasi' }]);
   assert.deepEqual(parseInline(''), []);
   assert.deepEqual(parseInline(null), []);
 });
@@ -92,10 +91,7 @@ test('a wrapped entry is joined back into one item', () => {
 
   const items = sectionFor(fake, '3.0.0')[0].items;
   assert.equal(items.length, 2);
-  assert.equal(
-    items[0],
-    'Baris pertama dari entri yang panjang dan lanjutannya ada di baris berikutnya.'
-  );
+  assert.equal(items[0], 'Baris pertama dari entri yang panjang dan lanjutannya ada di baris berikutnya.');
   assert.equal(items[1], 'Entri pendek.');
 });
 
@@ -116,8 +112,11 @@ test('every shipped entry is complete, not cut at a line break', () => {
   // Guards the bug the browser check found: entries used to end mid-sentence.
   for (const group of sectionFor(raw, version)) {
     for (const item of group.items) {
-      assert.doesNotMatch(item, /\b(dengan|yang|dan|untuk|pada|dari|di|ke)$/i,
-        `entry looks truncated: "${item}"`);
+      assert.doesNotMatch(
+        item,
+        /\b(dengan|yang|dan|untuk|pada|dari|di|ke)$/i,
+        `entry looks truncated: "${item}"`,
+      );
       const backticks = (item.match(/`/g) || []).length;
       assert.equal(backticks % 2, 0, `unbalanced backticks in: "${item}"`);
     }

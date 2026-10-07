@@ -10,12 +10,15 @@ const dashboard = readFileSync(new URL('../src/components/Dashboard.jsx', import
  * Tab ids that Dashboard routes to a placeholder panel, derived from the source
  * rather than restated here. If the two ever disagree, the sidebar either marks
  * a working section as unfinished or silently hides that a section is empty.
+ *
+ * The patterns tolerate arbitrary whitespace. The formatter wraps long lines, and
+ * a pattern that assumed a single line silently missed an entry.
  */
 const placeholderTabsFromRouting = () => {
   const wrappers = new Set(
-    [...dashboard.matchAll(/const (render[A-Za-z]+) = \(\) => renderPlaceholder\(/g)].map((m) => m[1])
+    [...dashboard.matchAll(/const (render[A-Za-z]+) = \(\) =>\s*renderPlaceholder\(/g)].map((m) => m[1]),
   );
-  const routed = [...dashboard.matchAll(/activeTab === '([a-z0-9-]+)' && (render[A-Za-z]+)\(\)/g)];
+  const routed = [...dashboard.matchAll(/activeTab === '([a-z0-9-]+)'\s*&&\s*(render[A-Za-z]+)\(\)/g)];
   return new Set(routed.filter(([, , fn]) => wrappers.has(fn)).map(([, id]) => id));
 };
 

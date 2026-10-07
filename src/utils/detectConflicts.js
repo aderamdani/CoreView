@@ -16,12 +16,15 @@ const singleCidrContains = (cidrA, cidrB) => {
   try {
     const [netA, prefA] = cidrA.includes('/') ? cidrA.split('/') : [cidrA, '32'];
     const [netB, prefB] = cidrB.includes('/') ? cidrB.split('/') : [cidrB, '32'];
-    const pA = parseInt(prefA, 10), pB = parseInt(prefB, 10);
+    const pA = parseInt(prefA, 10),
+      pB = parseInt(prefB, 10);
     if (Number.isNaN(pA) || Number.isNaN(pB)) return false;
     if (pA > pB) return false; // A is more specific → can't cover broader B
     const maskA = pA === 0 ? 0 : (~0 << (32 - pA)) >>> 0;
     return (ipToInt(netA) & maskA) >>> 0 === (ipToInt(netB) & maskA) >>> 0;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 };
 
 /**
@@ -37,8 +40,14 @@ function cidrContains(cidrA, cidrB) {
   if (!cidrA || cidrA === '' || cidrA === '0.0.0.0/0') return true;
   if (!cidrB || cidrB === '' || cidrB === '0.0.0.0/0') return false;
 
-  const entriesA = String(cidrA).split(',').map(s => s.trim()).filter(Boolean);
-  const entriesB = String(cidrB).split(',').map(s => s.trim()).filter(Boolean);
+  const entriesA = String(cidrA)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const entriesB = String(cidrB)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (entriesA.length === 0 || entriesB.length === 0) return false;
 
   return entriesA.some((a) => {
@@ -51,24 +60,34 @@ function portContains(portSpecA, portSpecB) {
   if (!portSpecA || portSpecA === '') return true;
   if (!portSpecB || portSpecB === '') return false;
   // Parse B's ports and check each is within A's ranges
-  const rangesA = String(portSpecA).split(',').map(p => {
-    const t = p.trim();
-    if (t.includes('-')) { const [lo, hi] = t.split('-').map(Number); return [lo, hi]; }
-    const n = parseInt(t, 10); return [n, n];
-  });
-  const portsB = String(portSpecB).split(',').map(p => {
-    const t = p.trim();
-    if (t.includes('-')) { const [lo, hi] = t.split('-').map(Number); return [lo, hi]; }
-    const n = parseInt(t, 10); return [n, n];
-  });
-  return portsB.every(([bLo, bHi]) =>
-    rangesA.some(([aLo, aHi]) => aLo <= bLo && aHi >= bHi)
-  );
+  const rangesA = String(portSpecA)
+    .split(',')
+    .map((p) => {
+      const t = p.trim();
+      if (t.includes('-')) {
+        const [lo, hi] = t.split('-').map(Number);
+        return [lo, hi];
+      }
+      const n = parseInt(t, 10);
+      return [n, n];
+    });
+  const portsB = String(portSpecB)
+    .split(',')
+    .map((p) => {
+      const t = p.trim();
+      if (t.includes('-')) {
+        const [lo, hi] = t.split('-').map(Number);
+        return [lo, hi];
+      }
+      const n = parseInt(t, 10);
+      return [n, n];
+    });
+  return portsB.every(([bLo, bHi]) => rangesA.some(([aLo, aHi]) => aLo <= bLo && aHi >= bHi));
 }
 
 function coversField(valA, valB, compareFn) {
-  if (!valA || valA === '') return true;   // A has no constraint → covers any B
-  if (!valB || valB === '') return false;  // A is specific, B has no constraint → A doesn't cover "any B"
+  if (!valA || valA === '') return true; // A has no constraint → covers any B
+  if (!valB || valB === '') return false; // A is specific, B has no constraint → A doesn't cover "any B"
   return compareFn(valA, valB);
 }
 
@@ -106,9 +125,9 @@ function ruleAShadowsB(ruleA, ruleB) {
   const csB = ruleB['connection-state'] || '';
   if (csA) {
     if (!csB) return false;
-    const statesA = csA.split(',').map(s => s.trim().toLowerCase());
-    const statesB = csB.split(',').map(s => s.trim().toLowerCase());
-    if (!statesB.every(s => statesA.includes(s))) return false;
+    const statesA = csA.split(',').map((s) => s.trim().toLowerCase());
+    const statesB = csB.split(',').map((s) => s.trim().toLowerCase());
+    if (!statesB.every((s) => statesA.includes(s))) return false;
   }
 
   return true;
@@ -118,30 +137,30 @@ function describeWhy(ruleA, ruleB) {
   const parts = [];
   const pA = (ruleA.protocol || '').toLowerCase();
 
-  if (!ruleA['src-address'])  parts.push('src IP: semua');
-  else                        parts.push(`src IP: ${ruleA['src-address']} ⊇ ${ruleB['src-address'] || 'semua'}`);
+  if (!ruleA['src-address']) parts.push('src IP: semua');
+  else parts.push(`src IP: ${ruleA['src-address']} ⊇ ${ruleB['src-address'] || 'semua'}`);
 
-  if (!ruleA['dst-address'])  parts.push('dst IP: semua');
-  else                        parts.push(`dst IP: ${ruleA['dst-address']} ⊇ ${ruleB['dst-address'] || 'semua'}`);
+  if (!ruleA['dst-address']) parts.push('dst IP: semua');
+  else parts.push(`dst IP: ${ruleA['dst-address']} ⊇ ${ruleB['dst-address'] || 'semua'}`);
 
-  if (!pA)                    parts.push('protokol: semua');
-  else                        parts.push(`protokol: ${pA}`);
+  if (!pA) parts.push('protokol: semua');
+  else parts.push(`protokol: ${pA}`);
 
-  if (!ruleA['dst-port'])     parts.push('port: semua');
-  else                        parts.push(`port: ${ruleA['dst-port']}`);
+  if (!ruleA['dst-port']) parts.push('port: semua');
+  else parts.push(`port: ${ruleA['dst-port']}`);
 
   // These three decide whether A shadows B just as much as the fields above do.
   // Omitting them produced "src IP: semua, dst IP: semua, protokol: semua,
   // port: semua" for a rule that actually matched a single interface and
   // connection state, which reads as the exact opposite of the truth.
   if (!ruleA['in-interface']) parts.push('interface: semua');
-  else                       parts.push(`interface: ${ruleA['in-interface']} ⊇ ${ruleB['in-interface'] || 'semua'}`);
+  else parts.push(`interface: ${ruleA['in-interface']} ⊇ ${ruleB['in-interface'] || 'semua'}`);
 
-  if (!ruleA['src-port'])    parts.push('src port: semua');
-  else                       parts.push(`src port: ${ruleA['src-port']} ⊇ ${ruleB['src-port'] || 'semua'}`);
+  if (!ruleA['src-port']) parts.push('src port: semua');
+  else parts.push(`src port: ${ruleA['src-port']} ⊇ ${ruleB['src-port'] || 'semua'}`);
 
   if (!ruleA['connection-state']) parts.push('connection state: semua');
-  else                            parts.push(`connection state: ${ruleA['connection-state']} ⊇ ${ruleB['connection-state'] || 'semua'}`);
+  else parts.push(`connection state: ${ruleA['connection-state']} ⊇ ${ruleB['connection-state'] || 'semua'}`);
 
   return parts.join(', ');
 }
@@ -151,17 +170,17 @@ function describeWhy(ruleA, ruleB) {
  * @returns {Array} conflicts: [{ shadowingRule, shadowingIndex, shadowedRule, shadowedIndex, chain, reason }]
  */
 export function detectConflicts(filterRules) {
-  const active = filterRules.filter(r => r.disabled !== 'yes' && r.disabled !== true);
+  const active = filterRules.filter((r) => r.disabled !== 'yes' && r.disabled !== true);
   const conflicts = [];
 
   for (let i = 0; i < active.length; i++) {
     for (let j = i + 1; j < active.length; j++) {
       if (ruleAShadowsB(active[i], active[j])) {
         conflicts.push({
-          shadowingRule:  active[i],
+          shadowingRule: active[i],
           shadowingIndex: filterRules.indexOf(active[i]) + 1,
-          shadowedRule:   active[j],
-          shadowedIndex:  filterRules.indexOf(active[j]) + 1,
+          shadowedRule: active[j],
+          shadowedIndex: filterRules.indexOf(active[j]) + 1,
           chain: active[i].chain,
           reason: describeWhy(active[i], active[j]),
         });
@@ -176,13 +195,23 @@ export function detectConflicts(filterRules) {
  * Detect duplicate rules (identical match conditions).
  */
 export function detectDuplicates(filterRules) {
-  const active = filterRules.filter(r => r.disabled !== 'yes' && r.disabled !== true);
-  const keys = ['chain', 'action', 'protocol', 'src-address', 'dst-address', 'src-port', 'dst-port', 'in-interface', 'connection-state'];
+  const active = filterRules.filter((r) => r.disabled !== 'yes' && r.disabled !== true);
+  const keys = [
+    'chain',
+    'action',
+    'protocol',
+    'src-address',
+    'dst-address',
+    'src-port',
+    'dst-port',
+    'in-interface',
+    'connection-state',
+  ];
   const seen = new Map();
   const dupes = [];
 
   for (let i = 0; i < active.length; i++) {
-    const key = keys.map(k => (active[i][k] || '')).join('|');
+    const key = keys.map((k) => active[i][k] || '').join('|');
     if (seen.has(key)) {
       dupes.push({
         original: seen.get(key).rule,
