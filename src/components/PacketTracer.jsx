@@ -1,8 +1,23 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Zap, Play, ChevronDown, RotateCcw, AlertCircle, CheckCircle2, Info, Shield } from 'lucide-react';
 import { tracePacket } from '../utils/packetTracer';
+import { formFromRule } from '../utils/traceForm';
+
+/* ── Default form values ─────────────────────────────────────────── */
+
+const DEFAULT_FORM = {
+  srcIp: '1.2.3.4',
+  dstIp: '192.168.1.1',
+  protocol: 'tcp',
+  srcPort: '54321',
+  dstPort: '22',
+  chain: 'input',
+  inInterface: '',
+  connectionState: 'new',
+};
 
 /* ── Preset scenarios ────────────────────────────────────────────── */
+
 const PRESETS = [
   {
     label: 'SSH dari Internet',
@@ -209,22 +224,16 @@ const FieldVal = ({ label, value }) => (
 );
 
 /* ── Main component ──────────────────────────────────────────────── */
-export const PacketTracer = ({ config, onNavigate }) => {
+export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
   // Memoised so the useCallback below keeps a stable identity. Without this the
   // array is a fresh reference on every render, which defeats the memo and trips
   // react-hooks/preserve-manual-memoization.
   const filterRules = useMemo(() => config.firewall?.filter || [], [config]);
 
-  const [form, setForm] = useState({
-    srcIp: '1.2.3.4',
-    dstIp: '192.168.1.1',
-    protocol: 'tcp',
-    srcPort: '54321',
-    dstPort: '22',
-    chain: 'input',
-    inInterface: '',
-    connectionState: 'new',
-  });
+  // Initialised from the seed on mount. A new seed arrives with a new `key`
+  // from the parent, which remounts this component, so no effect is needed to
+  // react to the prop changing.
+  const [form, setForm] = useState(() => ({ ...DEFAULT_FORM, ...formFromRule(seedRule) }));
   const [result, setResult] = useState(null);
   const [expanded, setExpanded] = useState({});
 

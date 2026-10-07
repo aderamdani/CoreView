@@ -498,6 +498,10 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const [expandedMenus, setExpandedMenus] = useState({ firewall: true });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedItemDetail, setSelectedItemDetail] = useState(null);
+  // Rule yang dipilih dari tombol "Uji di Packet Tracer" pada halaman swimlane.
+  // Sebelumnya tombol itu hanya berpindah tab dan membuang rule-nya, sehingga
+  // form tracer selalu terbuka dengan nilai bawaan.
+  const [traceSeed, setTraceSeed] = useState(null); // { rule, nonce }
   const [firewallViewMode, setFirewallViewMode] = useState('table');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [favorites, setFavorites] = useState(() => {
@@ -663,6 +667,14 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
   // ── Toast notification ─────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
+  // Dipanggil tombol "Uji di Packet Tracer" pada tiap rule di halaman swimlane.
+  const handleTraceRule = useCallback((rule) => {
+    // Nonce-nya berubah tiap klik supaya form tracer di-mount ulang dan nilainya
+    // diambil dari rule yang baru dipilih.
+    setTraceSeed({ rule, nonce: Date.now() });
+    setActiveTab('packet-tracer');
+  }, []);
+
   const showToast = useCallback((msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2400);
@@ -3532,7 +3544,11 @@ ${
       <HelpPanel id="firewall-filter" onNavigate={setActiveTab} />
 
       {firewallViewMode === 'swimlane' ? (
-        <FirewallSwimlane rules={applyFilter(firewall.filter)} onNavigate={setActiveTab} />
+        <FirewallSwimlane
+          rules={applyFilter(firewall.filter)}
+          onNavigate={setActiveTab}
+          onTraceRule={handleTraceRule}
+        />
       ) : (
         <>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>

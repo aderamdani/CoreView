@@ -292,7 +292,7 @@ const RuleCard = ({ rule, position, onGoTrace }) => {
 };
 
 /* ── Main component ──────────────────────────────────────────────── */
-export const FirewallSwimlane = ({ rules, onNavigate }) => {
+export const FirewallSwimlane = ({ rules, onNavigate, onTraceRule }) => {
   const [filterAction, setFilterAction] = useState('all');
   const [filterProto, setFilterProto] = useState('all');
   const [showDisabled, setShowDisabled] = useState(false);
@@ -532,7 +532,7 @@ export const FirewallSwimlane = ({ rules, onNavigate }) => {
                         key={pos}
                         rule={rule}
                         position={pos}
-                        onGoTrace={() => onNavigate?.('packet-tracer')}
+                        onGoTrace={() => onTraceRule?.(rule)}
                       />
                     );
                   })
@@ -605,7 +605,7 @@ export const FirewallSwimlane = ({ rules, onNavigate }) => {
                           key={allCr.indexOf(rule) + 1}
                           rule={rule}
                           position={allCr.indexOf(rule) + 1}
-                          onGoTrace={() => onNavigate?.('packet-tracer')}
+                          onGoTrace={() => onTraceRule?.(rule)}
                         />
                       ))}
                     </div>
