@@ -22,14 +22,30 @@ export const sectionFor = (raw, version) => {
 
   const groups = [];
   let current = null;
+  let lastItem = -1;
+
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith('## ')) break;
+
     if (line.startsWith('### ')) {
       current = { title: line.slice(4).trim(), items: [] };
       groups.push(current);
-    } else if (line.startsWith('- ') && current) {
+      lastItem = -1;
+      continue;
+    }
+
+    if (line.startsWith('- ') && current) {
       current.items.push(line.slice(2).trim());
+      lastItem = current.items.length - 1;
+      continue;
+    }
+
+    // A long entry wraps onto an indented continuation line. Without this the
+    // item was cut at the first line break, which only showed up when the panel
+    // was opened in a browser: the unit tests fed it single-line entries.
+    if (current && lastItem >= 0 && /^\s+\S/.test(line)) {
+      current.items[lastItem] = `${current.items[lastItem]} ${line.trim()}`;
     }
   }
 

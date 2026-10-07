@@ -79,3 +79,47 @@ test('plain text survives untouched and empty input yields nothing', () => {
 test('changelog prose contains no em dash', () => {
   assert.equal(raw.includes('\u2014'), false, 'em dash found in CHANGELOG.md');
 });
+
+test('a wrapped entry is joined back into one item', () => {
+  const fake = [
+    '# Changelog',
+    '## [3.0.0] - 2026-01-01',
+    '### Diperbaiki',
+    '- Baris pertama dari entri yang panjang',
+    '  dan lanjutannya ada di baris berikutnya.',
+    '- Entri pendek.',
+  ].join('\n');
+
+  const items = sectionFor(fake, '3.0.0')[0].items;
+  assert.equal(items.length, 2);
+  assert.equal(
+    items[0],
+    'Baris pertama dari entri yang panjang dan lanjutannya ada di baris berikutnya.'
+  );
+  assert.equal(items[1], 'Entri pendek.');
+});
+
+test('a paragraph after a bullet is not swallowed into it', () => {
+  const fake = [
+    '## [3.0.0] - 2026-01-01',
+    '### Diperbaiki',
+    '- Satu entri.',
+    '',
+    'Paragraf bebas yang bukan lanjutan butir.',
+  ].join('\n');
+
+  const items = sectionFor(fake, '3.0.0')[0].items;
+  assert.deepEqual(items, ['Satu entri.']);
+});
+
+test('every shipped entry is complete, not cut at a line break', () => {
+  // Guards the bug the browser check found: entries used to end mid-sentence.
+  for (const group of sectionFor(raw, version)) {
+    for (const item of group.items) {
+      assert.doesNotMatch(item, /\b(dengan|yang|dan|untuk|pada|dari|di|ke)$/i,
+        `entry looks truncated: "${item}"`);
+      const backticks = (item.match(/`/g) || []).length;
+      assert.equal(backticks % 2, 0, `unbalanced backticks in: "${item}"`);
+    }
+  }
+});
