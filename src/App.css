@@ -26,10 +26,6 @@
   letter-spacing: -0.02em;
 }
 
-.header-subtitle {
-  display: none;
-}
-
 /* ─── Header Search ──────────────────────────────────────────── */
 .header-search-wrapper {
   position: relative;
@@ -499,15 +495,6 @@
 .sidebar-collapsed .sidebar-logo {
   text-align: center;
   font-size: 0.7rem;
-}
-
-.sidebar-section-label {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  padding: 14px 12px 4px;
 }
 
 .sidebar-menu {
