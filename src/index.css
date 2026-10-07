@@ -311,6 +311,17 @@ body {
   font-size: 0.82rem;
 }
 
+/* Recharts paints axis tick labels with a hardcoded fill="#666" attribute, which
+   measures 3.15:1 against the panel background and fails AA. The vendored chart
+   container tries to override it with a Tailwind variant aimed at
+   `.recharts-cartesian-axis-tick text`, but the class Recharts actually renders
+   is `.recharts-cartesian-axis-tick-value`, so that rule never matched and no
+   rule in the stylesheet targeted the label at all. A stylesheet rule beats a
+   presentation attribute, so the colour is set here, scoped to the charts. */
+[data-chart] .recharts-cartesian-axis-tick-value {
+  fill: var(--text-secondary);
+}
+
 /* Badges */
 .badge {
   display: inline-flex;
