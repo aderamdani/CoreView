@@ -5,6 +5,17 @@ Semua perubahan penting proyek ini dicatat di berkas ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/), dan
 versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [1.0.1] - 2026-10-08
+
+### Diperbaiki
+
+- Dashboard gagal dirender di produksi dengan `ReferenceError: Server is not
+  defined`. Berkas `src/components/menus.jsx` memakai 18 ikon lucide tanpa
+  pernah mengimpornya, sehingga saat runtime nama ikon itu menjadi referensi
+  global yang tidak ada. Kesalahan ini lolos dari lint karena aturan `no-undef`
+  tidak memeriksa nama elemen JSX, dan lolos dari build karena identifier yang
+  belum terdefinisi adalah JavaScript yang sah.
+
 ## [1.0.0] - 2026-10-08
 
 Rilis pertama yang diberi nomor. Sebelum ini proyek belum punya versi, jadi

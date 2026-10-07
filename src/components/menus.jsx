@@ -1,3 +1,9 @@
+import {
+  Server, Activity, Shield, Wifi, Share2, Route, DownloadCloud,
+  Lock, Globe, Settings, Terminal, Monitor, Key, BarChart2, Layers, FileText,
+  Heart, Zap,
+} from 'lucide-react';
+
 // Sidebar definition. Kept in its own module so the 136-entry array is not
 // rebuilt on every render. The two counts come from healthAnalysis, which is
 // per-config, so they are arguments rather than module constants.
