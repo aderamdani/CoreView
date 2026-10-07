@@ -228,8 +228,8 @@ export const Landing = ({ onFileParsed }) => {
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: 'inherit', textDecoration: 'none' }}
-            onMouseEnter={(e) => (e.target.style.color = 'var(--accent-light)')}
-            onMouseLeave={(e) => (e.target.style.color = 'inherit')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent-light)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'inherit')}
           >
             Dibuat untuk Network Engineer Indonesia
           </a>

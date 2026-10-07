@@ -17,6 +17,7 @@ const spreadX = (count, centerX, spacing) => {
   return Array.from({ length: count }, (_, i) => start + i * spacing);
 };
 
+/** @returns {import('react').CSSProperties} */
 const baseNode = (extra = {}) => ({
   padding: '10px 14px',
   borderRadius: '10px',

@@ -233,7 +233,9 @@ export const MindMap = ({ config, onNavigate }) => {
           }}
         />
         <MiniMap
-          nodeColor={(n) => n.style?.background || 'var(--bg-elevated)'}
+          nodeColor={(n) =>
+            typeof n.style?.background === 'string' ? n.style.background : 'var(--bg-elevated)'
+          }
           style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
           maskColor="rgba(0, 0, 0, 0.1)"
         />

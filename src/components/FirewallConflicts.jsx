@@ -7,7 +7,7 @@ const CHAIN_COLOR = {
   output: { bg: 'rgba(249,115,22,0.10)', border: '#f97316', text: '#fb923c' },
 };
 
-function RuleRef({ rule, idx, dim }) {
+function RuleRef({ rule, idx, dim = false }) {
   const action = (rule.action || 'accept').toLowerCase();
   const color = action === 'accept' ? '#22c55e' : action === 'drop' ? '#ef4444' : '#f97316';
   return (

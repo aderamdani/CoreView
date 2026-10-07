@@ -9,10 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --test tests/",
-    "check": "npm run lint && npm run format:check && npm test && npm run test:render",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run test:render",
     "test:render": "vite-node tests/render.smoke.jsx",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\" \"tests/**/*.{js,jsx}\" \"*.{js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\" \"tests/**/*.{js,jsx}\" \"*.{js,json}\""
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\" \"tests/**/*.{js,jsx}\" \"*.{js,json}\"",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "dagre": "^0.8.5",

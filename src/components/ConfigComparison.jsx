@@ -115,7 +115,7 @@ export function ConfigComparison() {
     input.type = 'file';
     input.accept = '.rsc,.txt,.cfg,text/*';
     input.onchange = async (e) => {
-      const file = e.target.files[0];
+      const file = /** @type {HTMLInputElement} */ (e.currentTarget).files[0];
       if (!file) return;
       setLoading((prev) => ({ ...prev, [side]: true }));
       try {

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // vite/client declares the asset and `?raw` module shapes that Vite provides.
+    "types": ["vite/client"]
+  },
+  // Tests are excluded on purpose: they run under node:test and use Node APIs,
+  // which would need @types/node just to satisfy the checker. They are already
+  // verified by running them.
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.d.ts"]
+}

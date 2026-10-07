@@ -237,7 +237,7 @@ function Stat({ label, value, color }) {
   );
 }
 
-function LegendItem({ color, label, hatched }) {
+function LegendItem({ color, label, hatched = false }) {
   return (
     <div
       style={{

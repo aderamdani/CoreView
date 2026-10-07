@@ -2312,7 +2312,7 @@ ${
           <tbody>
             {applyFilter(interfaces).length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada interface yang cocok dengan pencarian.
                 </td>
               </tr>
@@ -2376,7 +2376,7 @@ ${
             <tbody>
               {applyFilter(ethernetIfaces).length === 0 ? (
                 <tr>
-                  <td className="table-empty-cell" colSpan="8">
+                  <td className="table-empty-cell" colSpan={8}>
                     Tidak ada interface Ethernet yang cocok dengan pencarian.
                   </td>
                 </tr>
@@ -2487,7 +2487,7 @@ ${
           <tbody>
             {config.interfaceLists.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="3">
+                <td className="table-empty-cell" colSpan={3}>
                   Belum ada Interface List yang dikonfigurasi.
                 </td>
               </tr>
@@ -2546,7 +2546,7 @@ ${
           <tbody>
             {!config.bridges || config.bridges.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Belum ada Bridge yang dikonfigurasi.
                 </td>
               </tr>
@@ -2617,7 +2617,7 @@ ${
           <tbody>
             {!config.bridgePorts || config.bridgePorts.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada Bridge Port yang dikonfigurasi.
                 </td>
               </tr>
@@ -2692,7 +2692,7 @@ ${
           <tbody>
             {applyFilter(ipAddresses).length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada alamat IP yang cocok dengan pencarian.
                 </td>
               </tr>
@@ -2781,7 +2781,7 @@ ${
           <tbody>
             {dhcp.servers.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Belum ada DHCP Server yang dikonfigurasi.
                 </td>
               </tr>
@@ -2816,7 +2816,7 @@ ${
                   </tr>
                   {server.poolObj?.ranges && (
                     <tr style={{ background: 'var(--bg-base)' }}>
-                      <td className="table-empty-cell" colSpan="6" style={{ padding: '0 12px 12px' }}>
+                      <td className="table-empty-cell" colSpan={6} style={{ padding: '0 12px 12px' }}>
                         <DHCPRangeVisualizer server={server} />
                       </td>
                     </tr>
@@ -2852,7 +2852,7 @@ ${
           <tbody>
             {!config.dhcp.clients || config.dhcp.clients.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada DHCP Client yang dikonfigurasi.
                 </td>
               </tr>
@@ -2934,7 +2934,7 @@ ${
           <tbody>
             {config.dns.static.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada entri DNS statis.
                 </td>
               </tr>
@@ -3077,7 +3077,7 @@ ${
               const filtered = applyColFilter('ip-routes', applyFilter(routes));
               return filtered.length === 0 ? (
                 <tr>
-                  <td className="table-empty-cell" colSpan="5">
+                  <td className="table-empty-cell" colSpan={5}>
                     Tidak ada route yang cocok dengan filter.
                   </td>
                 </tr>
@@ -3136,7 +3136,7 @@ ${
           <tbody>
             {!config.pools || config.pools.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada IP pool yang dikonfigurasi.
                 </td>
               </tr>
@@ -3221,7 +3221,7 @@ ${
           <tbody>
             {config.hotspot.servers.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada Hotspot Server yang dikonfigurasi.
                 </td>
               </tr>
@@ -3312,7 +3312,7 @@ ${
           <tbody>
             {!config.hotspot.users || config.hotspot.users.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Belum ada Hotspot User yang dikonfigurasi.
                 </td>
               </tr>
@@ -3359,7 +3359,7 @@ ${
               <tbody>
                 {!config.hotspot.bindings || config.hotspot.bindings.length === 0 ? (
                   <tr>
-                    <td className="table-empty-cell" colSpan="3">
+                    <td className="table-empty-cell" colSpan={3}>
                       None
                     </td>
                   </tr>
@@ -3396,7 +3396,7 @@ ${
               <tbody>
                 {!config.hotspot.walledGarden && !config.hotspot.walledGardenIp ? (
                   <tr>
-                    <td className="table-empty-cell" colSpan="2">
+                    <td className="table-empty-cell" colSpan={2}>
                       None
                     </td>
                   </tr>
@@ -3458,7 +3458,7 @@ ${
           <tbody>
             {config.routingTables.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada Routing Table yang dikonfigurasi.
                 </td>
               </tr>
@@ -3614,7 +3614,7 @@ ${
                   const filtered = applyColFilter('firewall-filter', applyFilter(firewall.filter));
                   return filtered.length === 0 ? (
                     <tr>
-                      <td className="table-empty-cell" colSpan="7">
+                      <td className="table-empty-cell" colSpan={7}>
                         Tidak ada rule filter yang cocok.
                       </td>
                     </tr>
@@ -3692,7 +3692,7 @@ ${
               const filtered = applyColFilter('firewall-nat', applyFilter(firewall.nat));
               return filtered.length === 0 ? (
                 <tr>
-                  <td className="table-empty-cell" colSpan="6">
+                  <td className="table-empty-cell" colSpan={6}>
                     Tidak ada rule NAT yang cocok.
                   </td>
                 </tr>
@@ -3751,7 +3751,7 @@ ${
           <tbody>
             {!firewall.mangle || applyFilter(firewall.mangle).length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada rule mangle yang cocok dengan pencarian.
                 </td>
               </tr>
@@ -3808,7 +3808,7 @@ ${
           <tbody>
             {!firewall.raw || applyFilter(firewall.raw).length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada rule raw yang cocok dengan pencarian.
                 </td>
               </tr>
@@ -3933,7 +3933,7 @@ ${
           <tbody>
             {config.queues.trees.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="8">
+                <td className="table-empty-cell" colSpan={8}>
                   Belum ada Queue Tree yang dikonfigurasi.
                 </td>
               </tr>
@@ -3995,7 +3995,7 @@ ${
           <tbody>
             {config.queues.types.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada Queue Type yang dikonfigurasi.
                 </td>
               </tr>
@@ -4056,7 +4056,7 @@ ${
             ))}
             {vpn.wireguard.length === 0 && (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Tidak ada koneksi WireGuard yang ditemukan.
                 </td>
               </tr>
@@ -4096,7 +4096,7 @@ ${
             ))}
             {vpn.ovpn.length + vpn.l2tp.length === 0 && (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Tidak ada koneksi VPN lama yang ditemukan.
                 </td>
               </tr>
@@ -4124,7 +4124,7 @@ ${
           <tbody>
             {!vpn.wireguardPeers || vpn.wireguardPeers.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="7">
+                <td className="table-empty-cell" colSpan={7}>
                   Belum ada WireGuard peer yang dikonfigurasi.
                 </td>
               </tr>
@@ -4192,7 +4192,7 @@ ${
             !config.tools.graphingInterfaces ||
             config.tools.graphingInterfaces.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada Interface Graphing yang dikonfigurasi.
                 </td>
               </tr>
@@ -4236,7 +4236,7 @@ ${
           <tbody>
             {config.services.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Tidak ada Service yang disebutkan di konfigurasi.
                 </td>
               </tr>
@@ -4339,7 +4339,7 @@ ${
           <tbody>
             {config.systemLogActions.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada logging action khusus yang didefinisikan.
                 </td>
               </tr>
@@ -4377,7 +4377,7 @@ ${
           <tbody>
             {config.system.logging.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada rule logging khusus yang didefinisikan.
                 </td>
               </tr>
@@ -4473,7 +4473,7 @@ ${
             ))}
             {(!config.lteApns || config.lteApns.length === 0) && (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Tidak ada konfigurasi LTE APN.
                 </td>
               </tr>
@@ -4512,7 +4512,7 @@ ${
             ))}
             {(!config.snmpCommunities || config.snmpCommunities.length === 0) && (
               <tr>
-                <td className="table-empty-cell" colSpan="3">
+                <td className="table-empty-cell" colSpan={3}>
                   Tidak ada konfigurasi SNMP Community.
                 </td>
               </tr>
@@ -4621,7 +4621,7 @@ ${
             ))}
             {(!config.ipsecProfiles || config.ipsecProfiles.length === 0) && (
               <tr>
-                <td className="table-empty-cell" colSpan="3">
+                <td className="table-empty-cell" colSpan={3}>
                   Tidak ada konfigurasi IPsec Profile.
                 </td>
               </tr>
@@ -4664,7 +4664,7 @@ ${
             ))}
             {(!config.routingBfd || config.routingBfd.length === 0) && (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Tidak ada konfigurasi Routing BFD.
                 </td>
               </tr>
@@ -4707,7 +4707,7 @@ ${
             ))}
             {(!config.routingRules || config.routingRules.length === 0) && (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Tidak ada konfigurasi Routing Rules.
                 </td>
               </tr>
@@ -4777,7 +4777,7 @@ ${
             ))}
             {(!config.vpn?.ovpnServers || config.vpn.ovpnServers.length === 0) && (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Tidak ada layanan OpenVPN Server.
                 </td>
               </tr>
@@ -4809,7 +4809,7 @@ ${
           <tbody>
             {config.ports.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada Port yang dikonfigurasi.
                 </td>
               </tr>
@@ -4994,7 +4994,7 @@ ${
           <tbody>
             {!config.system?.users || config.system.users.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Tidak ada user custom. (User 'admin' default tidak tereksport ke .rsc)
                 </td>
               </tr>
@@ -5034,7 +5034,7 @@ ${
           <tbody>
             {!config.system?.groups || config.system.groups.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="3">
+                <td className="table-empty-cell" colSpan={3}>
                   Tidak ada group custom. (Group default tidak tereksport)
                 </td>
               </tr>
@@ -5148,7 +5148,7 @@ ${
           <tbody>
             {!config.system?.scheduler || config.system.scheduler.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada Scheduler yang dikonfigurasi.
                 </td>
               </tr>
@@ -5211,7 +5211,7 @@ ${
           <tbody>
             {!config.system?.scripts || config.system.scripts.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Tidak ada Script yang dikonfigurasi.
                 </td>
               </tr>
@@ -5281,7 +5281,7 @@ ${
           <tbody>
             {!bridgeVlans || bridgeVlans.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada Bridge VLAN yang dikonfigurasi.
                 </td>
               </tr>
@@ -5345,7 +5345,7 @@ ${
           <tbody>
             {config.routingFilterRules.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="4">
+                <td className="table-empty-cell" colSpan={4}>
                   Belum ada routing filter rule yang didefinisikan.
                 </td>
               </tr>
@@ -5397,7 +5397,7 @@ ${
           <tbody>
             {config.routingBgpTmpl.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada BGP template yang didefinisikan.
                 </td>
               </tr>
@@ -5437,7 +5437,7 @@ ${
           <tbody>
             {config.routingBgpConn.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada koneksi BGP yang didefinisikan.
                 </td>
               </tr>
@@ -5489,7 +5489,7 @@ ${
           <tbody>
             {config.ppp.pppoeServers.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada PPPoE Server yang didefinisikan.
                 </td>
               </tr>
@@ -5537,7 +5537,7 @@ ${
           <tbody>
             {!config.firewall?.layer7 || config.firewall.layer7.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="3">
+                <td className="table-empty-cell" colSpan={3}>
                   Tidak ada Layer7 Protocol yang dikonfigurasi.
                 </td>
               </tr>
@@ -5594,7 +5594,7 @@ ${
           <tbody>
             {config.queues.simple.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Belum ada Simple Queue yang didefinisikan.
                 </td>
               </tr>
@@ -5639,7 +5639,7 @@ ${
           <tbody>
             {!config.queues?.interfaceQueues || config.queues.interfaceQueues.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="3">
+                <td className="table-empty-cell" colSpan={3}>
                   Tidak ada konfigurasi Interface Queue. (Menggunakan pengaturan default per interface)
                 </td>
               </tr>
@@ -5701,7 +5701,7 @@ ${
           <tbody>
             {!config.wireless?.interfaces || config.wireless.interfaces.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="8">
+                <td className="table-empty-cell" colSpan={8}>
                   Tidak ada konfigurasi Wireless Interface.
                 </td>
               </tr>
@@ -5762,7 +5762,7 @@ ${
           <tbody>
             {!config.wireless?.securityProfiles || config.wireless.securityProfiles.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada Security Profile yang dikonfigurasi.
                 </td>
               </tr>
@@ -5811,7 +5811,7 @@ ${
           <tbody>
             {!config.wireless?.accessList || config.wireless.accessList.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Tidak ada konfigurasi Access List.
                 </td>
               </tr>
@@ -5859,7 +5859,7 @@ ${
           <tbody>
             {!config.wireless?.connectList || config.wireless.connectList.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="5">
+                <td className="table-empty-cell" colSpan={5}>
                   Tidak ada konfigurasi Connect List.
                 </td>
               </tr>
@@ -5908,7 +5908,7 @@ ${
           <tbody>
             {!config.ppp?.profiles || config.ppp.profiles.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="6">
+                <td className="table-empty-cell" colSpan={6}>
                   Tidak ada PPP Profile yang dikonfigurasi.
                 </td>
               </tr>
@@ -5957,7 +5957,7 @@ ${
           <tbody>
             {!config.ppp?.secrets || config.ppp.secrets.length === 0 ? (
               <tr>
-                <td className="table-empty-cell" colSpan="7">
+                <td className="table-empty-cell" colSpan={7}>
                   Tidak ada PPP Secret yang dikonfigurasi.
                 </td>
               </tr>
