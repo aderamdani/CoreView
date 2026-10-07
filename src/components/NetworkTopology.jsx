@@ -63,6 +63,11 @@ const InternetNode = ({ data }) => (
     {data.wanCount > 1 && (
       <div style={{ fontSize: 10, opacity: 0.6, marginTop: 2 }}>{data.wanCount} uplink</div>
     )}
+    {data.wanTruncated && (
+      <div style={{ fontSize: 9, opacity: 0.55, marginTop: 2 }}>
+        menampilkan {data.wanShown} dari {data.wanCount}
+      </div>
+    )}
   </div>
 );
 
@@ -84,6 +89,11 @@ const RouterNode = ({ data }) => (
     <div style={{ fontSize: 22, marginBottom: 4 }}>🔀</div>
     <div style={{ fontWeight: 800, fontSize: 14, color: '#e0e7ff' }}>{data.label}</div>
     {data.model && <div style={{ fontSize: 10, opacity: 0.55, marginTop: 2 }}>{data.model}</div>}
+    {data.lanTruncated && (
+      <div style={{ fontSize: 9, opacity: 0.55, marginTop: 2 }}>
+        menampilkan {data.lanShown} dari {data.lanCount} LAN
+      </div>
+    )}
     {chip('MikroTik Router', 'rgba(99,102,241,0.25)', '#818cf8')}
   </div>
 );
@@ -158,8 +168,25 @@ const VpnNode = ({ data }) => (
 );
 
 /* Must be defined outside component to avoid ReactFlow re-registering on every render */
+/* A small label node used to state that a list was capped, so the graph never
+   drops items without saying so. */
+const NoteNode = ({ data }) => (
+  <div
+    style={baseNode({
+      background: 'var(--bg-elevated)',
+      borderColor: 'var(--border-strong)',
+      color: 'var(--text-secondary)',
+      cursor: 'default',
+      minWidth: '0',
+    })}
+  >
+    <div style={{ fontSize: 10 }}>{data.text}</div>
+  </div>
+);
+
 const NODE_TYPES = {
   internet: InternetNode,
+  note: NoteNode,
   router: RouterNode,
   wanIface: IfaceNode,
   lanIface: IfaceNode,
@@ -231,16 +258,24 @@ function buildGraph(config, onNavigate) {
 
   const CX = 420; // center x
 
+  /* WAN interfaces. The cap keeps the graph readable, but the cut has to be
+     visible: the node above reports how many of them are actually drawn. */
+  const wanAll = [...wanSet];
+  const wanList = wanAll.slice(0, 4);
+
   /* Internet */
   nodes.push({
     id: 'internet',
     type: 'internet',
     position: { x: CX - 70, y: 20 },
-    data: { wanCount: wanSet.size, onNavigate },
+    data: {
+      wanCount: wanAll.length,
+      wanShown: wanList.length,
+      wanTruncated: wanAll.length > wanList.length,
+      onNavigate,
+    },
   });
 
-  /* WAN interfaces */
-  const wanList = [...wanSet].slice(0, 4);
   const wanXs = spreadX(wanList.length, CX, 220);
   wanList.forEach((name, i) => {
     const iface = interfaces.find((f) => f.name === name) || {};
@@ -275,16 +310,26 @@ function buildGraph(config, onNavigate) {
     });
   });
 
+  /* LAN interfaces, capped for readability. Declared before the router node so
+     that node can report how many of them are actually drawn. */
+  const lanAll = [...lanSet];
+  const lanList = lanAll.slice(0, 5);
+
   /* Router core */
   nodes.push({
     id: 'router',
     type: 'router',
     position: { x: CX - 90, y: 320 },
-    data: { label: config.metadata?.identity || 'MikroTik', model: config.metadata?.model, onNavigate },
+    data: {
+      label: config.metadata?.identity || 'MikroTik',
+      model: config.metadata?.model,
+      lanCount: lanAll.length,
+      lanShown: lanList.length,
+      lanTruncated: lanAll.length > lanList.length,
+      onNavigate,
+    },
   });
 
-  /* LAN interfaces */
-  const lanList = [...lanSet].slice(0, 5);
   const lanXs = spreadX(lanList.length, CX, 220);
   lanList.forEach((name, i) => {
     const iface = interfaces.find((f) => f.name === name) || {};
@@ -336,8 +381,9 @@ function buildGraph(config, onNavigate) {
     })),
     ...ovpn.map((v) => ({ label: v.name || 'OpenVPN', type: 'OpenVPN', peers: 0 })),
     ...l2tp.map((v) => ({ label: v.name || 'L2TP', type: 'L2TP/IPSec', peers: 0 })),
-  ].slice(0, 4);
-  vpnAll.forEach((v, i) => {
+  ];
+  const vpnShown = vpnAll.slice(0, 4);
+  vpnShown.forEach((v, i) => {
     nodes.push({
       id: `vpn-${i}`,
       type: 'vpn',
@@ -353,6 +399,15 @@ function buildGraph(config, onNavigate) {
       markerEnd: { type: MarkerType.ArrowClosed, color: '#9b59b6' },
     });
   });
+
+  if (vpnAll.length > vpnShown.length) {
+    nodes.push({
+      id: 'vpn-truncated',
+      type: 'note',
+      position: { x: CX + 280, y: 320 + vpnShown.length * 130 },
+      data: { text: `menampilkan ${vpnShown.length} dari ${vpnAll.length} koneksi VPN` },
+    });
+  }
 
   return { nodes, edges };
 }
