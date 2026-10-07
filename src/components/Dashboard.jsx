@@ -6,6 +6,7 @@ import {
   Heart, AlertTriangle, Info, TrendingUp, BookOpen, Lightbulb, Zap
 } from 'lucide-react';
 import { buildMenus } from './menus.jsx';
+import { PLACEHOLDER_TABS } from './placeholderTabs';
 import { configHelp } from '../utils/configHelp';
 import { generateItemExplanation } from '../utils/itemExplainer';
 import { analyzeConfig } from '../utils/configAnalyzer';
@@ -702,38 +703,46 @@ ${(firewall.nat || []).length > 0 ? `
                     {menu.icon}
                     {!sidebarCollapsed && <span>{menu.label}</span>}
                   </div>
-                  {!sidebarCollapsed && (() => {
-                    if (menu.badge) {
-                      return (
-                        <span className="sidebar-count-badge" style={{ background: menu.badge.color, color: '#fff' }}>
-                          {menu.badge.count}
-                        </span>
-                      );
-                    }
-                    // Shown for parents too. The old guard (`> 0 && !hasSubmenus`)
-                    // computed the subtotal and then threw it away, so a parent
-                    // like "VPN" reported nothing even when its children held
-                    // every item in the config.
-                    const parentCount = hasSubmenus
-                      ? menu.submenus.reduce((s, sub) => s + (dataCounts[sub.id] || 0), 0)
-                      : (dataCounts[menu.id] || 0);
-                    if (parentCount > 0) {
-                      return <span className="sidebar-count-badge">{parentCount}</span>;
-                    }
-                    return null;
-                  })()}
-                  {!sidebarCollapsed && !hasSubmenus && (
-                    <button onClick={(e) => toggleFavorite(menu.id, e)} title={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: isFav ? '#f59e0b' : 'var(--text-muted)', padding: '0 2px', lineHeight: 1, fontSize: '0.85rem', opacity: isFav ? 1 : 0.4, transition: 'opacity 0.2s' }}>
-                      {isFav ? '⭐' : '☆'}
-                    </button>
-                  )}
-                  {hasSubmenus && !sidebarCollapsed && (
-                    <ChevronRight
-                      size={13}
-                      className={`sidebar-chevron ${isMenuExpanded ? 'open' : ''}`}
-                    />
-                  )}
+                  {/* Grouped so the indicators sit next to each other. With the
+                      row's space-between they were spread across the remaining
+                      width, and adding the placeholder marker made that worse. */}
+                  <div className="sidebar-item-trailing">
+                    {!sidebarCollapsed && !hasSubmenus && PLACEHOLDER_TABS.has(menu.id) && (
+                      <span className="sidebar-soon" title="Belum ada isinya, masih dalam pengembangan">Segera</span>
+                    )}
+                    {!sidebarCollapsed && (() => {
+                      if (menu.badge) {
+                        return (
+                          <span className="sidebar-count-badge" style={{ background: menu.badge.color, color: '#fff' }}>
+                            {menu.badge.count}
+                          </span>
+                        );
+                      }
+                      // Shown for parents too. The old guard (`> 0 && !hasSubmenus`)
+                      // computed the subtotal and then threw it away, so a parent
+                      // like "VPN" reported nothing even when its children held
+                      // every item in the config.
+                      const parentCount = hasSubmenus
+                        ? menu.submenus.reduce((s, sub) => s + (dataCounts[sub.id] || 0), 0)
+                        : (dataCounts[menu.id] || 0);
+                      if (parentCount > 0) {
+                        return <span className="sidebar-count-badge">{parentCount}</span>;
+                      }
+                      return null;
+                    })()}
+                    {!sidebarCollapsed && !hasSubmenus && (
+                      <button onClick={(e) => toggleFavorite(menu.id, e)} title={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: isFav ? '#f59e0b' : 'var(--text-muted)', padding: '0 2px', lineHeight: 1, fontSize: '0.85rem', opacity: isFav ? 1 : 0.4, transition: 'opacity 0.2s' }}>
+                        {isFav ? '⭐' : '☆'}
+                      </button>
+                    )}
+                    {hasSubmenus && !sidebarCollapsed && (
+                      <ChevronRight
+                        size={13}
+                        className={`sidebar-chevron ${isMenuExpanded ? 'open' : ''}`}
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {hasSubmenus && isMenuExpanded && !sidebarCollapsed && (
@@ -750,6 +759,9 @@ ${(firewall.nat || []).length > 0 ? `
                         >
                           <span>{sub.label}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            {PLACEHOLDER_TABS.has(sub.id) && (
+                              <span className="sidebar-soon" title="Belum ada isinya, masih dalam pengembangan">Segera</span>
+                            )}
                             {dataCounts[sub.id] > 0 && (
                               <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>{dataCounts[sub.id]}</span>
                             )}

@@ -657,3 +657,25 @@
 
 .card-hover { transition: border-color 0.2s; }
 .card-hover:hover { border-color: var(--border-strong); }
+
+/* Trailing indicators of a sidebar row, kept adjacent rather than spread. */
+.sidebar-item-trailing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Marks a section whose panel is still a placeholder, so the navigation does
+   not promise content that does not exist yet. */
+.sidebar-soon {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
