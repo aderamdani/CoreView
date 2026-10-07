@@ -26,7 +26,11 @@
 - [Cara Memulai](#-cara-memulai)
 - [Cara Menggunakan](#-cara-menggunakan)
 - [Struktur Proyek](#-struktur-proyek)
+- [Versi dan Changelog](#-versi-dan-changelog)
 - [Deployment](#-deployment)
+- [Privasi & Keamanan](#-privasi--keamanan)
+- [Kontribusi](#-kontribusi)
+- [Lisensi](#-lisensi)
 
 ---
 
@@ -195,6 +199,8 @@ CoreView/
 │   │   ├── FirewallSwimlane.jsx  # Visualisasi rule firewall per chain
 │   │   ├── ConfigComparison.jsx  # Bandingkan dua file konfigurasi
 │   │   ├── DHCPRangeVisualizer.jsx  # Visualisasi rentang IP DHCP
+│   │   ├── AboutPanel.jsx     # Chip versi + catatan rilis
+│   │   ├── menus.jsx          # Definisi menu sidebar
 │   │   └── GlossaryTip.jsx    # Tooltip istilah jaringan
 │   ├── utils/
 │   │   ├── parser.js            # Parser file .rsc → JSON terstruktur
@@ -202,12 +208,15 @@ CoreView/
 │   │   ├── configAnalyzer.js    # Health check & saran perbaikan
 │   │   ├── detectConflicts.js   # Deteksi konflik & duplikat firewall
 │   │   ├── packetTracer.js      # Logika simulasi packet tracer
+│   │   ├── changelog.js         # Baca CHANGELOG.md untuk panel rilis
 │   │   └── itemExplainer.js     # Penjelasan per item konfigurasi
 │   ├── App.jsx                # Root: state file, pencarian, theme
 │   ├── App.css                # Styling komponen
 │   ├── index.css              # Design system & CSS variables
 │   └── main.jsx               # Entry point
-├── tests/                    # Tes runner (node --test)
+├── tests/                    # Tes (node --test)
+├── CHANGELOG.md              # Riwayat versi
+├── DEPLOYMENT-DOMAIN.md      # Panduan migrasi domain
 ├── index.html                # HTML template
 ├── vite.config.js            # Konfigurasi Vite
 ├── eslint.config.js          # Konfigurasi ESLint
@@ -224,6 +233,47 @@ File .rsc  →  parser.js  →  Structured JSON  →  Dashboard.jsx  →  UI
 
 - **`parser.js`**: Membaca setiap baris file `.rsc`, mengekstrak context path (`/ip firewall filter`, dll.), dan memetakannya ke objek JSON terstruktur. Setelah parsing, fungsi `enrichDashboardData` menghubungkan relasi antar objek (misalnya: DHCP server → interface → pool). Input yang bukan export MikroTik ditolak dengan pesan yang bisa dibaca pengguna.
 - **`configHelp.js`**: Berisi deskripsi bahasa Indonesia untuk setiap seksi konfigurasi, digunakan oleh `HelpPanel` di dalam Dashboard.
+
+---
+
+## 🔖 Versi dan Changelog
+
+Versi proyek disimpan di satu tempat saja, yaitu field `version` pada
+`package.json`. Nilai itu diteruskan ke aplikasi lewat `define` di
+`vite.config.js` sebagai `__APP_VERSION__`, jadi angka yang tampil di aplikasi
+tidak bisa berbeda dari yang tertulis di `package.json`.
+
+Di aplikasi, nomor versi tampil sebagai chip di header. Mengkliknya membuka
+catatan rilis untuk versi yang sedang berjalan. Isi panel itu dibaca langsung
+dari `CHANGELOG.md` saat build, bukan disalin ke berkas terpisah, sehingga
+catatan rilis dan berkas changelog tidak bisa saling menyimpang.
+
+Riwayat lengkap ada di [`CHANGELOG.md`](CHANGELOG.md). Formatnya mengikuti
+Keep a Changelog, dan penomoran versinya mengikuti Semantic Versioning.
+
+### Alur rilis
+
+```bash
+# 1. Naikkan versi di package.json, lalu tulis bagian barunya di CHANGELOG.md.
+#    Judul bagian harus persis "## [x.y.z] - YYYY-MM-DD".
+
+# 2. Pastikan bersih.
+npm run check
+npm run build
+
+# 3. Commit, tag, push.
+git add -A
+git commit -m "chore(release): vX.Y.Z"
+git tag -a vX.Y.Z -m "CoreView vX.Y.Z"
+git push && git push --tags
+
+# 4. Buat GitHub Release dari tag tersebut, dengan isi bagian changelog
+#    versi itu sebagai keterangan rilis.
+```
+
+Kalau langkah 1 terlewat dan `CHANGELOG.md` belum punya bagian untuk versi yang
+baru, panel catatan rilis akan menampilkan kalimat bahwa catatan belum
+tersedia, bukan panel kosong.
 
 ---
 
