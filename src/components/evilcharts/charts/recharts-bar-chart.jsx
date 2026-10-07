@@ -66,8 +66,8 @@ function useBarChart() {
 
 /**
  * Root of the composible bar chart. Owns the data, the shared context, the
- * loading skeleton, and the optional zoom brush. Everything visual — axes,
- * grid, tooltip, legend, and the bars themselves — is composed as children,
+ * loading skeleton, and the optional zoom brush. Everything visual, axes,
+ * grid, tooltip, legend, and the bars themselves, is composed as children,
  * so a consumer renders exactly the parts they need.
  */
 export function EvilBarChart({
@@ -90,7 +90,7 @@ export function EvilBarChart({
   xDataKey,
 }) {
   const chartId = useId().replace(/:/g, ''); // colon-free id keeps CSS/SVG selectors valid
-  // Anchors the grow-in to a fixed moment so it plays exactly once — re-renders
+  // Anchors the grow-in to a fixed moment so it plays exactly once, re-renders
   // and Recharts' bar remounts read elapsed time from here instead of replaying.
   // Lazy useState stamps the time once, on the initial render only.
   const [introStartedAt] = useState(() => Date.now());
@@ -214,8 +214,8 @@ export function EvilBarChart({
 
 /**
  * A single bar series. Each <Bar /> is fully self-contained: it generates its
- * own gradient/pattern definitions under a unique id, so any number of bars —
- * each with its own variant, radius, glow, and clickability — can live in one
+ * own gradient/pattern definitions under a unique id, so any number of bars,
+ * each with its own variant, radius, glow, and clickability, can live in one
  * chart without style collisions.
  */
 function Bar({
@@ -252,7 +252,7 @@ function Bar({
   const resolvedRadius = radius ?? defaultRadius;
   const isSelected = selectedDataKey === dataKey;
 
-  // The grow-in is a per-frame animation — heavier than a static chart — so
+  // The grow-in is a per-frame animation, heavier than a static chart, so
   // `"none"` and the OS reduce-motion preference both opt out of it.
   const revealType = shouldReduceMotion ? 'none' : (animationType ?? defaultAnimation);
 
@@ -284,7 +284,7 @@ function Bar({
         stackId={isStacked ? STACK_ID : undefined}
         fill={`url(#${id}-colors-${dataKey})`}
         radius={resolvedRadius}
-        // Recharts' built-in bar animation is permanently disabled — every bar
+        // Recharts' built-in bar animation is permanently disabled, every bar
         // instead grows in from its baseline via the staggered motion.dev shape.
         isAnimationActive={false}
         style={isClickable || enableHoverHighlight ? { cursor: 'pointer' } : undefined}
@@ -313,7 +313,7 @@ function Bar({
  * The category axis. Ships with the chart's flat default styling and forwards
  * every Recharts XAxis prop, so `dataKey`, `tickFormatter`, etc. are passed
  * straight through. Hidden automatically while the chart is loading. Resolves
- * its axis type from the chart layout — categorical when vertical, numeric
+ * its axis type from the chart layout, categorical when vertical, numeric
  * when the bars run horizontally.
  */
 function XAxis({
@@ -342,7 +342,7 @@ function XAxis({
 
 /**
  * The value axis. Forwards every Recharts YAxis prop and resolves its axis type
- * from the chart layout — numeric when vertical, categorical when the bars run
+ * from the chart layout, numeric when vertical, categorical when the bars run
  * horizontally. Hidden automatically while the chart is loading.
  */
 function YAxis({
@@ -480,7 +480,7 @@ const CustomBar = (props) => {
   // Stripped bars round only their top corners; every other variant rounds all four
   const radius = isStripped ? [barRadius, barRadius, 0, 0] : barRadius;
 
-  // The visible, painted bar — plus the stripped variant's solid top strip
+  // The visible, painted bar, plus the stripped variant's solid top strip
   const visibleBar = (
     <>
       <Rectangle
@@ -532,15 +532,15 @@ const CustomBar = (props) => {
 /**
  * Builds the motion.dev grow-in animation for a single bar, or returns `null`
  * when the bar should render statically (`"none"`, reduced motion, an unknown
- * index, or — crucially — once the bar has already finished growing).
+ * index, or, crucially, once the bar has already finished growing).
  *
- * Every bar grows from its baseline — `scaleY` from the bottom for vertical
- * layout, `scaleX` from the left for horizontal — and `animationType` decides
+ * Every bar grows from its baseline, `scaleY` from the bottom for vertical
+ * layout, `scaleX` from the left for horizontal, and `animationType` decides
  * the stagger order, so the chart fills in one bar at a time.
  *
  * The intro is anchored to `introStartedAt` (stamped once when the chart
  * mounts) rather than to component mount. Recharts remounts every bar whenever
- * the chart re-renders — e.g. on hover-highlight — so a mount-based animation
+ * the chart re-renders, e.g. on hover-highlight, so a mount-based animation
  * would replay endlessly. Reading elapsed time instead makes it a true
  * one-shot: a bar past its window renders static, and a bar caught mid-grow
  * resumes from the progress it should already be at.
@@ -572,7 +572,7 @@ const getBarGrowAnimation = (animationType, index, dataLength, isHorizontal, int
   const endMs = startMs + durationMs;
   const elapsed = Date.now() - introStartedAt;
 
-  // Already finished — render static so re-renders/remounts can't replay it
+  // Already finished, render static so re-renders/remounts can't replay it
   if (elapsed >= endMs) return null;
 
   // Resume from wherever this bar should already be: 0 before it starts,
@@ -633,7 +633,7 @@ const getBarOpacity = ({
 };
 
 /**
- * Vertical top-to-bottom color gradient for a series. Always rendered — every
+ * Vertical top-to-bottom color gradient for a series. Always rendered, every
  * fill variant and the buffer-bar stroke paint from this single gradient.
  */
 const ColorGradient = ({ id, dataKey, config }) => {
@@ -729,7 +729,7 @@ const BufferHatchedPattern = ({ id, dataKey }) => {
   );
 };
 
-/** Two-tone fill — a half-faded, half-solid split applied per bar bounding box. */
+/** Two-tone fill, a half-faded, half-solid split applied per bar bounding box. */
 const DuotonePattern = ({ id, dataKey, config }) => {
   const colorsCount = getColorsCount(config[dataKey] ?? {});
 
@@ -1071,7 +1071,7 @@ const LoadingBarPattern = ({ chartId, onShimmerExit }) => {
 
 // Compound API: every part hangs off the root as a static member, so a consumer
 // writes <EvilBarChart.Bar/>, <EvilBarChart.Tooltip/>, … from a single import
-// — no colliding named marker exports when several charts share one file.
+// no colliding named marker exports when several charts share one file.
 EvilBarChart.Bar = Bar;
 EvilBarChart.XAxis = XAxis;
 EvilBarChart.YAxis = YAxis;

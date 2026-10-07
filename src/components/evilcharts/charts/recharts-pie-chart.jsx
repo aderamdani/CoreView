@@ -50,8 +50,8 @@ function usePieChart() {
 
 /**
  * Root of the composible pie chart. Owns the data, the shared context, and the
- * loading skeleton. Everything visual — the pie itself, tooltip, legend, and an
- * optional background — is composed as children, so a consumer renders exactly
+ * loading skeleton. Everything visual, the pie itself, tooltip, legend, and an
+ * optional background, is composed as children, so a consumer renders exactly
  * the parts they need.
  */
 export function EvilPieChart({
@@ -114,8 +114,8 @@ export function EvilPieChart({
 
 /**
  * The pie series. Self-contained: it generates its own radial color gradients
- * and glow filters under a unique id, so any number of pies — each with its own
- * shape and clickability — can live on one page without style collisions. While
+ * and glow filters under a unique id, so any number of pies, each with its own
+ * shape and clickability, can live on one page without style collisions. While
  * the chart is loading it renders an animated skeleton in place of the data.
  * Compose <Label /> inside it to draw labels on each sector.
  */
@@ -213,7 +213,7 @@ function Pie({
 
 /**
  * Declares per-sector labels for the <Pie /> it is composed inside. It renders
- * nothing on its own — the parent <Pie /> reads its props and wires them into a
+ * nothing on its own, the parent <Pie /> reads its props and wires them into a
  * Recharts LabelList drawn over the sectors.
  */
 const Label = () => null;

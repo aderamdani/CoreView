@@ -189,7 +189,7 @@ function EvilBrush({
       const clamped = clampRange(next, mode);
       const last = lastCommittedRef.current;
 
-      // Only update if the range has actually changed — avoids unnecessary
+      // Only update if the range has actually changed, avoids unnecessary
       // re-renders when the brush is at a boundary and small mouse movements
       // don't produce index changes
       if (last.startIndex === clamped.startIndex && last.endIndex === clamped.endIndex) {
@@ -198,7 +198,7 @@ function EvilBrush({
 
       lastCommittedRef.current = clamped;
       setInternalRange(clamped);
-      // Defer the parent callback — chart re-render happens at lower priority,
+      // Defer the parent callback, chart re-render happens at lower priority,
       // React can skip intermediate frames during fast drags
       React.startTransition(() => {
         onChange?.(clamped);
@@ -542,7 +542,7 @@ function useEvilBrush({ data, defaultStartIndex = 0, defaultEndIndex }) {
     endIndex: defaultEndIndex ?? Math.max(0, data.length - 1),
   });
 
-  // Defer the range used for data slicing — the brush handles move at the
+  // Defer the range used for data slicing, the brush handles move at the
 
   // immediate `range` cadence while the expensive chart re-render uses the
   // deferred value.  React can skip intermediate slices during fast drags.

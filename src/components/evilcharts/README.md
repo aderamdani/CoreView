@@ -35,6 +35,9 @@ dikerjakan lagi sesudahnya:
    `src/tailwind.css`. Pemindaian otomatis dimatikan seluruh proyek supaya
    utilitas tidak tergenerate dari string biasa, jadi folder ini harus terdaftar
    secara eksplisit.
+4. **Em dash di komentar diganti.** Aturan proyek melarang karakter itu di
+   seluruh `src/`, termasuk komentar. Penggantiannya hanya menyentuh komentar,
+   tidak ada perilaku yang berubah.
 
 ## Ketergantungan
 
