@@ -530,7 +530,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Konfigurasi — ${escapeHtml(identity)}</title>
+<title>Laporan Konfigurasi: ${escapeHtml(identity)}</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; max-width: 900px; margin: 0 auto; padding: 32px 24px; background: #f9fafb; }
   h1 { font-size: 28px; font-weight: 900; color: #1f2937; margin: 0 0 4px; }
@@ -589,7 +589,7 @@ ${(firewall.nat || []).length > 0 ? `
   <tbody>${natRows}</tbody>
 </table>` : '<p style="color:#9ca3af">Tidak ada NAT rules.</p>'}
 
-<div class="footer">Dibuat oleh CoreView — MikroTik Config Visualizer &nbsp;·&nbsp; ${now}</div>
+<div class="footer">Dibuat oleh CoreView, MikroTik Config Visualizer &nbsp;·&nbsp; ${now}</div>
 </body>
 </html>`;
 
@@ -848,10 +848,10 @@ ${(firewall.nat || []).length > 0 ? `
               {[
                 { icon: '🛡️', term: 'Firewall Rules', desc: 'Aturan penjaga yang memutuskan traffic mana yang boleh masuk/keluar, seperti satpam yang memeriksa tamu.' },
                 { icon: '📡', term: 'DHCP Server', desc: 'Layanan pembagi alamat IP otomatis ke perangkat, seperti resepsionis yang memberi nomor kamar.' },
-                { icon: '🗺️', term: 'Routes', desc: 'Peta jalan untuk data — memberitahu router harus kirim paket ke mana.' },
+                { icon: '🗺️', term: 'Routes', desc: 'Peta jalan untuk data. Memberitahu router harus kirim paket ke mana.' },
                 { icon: '🔒', term: 'VPN Tunnel', desc: 'Terowongan terenkripsi untuk koneksi aman dari jauh, seperti lorong rahasia antara dua gedung.' },
                 { icon: '🔄', term: 'NAT / Masquerade', desc: 'Menerjemahkan IP lokal ke IP publik agar semua perangkat bisa berbagi satu koneksi internet.' },
-                { icon: '📝', term: 'Logging', desc: 'Buku catatan aktivitas router — siapa login, traffic apa, error apa. Penting untuk investigasi insiden.' },
+                { icon: '📝', term: 'Logging', desc: 'Buku catatan aktivitas router: siapa login, traffic apa, error apa. Penting untuk investigasi insiden.' },
               ].map((item, i) => (
                 <div key={i} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--r-sm)', padding: '0.75rem', border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: '1.2rem', marginBottom: '6px' }}>{item.icon}</div>
@@ -878,7 +878,7 @@ ${(firewall.nat || []).length > 0 ? `
         {issues.length > 0 && (
           <div>
             <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', marginBottom: '12px' }}>
-              {issues.length} Masalah Ditemukan — diurutkan dari yang paling penting
+              {issues.length} Masalah Ditemukan, diurutkan dari yang paling penting
             </div>
             {['critical', 'warning', 'info'].map(sev => {
               const sevIssues = issues.filter(i => i.severity === sev);
@@ -1247,8 +1247,8 @@ ${(firewall.nat || []).length > 0 ? `
                   <div style={{ fontWeight: 700, fontSize: '1rem' }}>Kesehatan Jaringan: {gradeLabel}</div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                     {issues.length === 0
-                      ? 'Tidak ada masalah terdeteksi — konfigurasi terlihat baik!'
-                      : `${criticalCount > 0 ? `${criticalCount} kritis, ` : ''}${warningCount} peringatan, ${healthAnalysis.infoCount} saran — klik untuk detail`}
+                      ? 'Tidak ada masalah terdeteksi, konfigurasi terlihat baik!'
+                      : `${criticalCount > 0 ? `${criticalCount} kritis, ` : ''}${warningCount} peringatan, ${healthAnalysis.infoCount} saran. Klik untuk detail`}
                   </div>
                 </div>
               </div>
@@ -1485,7 +1485,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {applyFilter(interfaces).length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interfaces match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada interface yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(interfaces).map((iface, idx) => (
               <tr key={idx}>
@@ -1535,7 +1535,7 @@ ${(firewall.nat || []).length > 0 ? `
             </thead>
             <tbody>
               {applyFilter(ethernetIfaces).length === 0 ? (
-                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Ethernet interfaces match search.</td></tr>
+                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada interface Ethernet yang cocok dengan pencarian.</td></tr>
               ) : (
                 applyFilter(ethernetIfaces).map((iface, idx) => (
                 <tr key={idx} style={{ opacity: iface.active ? 1 : 0.6 }}>
@@ -1624,7 +1624,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.interfaceLists.length === 0 ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interface Lists configured.</td></tr>
+              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Interface List yang dikonfigurasi.</td></tr>
             ) : (
               config.interfaceLists.map((list, idx) => {
                 const members = config.interfaceListMembers.filter(m => m.list === list.name);
@@ -1633,7 +1633,7 @@ ${(firewall.nat || []).length > 0 ? `
                     <td style={{ fontWeight: 600 }}>{list.name}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                        {members.length === 0 ? <span style={{color: 'var(--text-muted)'}}>No members</span> : members.map((m, i) => (
+                        {members.length === 0 ? <span style={{color: 'var(--text-muted)'}}>Tidak ada anggota</span> : members.map((m, i) => (
                            <span key={i} className="badge badge-info">{m.interface}</span>
                         ))}
                       </div>
@@ -1671,7 +1671,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.bridges || config.bridges.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridges configured.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Bridge yang dikonfigurasi.</td></tr>
             ) : (
               config.bridges.map((bridge, idx) => {
                 const isActive = bridge.disabled !== 'yes';
@@ -1725,7 +1725,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.bridgePorts || config.bridgePorts.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridge Ports configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Bridge Port yang dikonfigurasi.</td></tr>
             ) : (
               config.bridgePorts.map((bp, idx) => {
                 const isActive = bp.disabled !== 'yes';
@@ -1782,7 +1782,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {applyFilter(ipAddresses).length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP Addresses match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada alamat IP yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(ipAddresses).map((ip, idx) => {
                 const hasDHCP = ip.interfaceObj?.dhcpServers?.length > 0;
@@ -1844,7 +1844,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {dhcp.servers.length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Servers configured.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada DHCP Server yang dikonfigurasi.</td></tr>
             ) : (
               dhcp.servers.map((server, idx) => (
                 <React.Fragment key={idx}>
@@ -1903,7 +1903,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.dhcp.clients || config.dhcp.clients.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No DHCP Clients configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada DHCP Client yang dikonfigurasi.</td></tr>
             ) : (
               config.dhcp.clients.map((client, idx) => (
                 <tr key={idx} style={{ opacity: client.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1943,7 +1943,7 @@ ${(firewall.nat || []).length > 0 ? `
         <h3 style={{ marginBottom: '1rem', color: 'var(--accent-secondary)' }}>DNS Servers</h3>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {config.dns.servers.length === 0 ? (
-            <span style={{ color: 'var(--text-muted)' }}>No DNS servers set.</span>
+            <span style={{ color: 'var(--text-muted)' }}>Belum ada DNS server yang diatur.</span>
           ) : (
             config.dns.servers.map((s, idx) => (
               <span key={idx} className="badge badge-info" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>{s}</span>
@@ -1965,7 +1965,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.dns.static.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No static DNS entries.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada entri DNS statis.</td></tr>
             ) : (
               config.dns.static.map((entry, idx) => (
                 <tr key={idx}>
@@ -2051,7 +2051,7 @@ ${(firewall.nat || []).length > 0 ? `
             {(() => {
               const filtered = applyColFilter('ip-routes', applyFilter(routes));
               return filtered.length === 0 ? (
-                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routes match filter.</td></tr>
+                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada route yang cocok dengan filter.</td></tr>
               ) : filtered.map((rt, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600, color: rt['dst-address'] === '0.0.0.0/0' ? 'var(--status-info)' : 'inherit' }}>
@@ -2093,7 +2093,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.pools || config.pools.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No IP pools configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada IP pool yang dikonfigurasi.</td></tr>
             ) : (
               config.pools.map((pool, idx) => (
                 <tr key={idx}>
@@ -2169,7 +2169,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.hotspot.servers.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Hotspot Servers configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Hotspot Server yang dikonfigurasi.</td></tr>
             ) : (
               config.hotspot.servers.map((server, idx) => (
                 <tr key={idx} style={{ opacity: server.active ? 1 : 0.6 }}>
@@ -2238,7 +2238,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.hotspot.users || config.hotspot.users.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Hotspot Users configured.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Hotspot User yang dikonfigurasi.</td></tr>
             ) : (
               config.hotspot.users.map((u, idx) => (
                 <tr key={idx} style={{ opacity: u.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2331,7 +2331,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingTables.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Routing Tables configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Routing Table yang dikonfigurasi.</td></tr>
             ) : (
               config.routingTables.map((rt, idx) => (
                 <tr key={idx} style={{ opacity: rt.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2422,7 +2422,7 @@ ${(firewall.nat || []).length > 0 ? `
                 {(() => {
                   const filtered = applyColFilter('firewall-filter', applyFilter(firewall.filter));
                   return filtered.length === 0 ? (
-                    <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Filter rules match.</td></tr>
+                    <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule filter yang cocok.</td></tr>
                   ) : filtered.map((rule, idx) => (
                     <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                       <td>
@@ -2478,7 +2478,7 @@ ${(firewall.nat || []).length > 0 ? `
             {(() => {
               const filtered = applyColFilter('firewall-nat', applyFilter(firewall.nat));
               return filtered.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No NAT rules match.</td></tr>
+                <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule NAT yang cocok.</td></tr>
               ) : filtered.map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td>
@@ -2525,7 +2525,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!firewall.mangle || applyFilter(firewall.mangle).length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Mangle rules match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule mangle yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(firewall.mangle).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2569,7 +2569,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!firewall.raw || applyFilter(firewall.raw).length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Raw rules match search.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule raw yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(firewall.raw).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2603,7 +2603,7 @@ ${(firewall.nat || []).length > 0 ? `
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
         {config.firewall.groupedAddressLists.length === 0 ? (
-           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No Address Lists configured.</div>
+           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Belum ada Address List yang dikonfigurasi.</div>
         ) : (
           config.firewall.groupedAddressLists.map((group, idx) => (
             <details key={idx} style={{ 
@@ -2679,7 +2679,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.queues.trees.length === 0 ? (
-              <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Queue Trees configured.</td></tr>
+              <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Queue Tree yang dikonfigurasi.</td></tr>
             ) : (
               config.queues.trees.map((qt, idx) => (
                 <tr key={idx} style={{ opacity: qt.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2726,7 +2726,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.queues.types.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Queue Types configured.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Queue Type yang dikonfigurasi.</td></tr>
             ) : (
               config.queues.types.map((qt, idx) => (
                 <tr key={idx}>
@@ -2775,7 +2775,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {vpn.wireguard.length === 0 && (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No WireGuard connections found.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada koneksi WireGuard yang ditemukan.</td></tr>
             )}
           </tbody>
         </table>
@@ -2802,7 +2802,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(vpn.ovpn.length + vpn.l2tp.length) === 0 && (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No legacy VPN connections found.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada koneksi VPN lama yang ditemukan.</td></tr>
             )}
           </tbody>
         </table>
@@ -2824,7 +2824,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!vpn.wireguardPeers || vpn.wireguardPeers.length === 0) ? (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No WireGuard peers configured.</td></tr>
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada WireGuard peer yang dikonfigurasi.</td></tr>
             ) : (
               vpn.wireguardPeers.map((peer, idx) => (
                 <tr key={idx} style={{ opacity: peer.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2864,7 +2864,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.tools || !config.tools.graphingInterfaces || config.tools.graphingInterfaces.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Interface Graphing configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Interface Graphing yang dikonfigurasi.</td></tr>
             ) : (
               config.tools.graphingInterfaces.map((g, idx) => (
                 <tr key={idx}>
@@ -2903,7 +2903,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.services.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Services specified in config.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Service yang disebutkan di konfigurasi.</td></tr>
             ) : (
               config.services.map((svc, idx) => (
                 <tr key={idx} style={{ opacity: svc.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2997,7 +2997,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.systemLogActions.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No custom logging actions defined.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada logging action khusus yang didefinisikan.</td></tr>
             ) : (
               config.systemLogActions.map((act, idx) => (
                 <tr key={idx}>
@@ -3029,7 +3029,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.system.logging.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No specific logging rules defined.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada rule logging khusus yang didefinisikan.</td></tr>
             ) : (
               config.system.logging.map((log, idx) => (
                 <tr key={idx}>
@@ -3314,7 +3314,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.ports.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Ports configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Port yang dikonfigurasi.</td></tr>
             ) : (
               config.ports.map((p, idx) => (
                 <tr key={idx}>
@@ -3696,7 +3696,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {!bridgeVlans || bridgeVlans.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Bridge VLANs configured.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Bridge VLAN yang dikonfigurasi.</td></tr>
             ) : (
               bridgeVlans.map((vlan, idx) => (
                 <tr key={idx}>
@@ -3746,7 +3746,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingFilterRules.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No routing filter rules defined.</td></tr>
+              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada routing filter rule yang didefinisikan.</td></tr>
             ) : (
               config.routingFilterRules.map((flt, idx) => (
                 <tr key={idx}>
@@ -3792,7 +3792,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingBgpTmpl.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No BGP templates defined.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada BGP template yang didefinisikan.</td></tr>
             ) : (
               config.routingBgpTmpl.map((bgp, idx) => (
                 <tr key={idx}>
@@ -3826,7 +3826,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingBgpConn.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No BGP connections defined.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada koneksi BGP yang didefinisikan.</td></tr>
             ) : (
               config.routingBgpConn.map((conn, idx) => (
                 <tr key={idx}>
@@ -3869,7 +3869,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.ppp.pppoeServers.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No PPPoE Servers defined.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada PPPoE Server yang didefinisikan.</td></tr>
             ) : (
               config.ppp.pppoeServers.map((srv, idx) => (
                 <tr key={idx}>
@@ -3955,7 +3955,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.queues.simple.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No Simple Queues defined.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Simple Queue yang didefinisikan.</td></tr>
             ) : (
               config.queues.simple.map((sq, idx) => (
                 <tr key={idx}>
@@ -4339,7 +4339,7 @@ ${(firewall.nat || []).length > 0 ? `
         {searchTerm && (
           <div className="search-active-banner">
             <Search size={12} />
-            Mencari: <strong>"{searchTerm}"</strong> — tabel menampilkan baris yang cocok saja
+            Mencari: <strong>"{searchTerm}"</strong>. Tabel menampilkan baris yang cocok saja
             <button onClick={() => {}} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: '0.78rem', opacity: 0.7 }}>
               (gunakan ⌘K atau search bar untuk ubah)
             </button>
@@ -4369,7 +4369,7 @@ ${(firewall.nat || []).length > 0 ? `
               <h2 className="section-title">Config Comparison</h2>
             </div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-              Bandingkan dua file konfigurasi MikroTik (.rsc) dan lihat apa yang berubah — berguna untuk review sebelum upgrade atau audit perubahan konfigurasi.
+              Bandingkan dua file konfigurasi MikroTik (.rsc) dan lihat apa yang berubah, berguna untuk review sebelum upgrade atau audit perubahan konfigurasi.
             </p>
             <ConfigComparison />
           </div>
