@@ -5,6 +5,86 @@ Semua perubahan penting proyek ini dicatat di berkas ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/), dan
 versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [1.2.0] - 2026-10-08
+
+### Ditambahkan
+
+- Grafik dipindahkan ke Evilcharts. Kedua chart di panel Analisis Konfigurasi,
+  yaitu donut distribusi firewall dan batang tipe interface, kini memakai
+  komponen dari registry shadcn Evilcharts yang divendorkan ke
+  `src/components/evilcharts/`.
+- `chartConfig` per chart: satu objek untuk label dan warna tiap seri, dengan
+  varian warna terang dan gelap. Evilcharts mengompilasinya menjadi CSS variable
+  per chart di bawah selektor `.dark`, sehingga pergantian tema terjadi murni
+  lewat CSS, tanpa render ulang dan tanpa kedip warna.
+- Empty state eksplisit untuk kedua chart. Sebelumnya blok chart hanya
+  disembunyikan saat data kosong, sehingga panel tampak rusak.
+- Pemeriksaan render di `tests/render.smoke.jsx` kini mencakup kedua komponen
+  chart, dari 13 menjadi 15 komponen.
+- Prettier sebagai formatter, dengan `format:check` masuk `npm run check`.
+- Pemeriksaan tipe lewat JSDoc (`tsc --noEmit` dengan `allowJs` dan `checkJs`),
+  juga masuk `npm run check`.
+- Tombol "Coba lagi" pada panel yang gagal dirender.
+
+### Diperbaiki
+
+- Donut distribusi firewall tampil sebagai wadah kosong. Recharts `Sector`
+  mengembalikan `null` ketika `startAngle === endAngle`, yaitu frame pertama
+  animasi masuknya, dan animasi itu terbukti tidak pernah maju meski
+  `requestAnimationFrame` berjalan normal dan animasi motion.dev pada chart
+  sebelah selesai. Sektornya kini dirender langsung.
+- Label sumbu chart gagal ambang kontras AA: `fill="#666"` bawaan Recharts di
+  atas latar panel menghasilkan 3,15:1. Komponen vendored mencoba menimpanya
+  lewat varian Tailwind yang menargetkan `.recharts-cartesian-axis-tick text`,
+  sedangkan kelas yang benar-benar dirender Recharts adalah
+  `.recharts-cartesian-axis-tick-value`, sehingga aturan itu tidak pernah cocok.
+  Setelah diperbaiki: 12,18:1 di tema gelap dan 7,58:1 di tema terang.
+- Token tema shadcn yang dirujuk komponen vendored, seperti `text-border` dan
+  `bg-background`, tidak terdefinisi karena `shadcn init` sengaja dilewati.
+  Utilitasnya menunjuk variabel yang tidak ada, sehingga warnanya diam-diam
+  jatuh ke nilai warisan. Token itu kini dipetakan ke variabel design system.
+- Tombol "Uji di Packet Tracer" membuang rule yang dipilih. Handler-nya
+  mengabaikan argumen rule, sehingga form tracer selalu terbuka dengan nilai
+  bawaan. Rule kini disalurkan sampai ke form, dengan 10 tes untuk pemetaannya.
+- Layout mind map dihitung di atas graf dagre yang tidak pernah direset, jadi
+  node dan edge dari konfigurasi sebelumnya ikut memengaruhi perankingan.
+- Satu panel yang gagal dirender mematikan seluruh dashboard sampai aplikasi
+  dimuat ulang, karena error boundary tidak punya jalur reset. Boundary kini
+  pulih saat pengguna berpindah tab.
+- Pemotongan senyap di topologi jaringan. Graf membatasi 4 interface WAN, 5 LAN,
+  dan 4 koneksi VPN tanpa memberi tahu, sehingga node Internet melaporkan 7
+  uplink sementara hanya 4 yang digambar. Kini ada keterangan "menampilkan N
+  dari M".
+
+### Diubah
+
+- Tailwind dipasang berdampingan dengan design system, tanpa preflight, dan
+  hanya memindai folder komponen chart. Preflight mereset gaya dasar elemen dan
+  akan bertabrakan dengan `index.css` serta `App.css`.
+- Kelas `delay-100/200/300` diganti nama menjadi `stagger-1/2/3` karena
+  bertabrakan dengan namespace utilitas Tailwind.
+- `App.jsx` menyalakan kelas `dark` dan `light` sekaligus, supaya konvensi
+  design system dan konvensi Tailwind tidak bisa berbeda pendapat.
+- Dua inline style yang berulang diubah menjadi kelas: pasangan ukuran dan warna
+  teks sekunder yang ditulis 41 kali, dan warna teks redup yang ditulis 21 kali.
+- Em dash dihapus dari seluruh `src/`, termasuk komentar komponen vendored.
+
+### Dihapus
+
+- `TODO.md`, catatan progres task yang sudah selesai dan tidak dirujuk siapa pun.
+- Selector `.search-match`, yang mendefinisikan sorotan hasil pencarian padahal
+  pencarian hanya menyaring baris tabel.
+
+### Catatan
+
+- Seluruh teks pada kedua chart diukur terhadap ambang kontras WCAG AA di
+  browser sungguhan: legenda 18,08:1 dan 17,85:1, tooltip 19,17:1, label sumbu
+  12,18:1 dan 7,58:1.
+- Berkas komponen Evilcharts disimpan sedekat mungkin dengan sumber aslinya agar
+  bisa disinkronkan ulang. Penyesuaian yang diperlukan dicatat di
+  `src/components/evilcharts/README.md`.
+- Em dash nol di seluruh repositori, dijaga oleh tes.
+
 ## [1.1.0] - 2026-10-08
 
 ### Ditambahkan
