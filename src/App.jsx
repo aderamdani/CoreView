@@ -4,6 +4,7 @@ import './App.css';
 import { parseMikroTikConfig } from './utils/parser';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
+import { AboutPanel } from './components/AboutPanel';
 import { Sun, Moon, Github, Search, X, AlertTriangle } from 'lucide-react';
 
 function App() {
@@ -104,6 +105,8 @@ function App() {
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
+
+          <AboutPanel />
 
           {config && (
             <button className="btn btn-primary animate-fade-in" onClick={handleReset}>

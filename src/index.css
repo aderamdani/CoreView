@@ -666,6 +666,102 @@ html.light .react-flow__controls-button {
   background: var(--bg-base);
 }
 
+/* ==========================================================================
+   Version chip and release notes
+   ========================================================================== */
+
+/* Lives in the header so it is available on every screen without taking a
+   dashboard tab. Radius matches the other small chips instead of going pill. */
+.version-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.version-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.version-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.about-group + .about-group {
+  margin-top: 1.5rem;
+}
+
+/* Section label treatment already used by the sidebar, so these read as labels
+   rather than competing with the modal title. */
+.about-group-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.about-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.about-list li {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.about-list li::marker {
+  color: var(--text-muted);
+}
+
+/* Identifiers such as `/ip dns` need to stay distinguishable from prose. */
+.about-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.about-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1.75rem;
+  color: var(--accent-light);
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+.about-link:hover {
+  text-decoration: underline;
+}
+.about-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 .detail-table {
   width: 100%;
   border-collapse: separate;
