@@ -29,10 +29,30 @@ import { DHCPRangeVisualizer } from '../src/components/DHCPRangeVisualizer.jsx';
 import { GlossaryTip } from '../src/components/GlossaryTip.jsx';
 import { FirewallConflicts } from '../src/components/FirewallConflicts.jsx';
 import { FirewallSwimlane } from '../src/components/FirewallSwimlane.jsx';
+import { EvilPieChart } from '../src/components/evilcharts/charts/recharts-pie-chart.jsx';
+import { EvilBarChart } from '../src/components/evilcharts/charts/recharts-bar-chart.jsx';
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf-8');
 const config = parseMikroTikConfig(read('../public/demo/test-mikrotik.rsc'));
 const noop = () => {};
+
+// Minimal series for the vendored charts. They are rendered here so a broken
+// import or a render-time throw in the registry code fails the check.
+const pieData = [
+  { key: 'a', value: 3 },
+  { key: 'b', value: 2 },
+];
+const pieConfig = {
+  a: { label: 'A', colors: { light: ['#dc2626'], dark: ['#ef4444'] } },
+  b: { label: 'B', colors: { light: ['#4f46e5'], dark: ['#818cf8'] } },
+};
+const barData = [
+  { type: 'ethernet', count: 4 },
+  { type: 'bridge', count: 1 },
+];
+const barConfig = {
+  count: { label: 'Jumlah', colors: { light: ['#4f46e5'], dark: ['#818cf8'] } },
+};
 
 // Each entry is a thunk, not a JSX element. Keeping the element out of the array
 // literal avoids a react/jsx-key false positive: these are rendered one at a
@@ -51,6 +71,28 @@ const cases = [
   ['GlossaryTip', () => <GlossaryTip term="NAT" />],
   ['FirewallConflicts', () => <FirewallConflicts rules={config.firewall.filter} />],
   ['FirewallSwimlane', () => <FirewallSwimlane rules={config.firewall.filter} onNavigate={noop} />],
+  [
+    'EvilPieChart',
+    () => (
+      <EvilPieChart className="chart-box" data={pieData} dataKey="value" nameKey="key" config={pieConfig}>
+        <EvilPieChart.Pie innerRadius="55%" outerRadius="80%" paddingAngle={2} />
+        <EvilPieChart.Legend />
+        <EvilPieChart.Tooltip />
+      </EvilPieChart>
+    ),
+  ],
+  [
+    'EvilBarChart',
+    () => (
+      <EvilBarChart className="chart-box" data={barData} config={barConfig} xDataKey="type" barRadius={4}>
+        <EvilBarChart.Grid />
+        <EvilBarChart.XAxis dataKey="type" />
+        <EvilBarChart.YAxis allowDecimals={false} />
+        <EvilBarChart.Tooltip />
+        <EvilBarChart.Bar dataKey="count" variant="gradient" />
+      </EvilBarChart>
+    ),
+  ],
 ];
 
 let failures = 0;

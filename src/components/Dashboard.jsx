@@ -39,6 +39,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { buildMenus } from './menus.jsx';
+import { EvilPieChart } from './evilcharts/charts/recharts-pie-chart';
+import { EvilBarChart } from './evilcharts/charts/recharts-bar-chart';
 import { PLACEHOLDER_TABS } from './placeholderTabs';
 import { configHelp } from '../utils/configHelp';
 import { generateItemExplanation } from '../utils/itemExplainer';
@@ -53,19 +55,6 @@ import { GlossaryTip } from './GlossaryTip';
 import { FirewallConflicts } from './FirewallConflicts';
 import { detectConflicts, detectDuplicates } from '../utils/detectConflicts';
 import { ConfigComparison } from './ConfigComparison';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-} from 'recharts';
 
 // Escapes a value for interpolation into the exported HTML report. That report
 // is assembled with template literals and opened as a local file, so a comment
@@ -1902,11 +1891,22 @@ ${
         {/* Config Analysis Charts */}
         {(firewallRules > 0 || totalInterfaces > 0) &&
           (() => {
+            // One config object per chart carries each series' label and its
+            // light/dark colours. Evilcharts compiles these into CSS variables
+            // scoped to the chart, so the theme swap is pure CSS: no re-render,
+            // no flash of the wrong colour.
+            const fwConfig = {
+              filter: { label: 'Filter', colors: { light: ['#dc2626'], dark: ['#ef4444'] } },
+              nat: { label: 'NAT', colors: { light: ['#b45309'], dark: ['#f59e0b'] } },
+              mangle: { label: 'Mangle', colors: { light: ['#4f46e5'], dark: ['#818cf8'] } },
+              raw: { label: 'Raw', colors: { light: ['#475569'], dark: ['#94a3b8'] } },
+            };
+
             const fwData = [
-              { name: 'Filter', value: firewall.filter?.length || 0, color: '#ef4444' },
-              { name: 'NAT', value: firewall.nat?.length || 0, color: '#f59e0b' },
-              { name: 'Mangle', value: firewall.mangle?.length || 0, color: '#6366f1' },
-              { name: 'Raw', value: firewall.raw?.length || 0, color: '#64748b' },
+              { key: 'filter', value: firewall.filter?.length || 0 },
+              { key: 'nat', value: firewall.nat?.length || 0 },
+              { key: 'mangle', value: firewall.mangle?.length || 0 },
+              { key: 'raw', value: firewall.raw?.length || 0 },
             ].filter((d) => d.value > 0);
 
             const ifaceTypeMap = interfaces.reduce((acc, iface) => {
@@ -1918,6 +1918,10 @@ ${
               .map(([type, count]) => ({ type, count }))
               .sort((a, b) => b.count - a.count)
               .slice(0, 6);
+
+            const ifaceConfig = {
+              count: { label: 'Jumlah interface', colors: { light: ['#4f46e5'], dark: ['#818cf8'] } },
+            };
 
             return (
               <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
@@ -1932,112 +1936,67 @@ ${
                     gap: '1.5rem',
                   }}
                 >
-                  {fwData.length > 0 && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.07em',
-                          color: 'var(--text-muted)',
-                          marginBottom: '12px',
-                        }}
-                      >
-                        Distribusi Firewall Rules ({firewallRules} total)
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <ResponsiveContainer width={120} height={120}>
-                          <PieChart>
-                            <Pie
-                              data={fwData}
-                              dataKey="value"
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={30}
-                              outerRadius={50}
-                              paddingAngle={2}
-                            >
-                              {fwData.map((entry, i) => (
-                                <Cell key={i} fill={entry.color} />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              formatter={(v, n) => [v, n]}
-                              contentStyle={{
-                                background: 'var(--bg-elevated)',
-                                border: '1px solid var(--border)',
-                                borderRadius: '8px',
-                                fontSize: '0.8rem',
-                              }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {fwData.map((d, i) => (
-                            <div
-                              key={i}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                fontSize: '0.82rem',
-                              }}
-                            >
-                              <span
-                                style={{
-                                  width: 10,
-                                  height: 10,
-                                  borderRadius: '50%',
-                                  background: d.color,
-                                  flexShrink: 0,
-                                }}
-                              />
-                              <span style={{ color: 'var(--text-secondary)' }}>{d.name}</span>
-                              <span
-                                style={{ color: 'var(--text-primary)', fontWeight: 600, marginLeft: 'auto' }}
-                              >
-                                {d.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.07em',
+                        color: 'var(--text-muted)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Distribusi Firewall Rules ({firewallRules} total)
                     </div>
-                  )}
+                    {fwData.length > 0 ? (
+                      <EvilPieChart
+                        className="chart-box"
+                        data={fwData}
+                        dataKey="value"
+                        nameKey="key"
+                        config={fwConfig}
+                      >
+                        <EvilPieChart.Pie innerRadius="55%" outerRadius="80%" paddingAngle={2} />
+                        <EvilPieChart.Legend />
+                        <EvilPieChart.Tooltip />
+                      </EvilPieChart>
+                    ) : (
+                      <p className="chart-empty">Belum ada rule firewall untuk ditampilkan.</p>
+                    )}
+                  </div>
 
-                  {ifaceData.length > 0 && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.07em',
-                          color: 'var(--text-muted)',
-                          marginBottom: '12px',
-                        }}
-                      >
-                        Interface berdasarkan Tipe
-                      </div>
-                      <ResponsiveContainer width="100%" height={120}>
-                        <BarChart data={ifaceData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                          <XAxis dataKey="type" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
-                          <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} allowDecimals={false} />
-                          <Tooltip
-                            contentStyle={{
-                              background: 'var(--bg-elevated)',
-                              border: '1px solid var(--border)',
-                              borderRadius: '8px',
-                              fontSize: '0.8rem',
-                            }}
-                          />
-                          <Bar dataKey="count" fill="var(--accent)" radius={[4, 4, 0, 0]} name="Jumlah" />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.07em',
+                        color: 'var(--text-muted)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Interface berdasarkan Tipe
                     </div>
-                  )}
+                    {ifaceData.length > 0 ? (
+                      <EvilBarChart
+                        className="chart-box"
+                        data={ifaceData}
+                        config={ifaceConfig}
+                        xDataKey="type"
+                        barRadius={4}
+                      >
+                        <EvilBarChart.Grid />
+                        <EvilBarChart.XAxis dataKey="type" />
+                        <EvilBarChart.YAxis allowDecimals={false} />
+                        <EvilBarChart.Tooltip />
+                        <EvilBarChart.Bar dataKey="count" variant="gradient" />
+                      </EvilBarChart>
+                    ) : (
+                      <p className="chart-empty">Belum ada interface untuk ditampilkan.</p>
+                    )}
+                  </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div

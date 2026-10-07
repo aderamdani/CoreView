@@ -282,6 +282,24 @@ body {
   font-size: 0.75rem;
 }
 
+/* Height for the vendored Evilcharts containers.
+   The height is set here rather than with a Tailwind utility because Tailwind
+   only scans the vendored chart folder; application code stays on the design
+   system. The chart component receives this as its className. */
+.chart-box {
+  height: 190px;
+}
+
+/* Shown in place of a chart when its data set is empty, so the panel explains
+   itself instead of collapsing to nothing. */
+.chart-empty {
+  margin: 0;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
 /* Badges */
 .badge {
   display: inline-flex;
