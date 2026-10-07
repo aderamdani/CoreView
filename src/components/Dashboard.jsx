@@ -92,6 +92,16 @@ class SectionErrorBoundary extends React.Component {
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
+
+  componentDidUpdate(prevProps) {
+    // Without this the boundary latched on: one panel failing left every other
+    // panel showing the error until the whole app was reloaded, because nothing
+    // ever cleared `hasError`. The guard keeps the reset from looping.
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -105,8 +115,31 @@ class SectionErrorBoundary extends React.Component {
             fontFamily: 'monospace',
             fontSize: '0.85rem',
           }}
+          role="alert"
         >
-          <strong>⚠ Section render error:</strong> {this.state.error?.message}
+          <div>
+            <strong>⚠ Panel ini gagal dirender:</strong> {this.state.error?.message}
+          </div>
+          <p style={{ margin: '0.6rem 0 0', color: 'var(--text-secondary)' }}>
+            Panel lain tetap bisa dibuka. Kembali ke panel ini akan mencobanya lagi.
+          </p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              marginTop: '0.9rem',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              border: '1px solid rgba(239,68,68,0.4)',
+              background: 'transparent',
+              color: '#f87171',
+              fontFamily: 'inherit',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+            }}
+          >
+            Coba lagi
+          </button>
         </div>
       );
     }
@@ -6060,12 +6093,19 @@ ${
             Shortcuts
           </button>
 
-          <SectionErrorBoundary>
+          <SectionErrorBoundary resetKey={activeTab}>
             {activeTab === 'health-check' && renderHealthCheck()}
             {activeTab === 'network-topology' && (
               <NetworkTopology config={config} onNavigate={setActiveTab} />
             )}
-            {activeTab === 'packet-tracer' && <PacketTracer config={config} onNavigate={setActiveTab} />}
+            {activeTab === 'packet-tracer' && (
+              <PacketTracer
+                key={traceSeed?.nonce ?? 'default'}
+                config={config}
+                onNavigate={setActiveTab}
+                seedRule={traceSeed?.rule ?? null}
+              />
+            )}
             {activeTab === 'config-compare' && (
               <div className="glass-panel config-section animate-fade-in">
                 <div className="section-header" style={{ marginBottom: '1.5rem' }}>
