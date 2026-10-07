@@ -19,14 +19,11 @@ jobs:
 
       - run: npm ci
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm test
-
-      - name: Render smoke test
-        run: npm run test:render
+      # Runs the same gate as local development: lint, format check, typecheck,
+      # unit tests, and the render smoke test. Listing the steps again here would
+      # let CI drift from `npm run check`.
+      - name: Check
+        run: npm run check
 
       - name: Build
         run: npm run build
