@@ -680,7 +680,9 @@ html.light .react-flow__controls-button {
   border-radius: var(--r-sm);
   border: 1px solid var(--border);
   background: var(--bg-elevated);
-  color: var(--text-muted);
+  /* --text-muted reads at 3.49:1 here, under the 4.5:1 floor for text this
+     small. --text-secondary clears it in both themes. */
+  color: var(--text-secondary);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.72rem;
   line-height: 1;
@@ -701,14 +703,16 @@ html.light .react-flow__controls-button {
 }
 
 /* Section label treatment already used by the sidebar, so these read as labels
-   rather than competing with the modal title. */
+   rather than competing with the modal title. Hierarchy comes from case, weight,
+   and tracking rather than colour: --text-muted measured 4.03:1 in dark and
+   2.45:1 in light, both under the 4.5:1 floor. */
 .about-group-title {
   margin: 0 0 0.6rem;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .about-list {
@@ -744,6 +748,10 @@ html.light .react-flow__controls-button {
   line-height: 1.6;
 }
 
+/* Dark uses --accent-light (6.43:1 on the modal body). The light theme's
+   --accent-light is lighter than its --accent, so it drops to 4.27:1 there;
+   swapping to --accent in light mode gives 6.01:1. Scoped to this element
+   rather than changing the token, which other components also use. */
 .about-link {
   display: inline-flex;
   align-items: center;
@@ -752,6 +760,9 @@ html.light .react-flow__controls-button {
   color: var(--accent-light);
   font-size: 0.82rem;
   text-decoration: none;
+}
+html.light .about-link {
+  color: var(--accent);
 }
 .about-link:hover {
   text-decoration: underline;
