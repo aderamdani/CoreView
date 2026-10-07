@@ -33,31 +33,31 @@ export const generateItemExplanation = (type, item) => {
       const disabled = item.disabled === 'yes' || !item.active;
       let desc = '';
       if (t === 'bridge') {
-        desc = `Virtual switch bridge '${n}' — menggabungkan beberapa port fisik menjadi satu broadcast domain LAN.`;
+        desc = `Virtual switch bridge '${n}': menggabungkan beberapa port fisik menjadi satu broadcast domain LAN.`;
       } else if (t === 'vlan') {
         desc = `VLAN interface ID ${item['vlan-id'] || '?'} di atas '${item['vlan-over'] || item.interface || '?'}'. Memisahkan jalur trafik Layer 2 secara logis tanpa kabel fisik terpisah.`;
       } else if (t === 'wlan' || t === 'wlan2') {
         desc = `Interface wireless '${n}'${item.ssid ? `, SSID: "${item.ssid}"` : ''}. Menangani asosiasi klien nirkabel.`;
       } else if (t === 'wireguard') {
-        desc = `WireGuard VPN '${n}' — modern, cepat, kriptografi Curve25519. Listen port: ${item['listen-port'] || '?'}.`;
+        desc = `WireGuard VPN '${n}': modern, cepat, kriptografi Curve25519. Listen port: ${item['listen-port'] || '?'}.`;
       } else if (t === 'pppoe-out' || t === 'ppp-out') {
         desc = `Koneksi PPPoE/PPP ke ISP '${n}'. Autentikasi CHAP/PAP, IP didapat dari server PPPoE.`;
       } else if (t === 'ethernet') {
         desc = `Port Ethernet fisik '${n}'${item.speed ? `, kecepatan: ${item.speed}` : ''}${item['mac-address'] ? `, MAC: ${item['mac-address']}` : ''}.`;
       } else if (t === 'loopback') {
-        desc = `Loopback '${n}' — selalu aktif, tidak bergantung interface fisik. Ideal sebagai Router-ID OSPF/BGP.`;
+        desc = `Loopback '${n}': selalu aktif, tidak bergantung interface fisik. Ideal sebagai Router-ID OSPF/BGP.`;
       } else if (t === 'lte') {
-        desc = `Modem LTE '${n}' — konektivitas WAN seluler. Kualitas sinyal menentukan throughput.`;
+        desc = `Modem LTE '${n}': konektivitas WAN seluler. Kualitas sinyal menentukan throughput.`;
       } else if (t === 'ovpn-client' || t === 'ovpn-out') {
-        desc = `OpenVPN client '${n}' — tunnel TLS terenkripsi ke server VPN.`;
+        desc = `OpenVPN client '${n}': tunnel TLS terenkripsi ke server VPN.`;
       } else if (t === 'l2tp-client' || t === 'l2tp-out') {
-        desc = `L2TP/IPSec client '${n}' — VPN native di Windows/macOS.`;
+        desc = `L2TP/IPSec client '${n}': VPN native di Windows/macOS.`;
       } else if (t === 'gre') {
-        desc = `GRE tunnel '${n}' — enkapsulasi IP-in-IP tanpa enkripsi, biasa dikombinasikan dengan IPSec.`;
+        desc = `GRE tunnel '${n}': enkapsulasi IP-in-IP tanpa enkripsi, biasa dikombinasikan dengan IPSec.`;
       } else {
         desc = `Interface ${t} '${n}'.`;
       }
-      if (disabled) desc += ' ⚠ Dinonaktifkan — tidak ada traffic yang melewati interface ini.';
+      if (disabled) desc += ' ⚠ Dinonaktifkan. Tidak ada traffic yang melewati interface ini.';
       if (item.comment) desc += ` [${item.comment}]`;
       return desc;
     }
@@ -66,13 +66,13 @@ export const generateItemExplanation = (type, item) => {
       const n = item.name || item.defaultName || 'unnamed';
       let desc = `Port Ethernet '${n}'.`;
       if (item['auto-negotiation'] === 'no') {
-        desc += ` Kecepatan dikunci paksa ke ${item.speed || '?'} — risiko duplex mismatch jika perangkat lawan menggunakan auto-negotiation.`;
+        desc += ` Kecepatan dikunci paksa ke ${item.speed || '?'}. Risiko duplex mismatch jika perangkat lawan menggunakan auto-negotiation.`;
       } else {
         desc += ` Auto-negotiation aktif${item.speed ? `, terdeteksi: ${item.speed}` : ''}.`;
       }
       if (item['mac-address']) desc += ` MAC: ${item['mac-address']}.`;
       if (item.mtu && item.mtu !== '1500') {
-        desc += ` MTU ${item.mtu} (non-standard) — perhatikan overhead fragmentasi untuk PPPoE/VPN.`;
+        desc += ` MTU ${item.mtu} (non-standard). Perhatikan overhead fragmentasi untuk PPPoE/VPN.`;
       }
       return desc;
     }
@@ -82,9 +82,9 @@ export const generateItemExplanation = (type, item) => {
       let desc = `Grup interface '${n}'.`;
       const lc = n.toLowerCase();
       if (lc.includes('wan') || lc.includes('internet') || lc.includes('isp') || lc.includes('uplink')) {
-        desc += ' Grup WAN/uplink — biasa dipakai sebagai out-interface-list pada aturan masquerade NAT dan firewall INPUT.';
+        desc += ' Grup WAN/uplink: biasa dipakai sebagai out-interface-list pada aturan masquerade NAT dan firewall INPUT.';
       } else if (lc.includes('lan') || lc.includes('local') || lc.includes('internal')) {
-        desc += ' Grup LAN/internal — biasa untuk mengizinkan layanan DHCP, DNS, dan akses manajemen dari jaringan lokal.';
+        desc += ' Grup LAN/internal: biasa untuk mengizinkan layanan DHCP, DNS, dan akses manajemen dari jaringan lokal.';
       } else {
         desc += ' Shorthand dalam aturan Firewall/NAT/Routing untuk mengelompokkan interface sekaligus.';
       }
@@ -95,11 +95,11 @@ export const generateItemExplanation = (type, item) => {
       const n = item.name || 'unnamed';
       let desc = `Bridge '${n}'`;
       const proto = item['protocol-mode'];
-      if (proto === 'rstp') desc += ' — RSTP aktif, mencegah loop, konvergensi ~1-2 detik.';
-      else if (proto === 'stp') desc += ' — STP aktif, konvergensi lambat ~30-50 detik. Pertimbangkan RSTP.';
-      else if (proto === 'mstp') desc += ' — MSTP aktif, multiple spanning tree per VLAN.';
-      else desc += ' — tanpa spanning tree. Aman hanya jika tidak ada loop fisik.';
-      if (item['vlan-filtering'] === 'yes') desc += ' VLAN filtering aktif — bridge beroperasi sebagai switch VLAN-aware.';
+      if (proto === 'rstp') desc += ': RSTP aktif, mencegah loop, konvergensi ~1-2 detik.';
+      else if (proto === 'stp') desc += ': STP aktif, konvergensi lambat ~30-50 detik. Pertimbangkan RSTP.';
+      else if (proto === 'mstp') desc += ': MSTP aktif, multiple spanning tree per VLAN.';
+      else desc += ': tanpa spanning tree. Aman hanya jika tidak ada loop fisik.';
+      if (item['vlan-filtering'] === 'yes') desc += ' VLAN filtering aktif. Bridge beroperasi sebagai switch VLAN-aware.';
       return desc;
     }
 
@@ -107,10 +107,10 @@ export const generateItemExplanation = (type, item) => {
       const pvid = item.pvid || '1';
       let desc = `Port '${item.interface}' bergabung ke bridge '${item.bridge}'.`;
       if (pvid !== '1') {
-        desc += ` PVID ${pvid} — frame untagged masuk dianggap VLAN ${pvid}.`;
+        desc += ` PVID ${pvid}. Frame untagged masuk dianggap VLAN ${pvid}.`;
       }
       if (item.edge === 'yes' || item.edge === 'auto-edge') {
-        desc += ' Edge/PortFast aktif — langsung masuk forwarding state. Gunakan hanya untuk port yang terhubung ke host, bukan switch.';
+        desc += ' Edge/PortFast aktif: langsung masuk forwarding state. Gunakan hanya untuk port yang terhubung ke host, bukan switch.';
       }
       return desc;
     }
@@ -123,7 +123,7 @@ export const generateItemExplanation = (type, item) => {
       let desc = `IP ${addr} pada interface '${iface}'.`;
       if (item.network) desc += ` Subnet ${item.network}/${prefix} (maks ${hostCount} host).`;
       const isPrivate = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(addr);
-      if (!isPrivate && prefix <= 30) desc += ' ⚡ Kemungkinan IP Publik — pastikan firewall INPUT sudah mengamankan akses.';
+      if (!isPrivate && prefix <= 30) desc += ' ⚡ Kemungkinan IP Publik. Pastikan firewall INPUT sudah mengamankan akses.';
       if (!item.active || item.disabled === 'yes') desc += ' ⚠ Dinonaktifkan.';
       return desc;
     }
@@ -136,14 +136,14 @@ export const generateItemExplanation = (type, item) => {
       }
       const lt = item.leaseTime || item['lease-time'];
       if (lt) desc += ` Lease time: ${lt}.`;
-      if (!item.active) desc += ' ⚠ Server dihentikan — klien tidak mendapat IP otomatis.';
+      if (!item.active) desc += ' ⚠ Server dihentikan. Klien tidak mendapat IP otomatis.';
       return desc;
     }
 
     case 'dhcp-client': {
       let desc = `DHCP Client di '${item.interface || '?'}' meminta IP dari upstream (ISP/modem).`;
       if (item['add-default-route'] === 'no') {
-        desc += ' ⚠ "Add Default Route" nonaktif — harus buat default route manual.';
+        desc += ' ⚠ "Add Default Route" nonaktif. Harus buat default route manual.';
       } else {
         desc += ' Default route dari ISP ditambahkan otomatis.';
       }
@@ -171,7 +171,7 @@ export const generateItemExplanation = (type, item) => {
       const mark = item['routing-mark'] || item['routing-table'];
       if (dst === '0.0.0.0/0') {
         let desc = `Default route → gateway ${gw}.`;
-        if (parseInt(dist) > 1) desc += ` Distance ${dist} — ini rute backup/failover.`;
+        if (parseInt(dist) > 1) desc += ` Distance ${dist}. Ini rute backup/failover.`;
         if (mark) desc += ` Terikat ke routing table '${mark}' (multi-WAN policy routing).`;
         return desc;
       }
@@ -202,7 +202,7 @@ export const generateItemExplanation = (type, item) => {
     case 'hotspot-server': {
       let desc = `Hotspot server '${item.name || '?'}' di interface '${item.interface || '?'}'.`;
       if (item['address-pool']) desc += ` Pool: '${item['address-pool']}'.`;
-      if (!item.active) desc += ' ⚠ Server nonaktif — klien tidak diarahkan ke portal login.';
+      if (!item.active) desc += ' ⚠ Server nonaktif. Klien tidak diarahkan ke portal login.';
       else desc += ' Semua perangkat baru akan diarahkan ke captive portal sebelum akses internet.';
       return desc;
     }
@@ -232,7 +232,7 @@ export const generateItemExplanation = (type, item) => {
     case 'routing-table': {
       const n = item.name || '?';
       let desc = `Routing table '${n}' untuk policy-based routing.`;
-      if (item.fib !== undefined) desc += ' FIB aktif — digunakan untuk forwarding paket aktual.';
+      if (item.fib !== undefined) desc += ' FIB aktif: digunakan untuk forwarding paket aktual.';
       if (n.toLowerCase().includes('isp') || n.toLowerCase().includes('wan') || /\d/.test(n)) {
         desc += ' Kemungkinan untuk load balancing/failover multi-WAN.';
       }
@@ -258,11 +258,11 @@ export const generateItemExplanation = (type, item) => {
         forward: 'traffic MELEWATI router (LAN↔WAN)',
         output: 'traffic KELUAR dari router',
       };
-      let desc = `${actionMap[action] || action} — ${chainMap[chain] || `chain ${chain}`}.`;
+      let desc = `${actionMap[action] || action}: ${chainMap[chain] || `chain ${chain}`}.`;
       const cs = item['connection-state'];
       if (cs) {
         if (cs === 'established,related' && action === 'accept') {
-          desc += ' (Aturan stateful wajib — izinkan reply dari koneksi aktif)';
+          desc += ' (Aturan stateful wajib: izinkan reply dari koneksi aktif)';
         } else {
           desc += ` State: ${cs}.`;
         }
@@ -288,7 +288,7 @@ export const generateItemExplanation = (type, item) => {
         let desc = '🌐 Masquerade: semua traffic LAN keluar menggunakan IP publik router.';
         if (item['out-interface']) desc += ` Interface keluar: '${item['out-interface']}'.`;
         if (item['out-interface-list']) desc += ` Grup: '${item['out-interface-list']}'.`;
-        if (item.disabled === 'yes') desc += ' ⚠ NONAKTIF — perangkat LAN tidak bisa akses internet!';
+        if (item.disabled === 'yes') desc += ' ⚠ NONAKTIF. Perangkat LAN tidak bisa akses internet!';
         return desc;
       }
       if (action === 'dst-nat') {
@@ -296,7 +296,7 @@ export const generateItemExplanation = (type, item) => {
         if (item.protocol && item['dst-port']) {
           const sensitive = { '22':'SSH', '3389':'RDP', '3306':'MySQL', '5432':'PostgreSQL' };
           desc += ` Traffic ${item.protocol.toUpperCase()} port ${item['dst-port']} dari internet diteruskan.`;
-          if (sensitive[item['dst-port']]) desc += ` ⚠ Layanan sensitif (${sensitive[item['dst-port']]}) terekspos — filter IP sumber!`;
+          if (sensitive[item['dst-port']]) desc += ` ⚠ Layanan sensitif (${sensitive[item['dst-port']]}) terekspos. Filter IP sumber!`;
         }
         if (item.disabled === 'yes') desc += ' ⚠ Dinonaktifkan.';
         return desc;
@@ -324,18 +324,18 @@ export const generateItemExplanation = (type, item) => {
         'passthrough': '⏩ Passthrough (statistik saja)',
         'sniff-tzsp': '👁 Mirror ke sniffer',
       };
-      let desc = `${actionMap[action] || `Mangle: ${action}`} — chain '${item.chain}'.`;
+      let desc = `${actionMap[action] || `Mangle: ${action}`}: chain '${item.chain}'.`;
       const newMark = item['new-connection-mark'] || item['new-routing-mark'] || item['new-packet-mark'];
       if (newMark) {
         desc += ` Mark: '${newMark}'.`;
-        if (action === 'mark-routing') desc += ` Traffic diarahkan ke routing table '${newMark}' — kritis untuk multi-WAN.`;
+        if (action === 'mark-routing') desc += ` Traffic diarahkan ke routing table '${newMark}': kritis untuk multi-WAN.`;
         else if (action === 'mark-packet') desc += ` Queue Tree yang menggunakan packet-mark '${newMark}' akan memproses paket ini.`;
-        else if (action === 'mark-connection') desc += ` Seluruh koneksi ditandai — paket berikutnya bisa di-mark berdasarkan connection-mark ini.`;
+        else if (action === 'mark-connection') desc += ` Seluruh koneksi ditandai. Paket berikutnya bisa di-mark berdasarkan connection-mark ini.`;
       }
       if (action === 'change-mss' && item['new-mss']) {
-        desc += ` MSS baru: ${item['new-mss']} — mengatasi masalah MTU pada PPPoE/VPN (PMTUD workaround).`;
+        desc += ` MSS baru: ${item['new-mss']}, mengatasi masalah MTU pada PPPoE/VPN (PMTUD workaround).`;
       }
-      if (item['connection-state'] === 'new') desc += ' Hanya pada koneksi baru — efisien, tidak proses tiap paket.';
+      if (item['connection-state'] === 'new') desc += ' Hanya pada koneksi baru: efisien, tidak proses tiap paket.';
       if (item.disabled === 'yes') desc += ' ⚠ Dinonaktifkan.';
       if (item.comment) desc += ` [${item.comment}]`;
       return desc;
@@ -346,11 +346,11 @@ export const generateItemExplanation = (type, item) => {
       const rawMap = {
         drop: '🚫 Drop SEBELUM connection tracking',
         accept: '✅ Izinkan, lewati raw',
-        notrack: '⚡ Bypass conntrack — performa maksimal',
+        notrack: '⚡ Bypass conntrack: performa maksimal',
       };
-      let desc = `${rawMap[action] || action} — chain '${item.chain}'.`;
-      if (action === 'notrack') desc += ' Traffic ini tidak dilacak conntrack — cocok untuk server/backbone volume tinggi.';
-      else if (action === 'drop') desc += ' Lebih efisien dari filter biasa — tidak membuat conntrack entry. Ideal mitigasi DDoS.';
+      let desc = `${rawMap[action] || action}: chain '${item.chain}'.`;
+      if (action === 'notrack') desc += ' Traffic ini tidak dilacak conntrack: cocok untuk server/backbone volume tinggi.';
+      else if (action === 'drop') desc += ' Lebih efisien dari filter biasa. Tidak membuat conntrack entry. Ideal mitigasi DDoS.';
       if (item['src-address'] || item['src-address-list']) desc += ` Sumber: ${item['src-address'] || 'list:'+item['src-address-list']}.`;
       if (item.disabled === 'yes') desc += ' ⚠ Dinonaktifkan.';
       if (item.comment) desc += ` [${item.comment}]`;
@@ -369,7 +369,7 @@ export const generateItemExplanation = (type, item) => {
       } else {
         desc += ` (child dari '${parent}')`;
       }
-      desc += maxLimit ? ` — max: ${maxLimit}.` : ' — tanpa batas max.';
+      desc += maxLimit ? `: max: ${maxLimit}.` : ': tanpa batas max.';
       if (item['limit-at']) desc += ` Garanteed: ${item['limit-at']}.`;
       if (pm) desc += ` Memproses paket mark '${pm}' (harus ada aturan Mangle).`;
       if (prio) {
@@ -383,18 +383,18 @@ export const generateItemExplanation = (type, item) => {
     case 'queue-type': {
       const kind = item.kind || '?';
       const kindMap = {
-        pcq: 'PCQ — membagi bandwidth merata antar pengguna otomatis',
-        sfq: 'SFQ — distribusi adil antar flow tanpa konfigurasi per-IP',
-        red: 'RED — membuang paket acak sebelum buffer penuh (anti-congestion)',
-        fifo: 'FIFO — sederhana, tidak adil, satu user bisa monopoli bandwidth',
-        bfifo: 'BFIFO — FIFO berbasis bytes',
-        pfifo: 'PFIFO — FIFO berbasis paket',
-        'fq-codel': 'FQ-CoDel — algoritma modern anti-bufferbloat, latensi sangat rendah',
-        cake: 'CAKE — algoritma terbaru, fairness terbaik, anti-bufferbloat',
+        pcq: 'PCQ: membagi bandwidth merata antar pengguna otomatis',
+        sfq: 'SFQ: distribusi adil antar flow tanpa konfigurasi per-IP',
+        red: 'RED: membuang paket acak sebelum buffer penuh (anti-congestion)',
+        fifo: 'FIFO: sederhana, tidak adil, satu user bisa monopoli bandwidth',
+        bfifo: 'BFIFO: FIFO berbasis bytes',
+        pfifo: 'PFIFO: FIFO berbasis paket',
+        'fq-codel': 'FQ-CoDel: algoritma modern anti-bufferbloat, latensi sangat rendah',
+        cake: 'CAKE: algoritma terbaru, fairness terbaik, anti-bufferbloat',
       };
       let desc = `Queue type '${item.name || '?'}': ${kindMap[kind] || `Algoritma: ${kind}`}.`;
       if (kind === 'pcq' && item['pcq-classifier']) {
-        desc += ` Classifier: ${item['pcq-classifier']} — bandwidth dibagi per ${item['pcq-classifier'].includes('dst') ? 'IP tujuan' : 'IP sumber'}.`;
+        desc += ` Classifier: ${item['pcq-classifier']}. Bandwidth dibagi per ${item['pcq-classifier'].includes('dst') ? 'IP tujuan' : 'IP sumber'}.`;
       }
       if (kind === 'pcq' && item['pcq-rate']) {
         desc += ` Batas per bucket: ${item['pcq-rate']}.`;
@@ -423,7 +423,7 @@ export const generateItemExplanation = (type, item) => {
       let desc = `WireGuard server '${item.name}' listen UDP port ${port}.`;
       if (port === '51820') desc += ' Port default WireGuard.';
       if (item.mtu) desc += ` MTU: ${item.mtu}${parseInt(item.mtu) < 1420 ? ' (dikurangi untuk menghindari fragmentasi)' : ''}.`;
-      desc += ' Kriptografi Curve25519 — sangat aman dan efisien.';
+      desc += ' Kriptografi Curve25519: sangat aman dan efisien.';
       return desc;
     }
 
@@ -435,10 +435,10 @@ export const generateItemExplanation = (type, item) => {
       const raw = item._type || item.type || 'VPN';
       const t = String(raw).replace(/-(client|out|server)$/, '');
       const typeDesc = {
-        ovpn: 'OpenVPN client — enkripsi TLS, cross-platform',
-        l2tp: 'L2TP/IPSec — native di Windows/macOS',
-        pptp: '⚠ PPTP — protokol lama dengan kelemahan keamanan diketahui, pertimbangkan migrasi',
-        sstp: 'SSTP (port 443) — menembus firewall korporat yang blokir non-HTTPS',
+        ovpn: 'OpenVPN client: enkripsi TLS, cross-platform',
+        l2tp: 'L2TP/IPSec: native di Windows/macOS',
+        pptp: '⚠ PPTP: protokol lama dengan kelemahan keamanan diketahui, pertimbangkan migrasi',
+        sstp: 'SSTP (port 443): menembus firewall korporat yang blokir non-HTTPS',
       };
       const known = typeDesc[t];
       return known
@@ -457,7 +457,7 @@ export const generateItemExplanation = (type, item) => {
       if (item['endpoint-address'] && item['endpoint-port']) {
         desc += ` Endpoint: ${item['endpoint-address']}:${item['endpoint-port']} (IP publik statis).`;
       } else {
-        desc += ' Tanpa endpoint statis — peer di belakang NAT (butuh persistent-keepalive).';
+        desc += ' Tanpa endpoint statis: peer di belakang NAT (butuh persistent-keepalive).';
       }
       if (item['persistent-keepalive']) desc += ` Keepalive: ${item['persistent-keepalive']}s.`;
       if (item.comment) desc += ` [${item.comment}]`;
@@ -480,13 +480,13 @@ export const generateItemExplanation = (type, item) => {
         api: 'RouterOS API (otomatisasi)',
         'api-ssl': 'RouterOS API over SSL (aman)',
         ftp: 'FTP transfer file',
-        ssh: 'SSH — CLI terenkripsi ✅',
-        telnet: '⚠ Telnet — CLI TIDAK terenkripsi (hindari!)',
+        ssh: 'SSH: CLI terenkripsi ✅',
+        telnet: '⚠ Telnet: CLI TIDAK terenkripsi (hindari!)',
         winbox: 'Akses GUI Winbox',
         www: '⚠ HTTP WebFig (tidak terenkripsi)',
         'www-ssl': 'HTTPS WebFig (terenkripsi) ✅',
       };
-      let desc = `${serviceInfo[n] || `Layanan '${item.name}'`} — port ${port}.`;
+      let desc = `${serviceInfo[n] || `Layanan '${item.name}'`}, port ${port}.`;
       if (disabled) {
         desc += ' (Dinonaktifkan)';
       } else {
@@ -495,7 +495,7 @@ export const generateItemExplanation = (type, item) => {
         // reported the "open to all IPs" warning.
         const af = item.address;
         if (!af || af === '0.0.0.0/0' || af === '::/0') {
-          desc += ' ⚠ Terbuka dari semua IP — pertimbangkan pembatasan alamat akses.';
+          desc += ' ⚠ Terbuka dari semua IP. Pertimbangkan pembatasan alamat akses.';
         } else {
           desc += ` Dibatasi dari: ${af} ✅`;
         }
@@ -508,7 +508,7 @@ export const generateItemExplanation = (type, item) => {
       const action = item.action || 'memory';
       const actionStr = { memory:'RAM (hilang reboot)', disk:'disk permanen', remote:'server syslog remote', email:'email', echo:'console' }[action] || action;
       let desc = `Log topic '${topics}' → ${actionStr}.`;
-      if (action === 'memory') desc += ' ⚠ Tidak persisten — pertimbangkan logging ke disk atau remote syslog.';
+      if (action === 'memory') desc += ' ⚠ Tidak persisten. Pertimbangkan logging ke disk atau remote syslog.';
       else if (action === 'disk') desc += ' Persisten, hati-hati volume log memenuhi storage.';
       else if (action === 'remote') desc += ' Cocok untuk SIEM/Zabbix.';
       return desc;
@@ -535,7 +535,7 @@ export const generateItemExplanation = (type, item) => {
       let desc = `SNMP community '${n}'.`;
       if (n === 'public') desc += ' ⚠ Nama default "public" sangat mudah ditebak penyerang!';
       if (addr === '::/0' || addr === '0.0.0.0/0') {
-        desc += ' ⚠ Terbuka dari SEMUA IP — batasi ke IP server monitoring saja.';
+        desc += ' ⚠ Terbuka dari SEMUA IP. Batasi ke IP server monitoring saja.';
       } else {
         desc += ` Dibatasi dari: ${addr} ✅`;
       }
@@ -550,10 +550,10 @@ export const generateItemExplanation = (type, item) => {
       const hash = item['hash-algorithm'] || 'sha1';
       const dh = item['dh-group'] || 'modp1024';
       let desc = `IPSec: enkripsi ${enc}, hash ${hash}, DH ${dh}.`;
-      if (enc.includes('des') || enc === '3des') desc += ' ⚠ 3DES/DES lemah secara kriptografi — upgrade ke AES-256.';
-      else if (enc.includes('aes-256')) desc += ' AES-256 — keamanan terkuat.';
-      if (dh === 'modp1024' || dh === 'modp768') desc += ` ⚠ DH group ${dh} sudah tidak direkomendasikan — pakai modp2048+.`;
-      if (hash === 'md5') desc += ' ⚠ MD5 tidak aman — pakai SHA-256.';
+      if (enc.includes('des') || enc === '3des') desc += ' ⚠ 3DES/DES lemah secara kriptografi. Upgrade ke AES-256.';
+      else if (enc.includes('aes-256')) desc += ' AES-256: keamanan terkuat.';
+      if (dh === 'modp1024' || dh === 'modp768') desc += ` ⚠ DH group ${dh} sudah tidak direkomendasikan. Pakai modp2048+.`;
+      if (hash === 'md5') desc += ' ⚠ MD5 tidak aman. Pakai SHA-256.';
       return desc;
     }
 
@@ -584,7 +584,7 @@ export const generateItemExplanation = (type, item) => {
       let desc = `OpenVPN Server '${item.name || '?'}' port ${item.port || '1194'}/${proto.toUpperCase()}.`;
       if (proto === 'tcp') desc += ' TCP menembus firewall korporat, tapi ada overhead TCP-over-TCP.';
       else if (proto === 'udp') desc += ' UDP lebih efisien untuk koneksi stabil.';
-      if (item.auth === 'null') desc += ' ⚠ Autentikasi NULL — tidak aman untuk produksi!';
+      if (item.auth === 'null') desc += ' ⚠ Autentikasi NULL. Tidak aman untuk produksi!';
       return desc;
     }
 
@@ -592,15 +592,15 @@ export const generateItemExplanation = (type, item) => {
       let desc = `PPPoE Server '${item['service-name'] || '?'}' di interface '${item.interface || '?'}'.`;
       if (item['max-sessions']) desc += ` Maks sesi: ${item['max-sessions']}.`;
       if (item.authentication) {
-        if (item.authentication.includes('pap')) desc += ' ⚠ PAP diizinkan — password tidak terenkripsi!';
-        else if (item.authentication.includes('mschap2')) desc += ' MSCHAPv2 — autentikasi aman.';
+        if (item.authentication.includes('pap')) desc += ' ⚠ PAP diizinkan. Password tidak terenkripsi!';
+        else if (item.authentication.includes('mschap2')) desc += ' MSCHAPv2: autentikasi aman.';
       }
       return desc;
     }
 
     case 'routing-bgp-tmpl': {
       let desc = `BGP template '${item.name || '?'}' AS ${item.as || '?'}.`;
-      if (item['route-reflect'] === 'yes') desc += ' Route Reflector — distribusi route iBGP tanpa full-mesh.';
+      if (item['route-reflect'] === 'yes') desc += ' Route Reflector: distribusi route iBGP tanpa full-mesh.';
       if (item.multihop === 'yes') desc += ` Multihop (TTL: ${item['multihop-ttl'] || '?'}).`;
       return desc;
     }
@@ -610,9 +610,9 @@ export const generateItemExplanation = (type, item) => {
       const localAs = item['local.as'] || item.as || '?';
       const type = (localAs !== '?' && remoteAs !== '?' && localAs === remoteAs) ? 'iBGP' : 'eBGP';
       let desc = `Sesi ${type} ke ${item['remote.address'] || '?'} (AS ${remoteAs}).`;
-      if (type === 'eBGP') desc += ' Koneksi ke AS lain — upstream/IX provider.';
-      else desc += ' Koneksi dalam AS yang sama — distribusi route internal.';
-      if (item.disabled === 'yes') desc += ' ⚠ Sesi nonaktif — tidak ada route yang ditukar.';
+      if (type === 'eBGP') desc += ' Koneksi ke AS lain: upstream/IX provider.';
+      else desc += ' Koneksi dalam AS yang sama: distribusi route internal.';
+      if (item.disabled === 'yes') desc += ' ⚠ Sesi nonaktif. Tidak ada route yang ditukar.';
       return desc;
     }
 
@@ -641,7 +641,7 @@ export const generateItemExplanation = (type, item) => {
     }
 
     case 'ppp-profile': {
-      let desc = `PPP Profile '${item.name || '?'}' — template untuk koneksi VPN/PPPoE.`;
+      let desc = `PPP Profile '${item.name || '?'}': template untuk koneksi VPN/PPPoE.`;
       if (item['rate-limit']) {
         const [dl, ul] = item['rate-limit'].split('/');
         desc += ` Rate limit: ↓${dl || item['rate-limit']} ↑${ul || item['rate-limit']}.`;
@@ -680,6 +680,6 @@ export const generateItemExplanation = (type, item) => {
     }
 
     default:
-      return 'Detail tersedia — klik tombol Detail untuk melihat selengkapnya.';
+      return 'Detail tersedia. Klik tombol Detail untuk melihat selengkapnya.';
   }
 };

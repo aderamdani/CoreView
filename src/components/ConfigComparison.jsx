@@ -66,10 +66,10 @@ function DiffRow({ path, valA, valB }) {
         {path}
       </td>
       <td style={{ ...tdStyle, color: '#ef4444', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-        {removed || changed ? (valA ?? '—') : '—'}
+        {removed || changed ? (valA ?? '-') : '-'}
       </td>
       <td style={{ ...tdStyle, color: '#22c55e', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-        {added || changed ? (valB ?? '—') : '—'}
+        {added || changed ? (valB ?? '-') : '-'}
       </td>
     </tr>
   );
@@ -174,7 +174,7 @@ export function ConfigComparison() {
               <>
                 <div style={{ fontSize: '1.5rem', marginBottom: '6px' }}>{side === 'a' ? '📂' : '📂'}</div>
                 <div style={{ fontWeight: 700, color, fontSize: '0.9rem' }}>{name}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>{label} — klik untuk ganti</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>{label}: klik untuk ganti</div>
                 {cfg && (
                   <div style={{ marginTop: '8px', display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     {Object.entries(summarizeConfig(cfg)).slice(1).map(([k, v]) => (
@@ -200,7 +200,7 @@ export function ConfigComparison() {
         </div>
       ) : diffs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '12px', color: '#22c55e', fontWeight: 600 }}>
-          ✅ Kedua konfigurasi identik — tidak ada perbedaan.
+          ✅ Kedua konfigurasi identik. Tidak ada perbedaan.
         </div>
       ) : (
         <>

@@ -38,7 +38,7 @@
 
 **CoreView** adalah aplikasi web berbasis browser yang membantu network engineer dan administrator jaringan untuk **memahami dan memvisualisasikan konfigurasi MikroTik RouterOS** secara cepat dan intuitif.
 
-Cukup upload file export konfigurasi (`.rsc` atau `.txt`) dari router MikroTik Anda, dan CoreView akan langsung memparsing serta menampilkannya dalam bentuk dashboard yang terstruktur dan interaktif — **tanpa perlu kirim data ke server manapun**. Semua pemrosesan dilakukan lokal di browser Anda.
+Cukup upload file export konfigurasi (`.rsc` atau `.txt`) dari router MikroTik Anda, dan CoreView akan langsung memparsing serta menampilkannya dalam bentuk dashboard yang terstruktur dan interaktif, **tanpa perlu kirim data ke server manapun**. Semua pemrosesan dilakukan lokal di browser Anda.
 
 ### Masalah yang Diselesaikan
 
@@ -154,7 +154,7 @@ Buka browser dan akses `http://localhost:5173` (atau port yang ditampilkan di te
 
 ## 📖 Cara Menggunakan
 
-### Langkah 1 — Export Konfigurasi dari MikroTik
+### Langkah 1: Export Konfigurasi dari MikroTik
 
 Hubungkan ke router MikroTik Anda (via Winbox, WebFig, SSH, atau Telnet), lalu jalankan perintah:
 
@@ -164,14 +164,14 @@ Hubungkan ke router MikroTik Anda (via Winbox, WebFig, SSH, atau Telnet), lalu j
 
 Ini akan membuat file `config-export.rsc` di sistem file router.
 
-### Langkah 2 — Download File `.rsc`
+### Langkah 2: Download File `.rsc`
 
 Download file tersebut melalui:
 - **Winbox**: Menu `Files` → Download
 - **WebFig**: Menu `Files` → Download
 - **FTP/SFTP**: Ambil langsung dari router
 
-### Langkah 3 — Upload ke CoreView
+### Langkah 3: Upload ke CoreView
 
 1. Buka CoreView di browser
 2. Drag & drop file `.rsc` ke area upload, atau klik untuk browse

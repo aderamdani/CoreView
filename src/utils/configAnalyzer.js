@@ -2,8 +2,8 @@
  * Analyzes a parsed MikroTik config object and returns:
  *  - score (0–100)
  *  - grade / gradeLabel / gradeColor
- *  - issues[]  — each issue has { severity, category, icon, title, description, fix, tab }
- *  - plainSummary — human-readable paragraph for beginners
+ *  - issues[]: each issue has { severity, category, icon, title, description, fix, tab }
+ *  - plainSummary: human-readable paragraph for beginners
  */
 export function analyzeConfig(config) {
   const issues = [];
@@ -31,7 +31,7 @@ export function analyzeConfig(config) {
       icon: '🛡️',
       title: 'Tidak ada aturan Firewall sama sekali',
       description:
-        'Router tidak memiliki satu pun aturan firewall. Artinya semua koneksi dari mana saja — termasuk internet — ' +
+        'Router tidak memiliki satu pun aturan firewall. Artinya semua koneksi dari mana saja (termasuk internet) ' +
         'bisa masuk langsung ke router tanpa hambatan. Ini sama seperti rumah tanpa kunci dan tanpa penjaga.',
       fix: 'Buat aturan firewall minimal: izinkan koneksi yang sudah ada (established/related), ' +
            'blokir traffic invalid, dan DROP semua sisa traffic INPUT dari internet.',
@@ -63,7 +63,7 @@ export function analyzeConfig(config) {
           'Tidak ada aturan pemblokiran (drop/reject) untuk traffic yang masuk langsung ke router. ' +
           'Ini berarti siapapun di internet bisa mencoba mengakses panel manajemen, SSH, atau Winbox router Anda.',
         fix: 'Tambahkan aturan "chain=input action=drop" sebagai baris terakhir di INPUT chain. ' +
-             'Ini adalah "pintu kunci default" — hanya koneksi yang sudah diizinkan sebelumnya yang boleh masuk.',
+             'Ini adalah "pintu kunci default". Hanya koneksi yang sudah diizinkan sebelumnya yang boleh masuk.',
         tab: 'firewall-filter',
         commands: [
           '/ip firewall filter add chain=input connection-state=established,related action=accept comment="Allow Established"',
@@ -106,10 +106,10 @@ export function analyzeConfig(config) {
       severity: 'warning',
       category: 'Keamanan',
       icon: '🔓',
-      title: 'Telnet aktif — komunikasi tidak terenkripsi',
+      title: 'Telnet aktif: komunikasi tidak terenkripsi',
       description:
         'Telnet mengirimkan username, password, dan semua perintah dalam teks biasa yang bisa dibaca siapapun. ' +
-        'Bayangkan mengirim surat rahasia dalam amplop transparan — semua orang bisa membacanya.',
+        'Bayangkan mengirim surat rahasia dalam amplop transparan. Semua orang bisa membacanya.',
       fix: 'Nonaktifkan Telnet di IP → Services dan gunakan SSH sebagai gantinya. ' +
            'SSH mengenkripsi semua komunikasi sehingga tidak bisa disadap.',
       tab: 'ip-services',
@@ -124,7 +124,7 @@ export function analyzeConfig(config) {
       severity: 'warning',
       category: 'Keamanan',
       icon: '📁',
-      title: 'FTP aktif — transfer file tidak aman',
+      title: 'FTP aktif: transfer file tidak aman',
       description:
         'FTP mengirimkan file dan kredensial tanpa enkripsi. Sangat rentan terhadap penyadapan di jaringan yang sama.',
       fix: 'Nonaktifkan FTP di IP → Services. Gunakan SCP atau SFTP via SSH untuk transfer file yang aman.',
@@ -232,7 +232,7 @@ export function analyzeConfig(config) {
       title: 'DNS server belum dikonfigurasi',
       description:
         'Router punya DHCP Server (membagi IP ke perangkat) tapi DNS belum diset. ' +
-        'Tanpa DNS, perangkat klien tidak bisa membuka website menggunakan nama (misal google.com) — ' +
+        'Tanpa DNS, perangkat klien tidak bisa membuka website menggunakan nama (misal google.com), ' +
         'hanya bisa dengan IP langsung.',
       fix: 'Tambahkan DNS server di IP → DNS. Contoh: isi "8.8.8.8" (Google) atau "1.1.1.1" (Cloudflare) ' +
            'dan aktifkan "Allow Remote Requests".',
@@ -278,7 +278,7 @@ export function analyzeConfig(config) {
       title: 'Tidak ada aturan logging (pencatatan aktivitas)',
       description:
         'Tanpa logging, semua aktivitas di router tidak tercatat: login gagal, perubahan konfigurasi, ' +
-        'koneksi mencurigakan — semuanya hilang tanpa jejak. Seperti gedung tanpa buku tamu.',
+        'koneksi mencurigakan. Semuanya hilang tanpa jejak. Seperti gedung tanpa buku tamu.',
       fix: 'Konfigurasi System → Logging. Minimal tambahkan aturan untuk topic "error" dan "warning" ' +
            'dengan action "memory" atau "disk" agar bisa diperiksa nanti.',
       tab: 'system-logging',

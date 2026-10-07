@@ -117,7 +117,7 @@ export function tracePacket(packet, filterRules) {
       return states.includes(connectionState.toLowerCase());
     });
 
-    // Address lists — we can't resolve membership → flag as unknown
+    // Address lists: we can't resolve membership → flag as unknown
     if (rule['src-address-list']) {
       unknownChecks.push({ field: 'src-address-list', value: rule['src-address-list'] });
     }

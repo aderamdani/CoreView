@@ -26,7 +26,7 @@ const VERDICT = {
     icon: '🚫', label: 'DIBUANG (DROP)', color: '#ef4444',
     bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.3)',
     explain: (rule, chain) =>
-      `Paket DIBUANG secara diam-diam oleh chain "${chain}".${rule?.comment ? ` Rule: "${rule.comment}".` : ''} Pengirim tidak mendapat respons apapun — koneksi langsung "mati" tanpa pemberitahuan. Ini pilihan paling aman untuk memblokir traffic berbahaya.`,
+      `Paket DIBUANG secara diam-diam oleh chain "${chain}".${rule?.comment ? ` Rule: "${rule.comment}".` : ''} Pengirim tidak mendapat respons apapun. Koneksi langsung "mati" tanpa pemberitahuan. Ini pilihan paling aman untuk memblokir traffic berbahaya.`,
   },
   reject: {
     icon: '⛔', label: 'DITOLAK (REJECT)', color: '#f97316',
@@ -66,7 +66,7 @@ const ActionBadge = ({ action }) => {
 const FieldVal = ({ label, value }) => (
   <div style={{ background: 'var(--bg-elevated)', borderRadius: 6, padding: '4px 10px', fontSize: '0.78rem', display: 'inline-flex', gap: 6, alignItems: 'center', border: '1px solid var(--border)' }}>
     <span style={{ color: 'var(--text-muted)' }}>{label}:</span>
-    <code style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{value || '—'}</code>
+    <code style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{value || '-'}</code>
   </div>
 );
 
@@ -113,12 +113,12 @@ export const PacketTracer = ({ config, onNavigate }) => {
       <div className="glass-panel config-section" style={{ marginBottom: '1.25rem' }}>
         <div className="section-header" style={{ marginBottom: '0.75rem' }}>
           <Zap className="summary-card-icon" />
-          <h2 className="section-title">Packet Tracer — Simulator Firewall</h2>
+          <h2 className="section-title">Packet Tracer: Simulator Firewall</h2>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.7, margin: '0 0 0.75rem' }}>
           Simulasikan apakah sebuah koneksi akan <strong style={{ color: '#22c55e' }}>diterima</strong> atau{' '}
           <strong style={{ color: '#ef4444' }}>diblokir</strong> oleh firewall router ini.
-          Sistem mengikuti logika <em>first-match</em> RouterOS — rule pertama yang cocok menang.
+          Sistem mengikuti logika <em>first-match</em> RouterOS. Rule pertama yang cocok menang.
         </p>
         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           <span>📋 Rules aktif: <strong style={{ color: 'var(--text-primary)' }}>{activeRules.length}</strong></span>
@@ -127,7 +127,7 @@ export const PacketTracer = ({ config, onNavigate }) => {
           </span>
           {filterRules.length === 0 && (
             <span style={{ color: '#f97316', fontWeight: 600 }}>
-              ⚠️ Tidak ada firewall rules — semua traffic akan diterima default
+              ⚠️ Tidak ada firewall rules. Semua traffic akan diterima default
             </span>
           )}
         </div>
@@ -135,7 +135,7 @@ export const PacketTracer = ({ config, onNavigate }) => {
 
       {/* ── Preset Buttons ──────────────────────────────────────── */}
       <div className="glass-panel config-section" style={{ marginBottom: '1.25rem' }}>
-        <div style={lbl}>Skenario Umum — klik untuk isi form otomatis</div>
+        <div style={lbl}>Skenario Umum: klik untuk isi form otomatis</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {PRESETS.map((p, i) => (
             <button
@@ -172,19 +172,19 @@ export const PacketTracer = ({ config, onNavigate }) => {
           <div>
             <label style={lbl}>Protokol</label>
             <select style={{ ...inp, cursor: 'pointer' }} value={form.protocol} onChange={e => update('protocol', e.target.value)}>
-              <option value="tcp">TCP — web, SSH, FTP</option>
-              <option value="udp">UDP — DNS, VoIP, game</option>
-              <option value="icmp">ICMP — Ping</option>
-              <option value="gre">GRE — VPN L2TP</option>
+              <option value="tcp">TCP: web, SSH, FTP</option>
+              <option value="udp">UDP: DNS, VoIP, game</option>
+              <option value="icmp">ICMP: Ping</option>
+              <option value="gre">GRE: VPN L2TP</option>
             </select>
           </div>
 
           <div>
             <label style={lbl}>Arah / Chain</label>
             <select style={{ ...inp, cursor: 'pointer' }} value={form.chain} onChange={e => update('chain', e.target.value)}>
-              <option value="input">INPUT — menuju router</option>
-              <option value="forward">FORWARD — melewati router</option>
-              <option value="output">OUTPUT — dari router</option>
+              <option value="input">INPUT: menuju router</option>
+              <option value="forward">FORWARD: melewati router</option>
+              <option value="output">OUTPUT: dari router</option>
             </select>
           </div>
 
@@ -209,9 +209,9 @@ export const PacketTracer = ({ config, onNavigate }) => {
           <div>
             <label style={lbl}>Status Koneksi</label>
             <select style={{ ...inp, cursor: 'pointer' }} value={form.connectionState} onChange={e => update('connectionState', e.target.value)}>
-              <option value="new">new — koneksi baru</option>
-              <option value="established">established — sudah ada</option>
-              <option value="related">related — terkait</option>
+              <option value="new">new: koneksi baru</option>
+              <option value="established">established: sudah ada</option>
+              <option value="related">related: terkait</option>
               <option value="invalid">invalid</option>
             </select>
           </div>
@@ -282,7 +282,7 @@ export const PacketTracer = ({ config, onNavigate }) => {
                     <div style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--r-sm)', fontSize: '0.83rem', border: '1px solid var(--border)' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Cocok pada</span>
                       <strong style={{ color: v.color }}>Rule #{matchedStep.ruleIndex}</strong>
-                      {result.matchedRule?.comment && <span style={{ color: 'var(--text-secondary)' }}>— "{result.matchedRule.comment}"</span>}
+                      {result.matchedRule?.comment && <span style={{ color: 'var(--text-secondary)' }}>: "{result.matchedRule.comment}"</span>}
                       <button
                         onClick={() => onNavigate?.('firewall-filter')}
                         style={{ marginLeft: 6, padding: '2px 8px', borderRadius: 4, background: v.bg, border: `1px solid ${v.border}`, color: v.color, cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
@@ -303,7 +303,7 @@ export const PacketTracer = ({ config, onNavigate }) => {
             <div className="glass-panel config-section">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: 8 }}>
                 <div style={{ fontWeight: 700 }}>
-                  Trace Log — Chain <code style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: 4, fontSize: '0.83rem' }}>{form.chain}</code>
+                  Trace Log: Chain <code style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: 4, fontSize: '0.83rem' }}>{form.chain}</code>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem' }}>
                   <span style={{ color: '#22c55e' }}>✅ = cocok</span>
@@ -363,7 +363,7 @@ export const PacketTracer = ({ config, onNavigate }) => {
                             {/* No conditions = match all */}
                             {step.conditions.length === 0 && step.unknownChecks.length === 0 && (
                               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 10, fontStyle: 'italic' }}>
-                                Rule ini tidak memiliki kondisi — cocok dengan SEMUA paket di chain ini.
+                                Rule ini tidak memiliki kondisi: cocok dengan SEMUA paket di chain ini.
                               </div>
                             )}
 
@@ -402,7 +402,7 @@ export const PacketTracer = ({ config, onNavigate }) => {
                                     <span>❓</span>
                                     <span style={{ fontFamily: 'monospace', color: 'var(--text-muted)', minWidth: 140, fontSize: '0.76rem' }}>{u.field}</span>
                                     <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                                      "{u.value}" — tidak dapat dievaluasi (butuh data {u.field.includes('address') ? 'address-list' : 'interface-list'})
+                                      "{u.value}": tidak dapat dievaluasi (butuh data {u.field.includes('address') ? 'address-list' : 'interface-list'})
                                     </span>
                                   </div>
                                 ))}
@@ -424,9 +424,9 @@ export const PacketTracer = ({ config, onNavigate }) => {
                   {/* Final "end of chain" row */}
                   {result.verdict === 'no-match' && (
                     <div style={{ borderRadius: 8, border: '1px dashed var(--border)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, opacity: 0.7, marginTop: 4 }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'var(--text-muted)', minWidth: 28 }}>—</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'var(--text-muted)', minWidth: 28 }}>-</span>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                        End of chain — tidak ada rule yang cocok → RouterOS default: ACCEPT
+                        End of chain. Tidak ada rule yang cocok → RouterOS default: ACCEPT
                       </span>
                     </div>
                   )}
