@@ -5,6 +5,40 @@ Semua perubahan penting proyek ini dicatat di berkas ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/), dan
 versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [1.1.0] - 2026-10-08
+
+### Ditambahkan
+
+- Penanda `Segera` pada menu sidebar yang panelnya masih placeholder, supaya
+  navigasi tidak menjanjikan seksi yang belum ada isinya. Ada 46 menu seperti
+  itu. Daftarnya dideklarasikan sekali di `src/components/placeholderTabs.js`
+  dan diperiksa silang terhadap routing Dashboard oleh `tests/menus.test.js`.
+
+### Diubah
+
+- 37 pesan kosong berbahasa Inggris diseragamkan ke bahasa Indonesia, dengan
+  dua pola: `Tidak ada ... yang cocok dengan pencarian.` untuk hasil pencarian,
+  dan `Belum ada ... yang dikonfigurasi.` untuk seksi yang belum diisi.
+- Sembilan em dash pada teks laporan HTML, banner pencarian, dan daftar istilah
+  diganti. Tidak ada lagi em dash di seluruh `src/`.
+- Inline style yang berulang diubah menjadi kelas. Sel kosong pada tabel
+  (`table-empty-cell`) muncul 55 kali dan tombol Detail per baris (`btn-detail`)
+  16 kali, masing-masing dengan gaya yang sama persis, sehingga satu perubahan
+  gaya harus disunting di puluhan tempat.
+- Elemen penanda di ujung baris sidebar dikelompokkan dalam satu wadah. Dengan
+  `space-between`, penanda jumlah, tombol favorit, dan chevron saling tersebar,
+  dan menambah satu elemen lagi memperburuknya.
+
+### Catatan
+
+- Target memangkas `Dashboard.jsx` lebih dari 50 persen tidak tercapai, dan
+  memang tidak bisa dicapai dengan refactor yang aman. Berkas itu besar karena
+  memuat 116 seksi dengan isi yang berbeda-beda, bukan karena pengulangan yang
+  bisa diseragamkan. Ekstraksi yang benar-benar mengurangi pengulangan hanya
+  menyentuh 71 tempat dari 4.600 baris. Menekan angka itu lebih jauh menuntut
+  penulisan ulang berbasis data, yang merupakan perancangan ulang arsitektur,
+  bukan pekerjaan merapikan.
+
 ## [1.0.1] - 2026-10-08
 
 ### Diperbaiki

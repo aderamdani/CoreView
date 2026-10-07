@@ -1497,7 +1497,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {applyFilter(interfaces).length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada interface yang cocok dengan pencarian.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada interface yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(interfaces).map((iface, idx) => (
               <tr key={idx}>
@@ -1547,7 +1547,7 @@ ${(firewall.nat || []).length > 0 ? `
             </thead>
             <tbody>
               {applyFilter(ethernetIfaces).length === 0 ? (
-                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada interface Ethernet yang cocok dengan pencarian.</td></tr>
+                <tr><td className="table-empty-cell" colSpan="8">Tidak ada interface Ethernet yang cocok dengan pencarian.</td></tr>
               ) : (
                 applyFilter(ethernetIfaces).map((iface, idx) => (
                 <tr key={idx} style={{ opacity: iface.active ? 1 : 0.6 }}>
@@ -1566,7 +1566,7 @@ ${(firewall.nat || []).length > 0 ? `
                       : <span className="badge badge-info">Auto{iface.speed ? ` / ${iface.speed}`: ''}</span>}
                   </td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(iface)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(iface)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -1636,7 +1636,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.interfaceLists.length === 0 ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Interface List yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="3">Belum ada Interface List yang dikonfigurasi.</td></tr>
             ) : (
               config.interfaceLists.map((list, idx) => {
                 const members = config.interfaceListMembers.filter(m => m.list === list.name);
@@ -1683,7 +1683,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.bridges || config.bridges.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Bridge yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Belum ada Bridge yang dikonfigurasi.</td></tr>
             ) : (
               config.bridges.map((bridge, idx) => {
                 const isActive = bridge.disabled !== 'yes';
@@ -1737,7 +1737,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.bridgePorts || config.bridgePorts.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Bridge Port yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada Bridge Port yang dikonfigurasi.</td></tr>
             ) : (
               config.bridgePorts.map((bp, idx) => {
                 const isActive = bp.disabled !== 'yes';
@@ -1794,7 +1794,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {applyFilter(ipAddresses).length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada alamat IP yang cocok dengan pencarian.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada alamat IP yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(ipAddresses).map((ip, idx) => {
                 const hasDHCP = ip.interfaceObj?.dhcpServers?.length > 0;
@@ -1856,7 +1856,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {dhcp.servers.length === 0 ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada DHCP Server yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Belum ada DHCP Server yang dikonfigurasi.</td></tr>
             ) : (
               dhcp.servers.map((server, idx) => (
                 <React.Fragment key={idx}>
@@ -1880,7 +1880,7 @@ ${(firewall.nat || []).length > 0 ? `
                   </tr>
                   {server.poolObj?.ranges && (
                     <tr style={{ background: 'var(--bg-base)' }}>
-                      <td colSpan="6" style={{ padding: '0 12px 12px' }}>
+                      <td className="table-empty-cell" colSpan="6" style={{ padding: '0 12px 12px' }}>
                         <DHCPRangeVisualizer server={server} />
                       </td>
                     </tr>
@@ -1915,7 +1915,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.dhcp.clients || config.dhcp.clients.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada DHCP Client yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada DHCP Client yang dikonfigurasi.</td></tr>
             ) : (
               config.dhcp.clients.map((client, idx) => (
                 <tr key={idx} style={{ opacity: client.disabled === 'yes' ? 0.6 : 1 }}>
@@ -1977,7 +1977,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.dns.static.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada entri DNS statis.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada entri DNS statis.</td></tr>
             ) : (
               config.dns.static.map((entry, idx) => (
                 <tr key={idx}>
@@ -2063,7 +2063,7 @@ ${(firewall.nat || []).length > 0 ? `
             {(() => {
               const filtered = applyColFilter('ip-routes', applyFilter(routes));
               return filtered.length === 0 ? (
-                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada route yang cocok dengan filter.</td></tr>
+                <tr><td className="table-empty-cell" colSpan="5">Tidak ada route yang cocok dengan filter.</td></tr>
               ) : filtered.map((rt, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600, color: rt['dst-address'] === '0.0.0.0/0' ? 'var(--status-info)' : 'inherit' }}>
@@ -2105,7 +2105,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.pools || config.pools.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada IP pool yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada IP pool yang dikonfigurasi.</td></tr>
             ) : (
               config.pools.map((pool, idx) => (
                 <tr key={idx}>
@@ -2181,7 +2181,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.hotspot.servers.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Hotspot Server yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada Hotspot Server yang dikonfigurasi.</td></tr>
             ) : (
               config.hotspot.servers.map((server, idx) => (
                 <tr key={idx} style={{ opacity: server.active ? 1 : 0.6 }}>
@@ -2250,7 +2250,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.hotspot.users || config.hotspot.users.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Hotspot User yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Belum ada Hotspot User yang dikonfigurasi.</td></tr>
             ) : (
               config.hotspot.users.map((u, idx) => (
                 <tr key={idx} style={{ opacity: u.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2275,7 +2275,7 @@ ${(firewall.nat || []).length > 0 ? `
                <thead><tr><th>MAC</th><th>Address</th><th>Type</th></tr></thead>
                <tbody>
                  {(!config.hotspot.bindings || config.hotspot.bindings.length === 0) ? (
-                   <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>None</td></tr>
+                   <tr><td className="table-empty-cell" colSpan="3">None</td></tr>
                  ) : (
                    config.hotspot.bindings.map((b, idx) => (
                      <tr key={idx} style={{ opacity: b.disabled === 'yes'? 0.6 : 1 }}>
@@ -2297,7 +2297,7 @@ ${(firewall.nat || []).length > 0 ? `
                <thead><tr><th>Action</th><th>Dst Host / IP</th></tr></thead>
                <tbody>
                  {(!config.hotspot.walledGarden && !config.hotspot.walledGardenIp) ? (
-                   <tr><td colSpan="2" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>None</td></tr>
+                   <tr><td className="table-empty-cell" colSpan="2">None</td></tr>
                  ) : (
                    <>
                      {config.hotspot.walledGarden?.map((wg, idx) => (
@@ -2343,7 +2343,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingTables.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Routing Table yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada Routing Table yang dikonfigurasi.</td></tr>
             ) : (
               config.routingTables.map((rt, idx) => (
                 <tr key={idx} style={{ opacity: rt.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2434,7 +2434,7 @@ ${(firewall.nat || []).length > 0 ? `
                 {(() => {
                   const filtered = applyColFilter('firewall-filter', applyFilter(firewall.filter));
                   return filtered.length === 0 ? (
-                    <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule filter yang cocok.</td></tr>
+                    <tr><td className="table-empty-cell" colSpan="7">Tidak ada rule filter yang cocok.</td></tr>
                   ) : filtered.map((rule, idx) => (
                     <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                       <td>
@@ -2490,7 +2490,7 @@ ${(firewall.nat || []).length > 0 ? `
             {(() => {
               const filtered = applyColFilter('firewall-nat', applyFilter(firewall.nat));
               return filtered.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule NAT yang cocok.</td></tr>
+                <tr><td className="table-empty-cell" colSpan="6">Tidak ada rule NAT yang cocok.</td></tr>
               ) : filtered.map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
                   <td>
@@ -2537,7 +2537,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!firewall.mangle || applyFilter(firewall.mangle).length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule mangle yang cocok dengan pencarian.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada rule mangle yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(firewall.mangle).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2581,7 +2581,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!firewall.raw || applyFilter(firewall.raw).length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada rule raw yang cocok dengan pencarian.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada rule raw yang cocok dengan pencarian.</td></tr>
             ) : (
               applyFilter(firewall.raw).map((rule, idx) => (
                 <tr key={idx} style={{ opacity: rule.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2691,7 +2691,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.queues.trees.length === 0 ? (
-              <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Queue Tree yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="8">Belum ada Queue Tree yang dikonfigurasi.</td></tr>
             ) : (
               config.queues.trees.map((qt, idx) => (
                 <tr key={idx} style={{ opacity: qt.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2738,7 +2738,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.queues.types.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Queue Type yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada Queue Type yang dikonfigurasi.</td></tr>
             ) : (
               config.queues.types.map((qt, idx) => (
                 <tr key={idx}>
@@ -2787,7 +2787,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {vpn.wireguard.length === 0 && (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada koneksi WireGuard yang ditemukan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Tidak ada koneksi WireGuard yang ditemukan.</td></tr>
             )}
           </tbody>
         </table>
@@ -2814,7 +2814,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(vpn.ovpn.length + vpn.l2tp.length) === 0 && (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada koneksi VPN lama yang ditemukan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Tidak ada koneksi VPN lama yang ditemukan.</td></tr>
             )}
           </tbody>
         </table>
@@ -2836,7 +2836,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!vpn.wireguardPeers || vpn.wireguardPeers.length === 0) ? (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada WireGuard peer yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="7">Belum ada WireGuard peer yang dikonfigurasi.</td></tr>
             ) : (
               vpn.wireguardPeers.map((peer, idx) => (
                 <tr key={idx} style={{ opacity: peer.disabled === 'yes' ? 0.6 : 1 }}>
@@ -2876,7 +2876,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.tools || !config.tools.graphingInterfaces || config.tools.graphingInterfaces.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Interface Graphing yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada Interface Graphing yang dikonfigurasi.</td></tr>
             ) : (
               config.tools.graphingInterfaces.map((g, idx) => (
                 <tr key={idx}>
@@ -2915,7 +2915,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.services.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Service yang disebutkan di konfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Tidak ada Service yang disebutkan di konfigurasi.</td></tr>
             ) : (
               config.services.map((svc, idx) => (
                 <tr key={idx} style={{ opacity: svc.disabled === 'yes' ? 0.6 : 1 }}>
@@ -3009,14 +3009,14 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.systemLogActions.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada logging action khusus yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada logging action khusus yang didefinisikan.</td></tr>
             ) : (
               config.systemLogActions.map((act, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>{act.name || '-'}</td>
                   <td>{act.target || 'memory'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(act)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(act)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3041,14 +3041,14 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.system.logging.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada rule logging khusus yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada rule logging khusus yang didefinisikan.</td></tr>
             ) : (
               config.system.logging.map((log, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>{log.topics || 'all'}</td>
                   <td>{log.action || 'memory'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(log)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(log)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3112,7 +3112,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(!config.lteApns || config.lteApns.length === 0) && (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi LTE APN.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Tidak ada konfigurasi LTE APN.</td></tr>
             )}
           </tbody>
         </table>
@@ -3139,7 +3139,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(!config.snmpCommunities || config.snmpCommunities.length === 0) && (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi SNMP Community.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="3">Tidak ada konfigurasi SNMP Community.</td></tr>
             )}
           </tbody>
         </table>
@@ -3192,7 +3192,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(!config.ipsecProfiles || config.ipsecProfiles.length === 0) && (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi IPsec Profile.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="3">Tidak ada konfigurasi IPsec Profile.</td></tr>
             )}
           </tbody>
         </table>
@@ -3221,7 +3221,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(!config.routingBfd || config.routingBfd.length === 0) && (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Routing BFD.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Tidak ada konfigurasi Routing BFD.</td></tr>
             )}
           </tbody>
         </table>
@@ -3250,7 +3250,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(!config.routingRules || config.routingRules.length === 0) && (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Routing Rules.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Tidak ada konfigurasi Routing Rules.</td></tr>
             )}
           </tbody>
         </table>
@@ -3272,7 +3272,7 @@ ${(firewall.nat || []).length > 0 ? `
             <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{config.firewall.connectionTracking['udp-timeout'] || '-'}</div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Pengaturan default atau tidak ditemukan.</div>
+          <div >Pengaturan default atau tidak ditemukan.</div>
         )}
       </div>
     </div>
@@ -3298,7 +3298,7 @@ ${(firewall.nat || []).length > 0 ? `
               </tr>
             ))}
             {(!config.vpn?.ovpnServers || config.vpn.ovpnServers.length === 0) && (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada layanan OpenVPN Server.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Tidak ada layanan OpenVPN Server.</td></tr>
             )}
           </tbody>
         </table>
@@ -3326,7 +3326,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.ports.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Port yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada Port yang dikonfigurasi.</td></tr>
             ) : (
               config.ports.map((p, idx) => (
                 <tr key={idx}>
@@ -3485,7 +3485,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.system?.users || config.system.users.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada user custom. (User 'admin' default tidak tereksport ke .rsc)</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Tidak ada user custom. (User 'admin' default tidak tereksport ke .rsc)</td></tr>
             ) : (
               config.system.users.map((u, idx) => (
                 <tr key={idx} style={{ opacity: u.disabled === 'yes' ? 0.6 : 1 }}>
@@ -3519,7 +3519,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.system?.groups || config.system.groups.length === 0) ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada group custom. (Group default tidak tereksport)</td></tr>
+              <tr><td className="table-empty-cell" colSpan="3">Tidak ada group custom. (Group default tidak tereksport)</td></tr>
             ) : (
               config.system.groups.map((g, idx) => (
                 <tr key={idx}>
@@ -3605,7 +3605,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.system?.scheduler || config.system.scheduler.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Scheduler yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada Scheduler yang dikonfigurasi.</td></tr>
             ) : (
               config.system.scheduler.map((sch, idx) => (
                 <tr key={idx} style={{ opacity: sch.disabled === 'yes' ? 0.6 : 1 }}>
@@ -3621,7 +3621,7 @@ ${(firewall.nat || []).length > 0 ? `
                       : <span className="badge badge-success">Active</span>}
                   </td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sch)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(sch)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3653,7 +3653,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.system?.scripts || config.system.scripts.length === 0) ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Script yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Tidak ada Script yang dikonfigurasi.</td></tr>
             ) : (
               config.system.scripts.map((sc, idx) => (
                 <tr key={idx}>
@@ -3663,7 +3663,7 @@ ${(firewall.nat || []).length > 0 ? `
                     {sc.source || '-'}
                   </td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sc)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(sc)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3708,7 +3708,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {!bridgeVlans || bridgeVlans.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Bridge VLAN yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada Bridge VLAN yang dikonfigurasi.</td></tr>
             ) : (
               bridgeVlans.map((vlan, idx) => (
                 <tr key={idx}>
@@ -3758,14 +3758,14 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingFilterRules.length === 0 ? (
-              <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada routing filter rule yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="4">Belum ada routing filter rule yang didefinisikan.</td></tr>
             ) : (
               config.routingFilterRules.map((flt, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>{flt.chain || 'unknown'}</td>
                   <td>{flt.action || 'accept'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(flt)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(flt)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3804,7 +3804,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingBgpTmpl.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada BGP template yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada BGP template yang didefinisikan.</td></tr>
             ) : (
               config.routingBgpTmpl.map((bgp, idx) => (
                 <tr key={idx}>
@@ -3812,7 +3812,7 @@ ${(firewall.nat || []).length > 0 ? `
                   <td>{bgp.as || '-'}</td>
                   <td>{bgp['router-id'] || 'auto'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(bgp)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(bgp)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3838,7 +3838,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.routingBgpConn.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada koneksi BGP yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada koneksi BGP yang didefinisikan.</td></tr>
             ) : (
               config.routingBgpConn.map((conn, idx) => (
                 <tr key={idx}>
@@ -3846,7 +3846,7 @@ ${(firewall.nat || []).length > 0 ? `
                   <td>{conn['remote.address'] || '-'}</td>
                   <td>{conn['remote.as'] || '-'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(conn)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(conn)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3881,7 +3881,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.ppp.pppoeServers.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada PPPoE Server yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada PPPoE Server yang didefinisikan.</td></tr>
             ) : (
               config.ppp.pppoeServers.map((srv, idx) => (
                 <tr key={idx}>
@@ -3889,7 +3889,7 @@ ${(firewall.nat || []).length > 0 ? `
                   <td>{srv.interface || '-'}</td>
                   <td>{srv['default-profile'] || 'default'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(srv)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(srv)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3923,7 +3923,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.firewall?.layer7 || config.firewall.layer7.length === 0) ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Layer7 Protocol yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="3">Tidak ada Layer7 Protocol yang dikonfigurasi.</td></tr>
             ) : (
               config.firewall.layer7.map((l7, idx) => (
                 <tr key={idx}>
@@ -3932,7 +3932,7 @@ ${(firewall.nat || []).length > 0 ? `
                     {l7.regexp || '-'}
                   </td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(l7)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(l7)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -3967,7 +3967,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {config.queues.simple.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada Simple Queue yang didefinisikan.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Belum ada Simple Queue yang didefinisikan.</td></tr>
             ) : (
               config.queues.simple.map((sq, idx) => (
                 <tr key={idx}>
@@ -3975,7 +3975,7 @@ ${(firewall.nat || []).length > 0 ? `
                   <td>{sq.target || '-'}</td>
                   <td>{sq['max-limit'] || 'unlimited'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sq)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(sq)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -4006,14 +4006,14 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.queues?.interfaceQueues || config.queues.interfaceQueues.length === 0) ? (
-              <tr><td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Interface Queue. (Menggunakan pengaturan default per interface)</td></tr>
+              <tr><td className="table-empty-cell" colSpan="3">Tidak ada konfigurasi Interface Queue. (Menggunakan pengaturan default per interface)</td></tr>
             ) : (
               config.queues.interfaceQueues.map((q, idx) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: 600 }}>{safeStr(q.name || q.interface)}</td>
                   <td>{safeStr(q['queue-type'] || 'default-small')}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(q)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(q)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -4064,7 +4064,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.wireless?.interfaces || config.wireless.interfaces.length === 0) ? (
-              <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Wireless Interface.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="8">Tidak ada konfigurasi Wireless Interface.</td></tr>
             ) : (
               config.wireless.interfaces.map((iface, idx) => (
                 <tr key={idx} style={{ opacity: iface.disabled === 'yes' ? 0.6 : 1 }}>
@@ -4080,7 +4080,7 @@ ${(firewall.nat || []).length > 0 ? `
                       : <span className="badge badge-success">Active</span>}
                   </td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(iface)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(iface)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -4114,7 +4114,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.wireless?.securityProfiles || config.wireless.securityProfiles.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada Security Profile yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada Security Profile yang dikonfigurasi.</td></tr>
             ) : (
               config.wireless.securityProfiles.map((sp, idx) => (
                 <tr key={idx}>
@@ -4124,7 +4124,7 @@ ${(firewall.nat || []).length > 0 ? `
                   <td>{sp['unicast-ciphers'] || '-'}</td>
                   <td>{sp['group-ciphers'] || '-'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(sp)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(sp)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -4157,7 +4157,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.wireless?.accessList || config.wireless.accessList.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Access List.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Tidak ada konfigurasi Access List.</td></tr>
             ) : (
               config.wireless.accessList.map((item, idx) => (
                 <tr key={idx} style={{ opacity: item.disabled === 'yes' ? 0.6 : 1 }}>
@@ -4199,7 +4199,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.wireless?.connectList || config.wireless.connectList.length === 0) ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada konfigurasi Connect List.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="5">Tidak ada konfigurasi Connect List.</td></tr>
             ) : (
               config.wireless.connectList.map((item, idx) => (
                 <tr key={idx} style={{ opacity: item.disabled === 'yes' ? 0.6 : 1 }}>
@@ -4242,7 +4242,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.ppp?.profiles || config.ppp.profiles.length === 0) ? (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada PPP Profile yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="6">Tidak ada PPP Profile yang dikonfigurasi.</td></tr>
             ) : (
               config.ppp.profiles.map((p, idx) => (
                 <tr key={idx}>
@@ -4252,7 +4252,7 @@ ${(firewall.nat || []).length > 0 ? `
                   <td>{p['rate-limit'] || 'unlimited'}</td>
                   <td style={{ fontFamily: 'monospace' }}>{p['dns-server'] || '-'}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(p)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(p)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>
@@ -4287,7 +4287,7 @@ ${(firewall.nat || []).length > 0 ? `
           </thead>
           <tbody>
             {(!config.ppp?.secrets || config.ppp.secrets.length === 0) ? (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Tidak ada PPP Secret yang dikonfigurasi.</td></tr>
+              <tr><td className="table-empty-cell" colSpan="7">Tidak ada PPP Secret yang dikonfigurasi.</td></tr>
             ) : (
               config.ppp.secrets.map((s, idx) => (
                 <tr key={idx} style={{ opacity: s.disabled === 'yes' ? 0.6 : 1 }}>
@@ -4302,7 +4302,7 @@ ${(firewall.nat || []).length > 0 ? `
                       : <span className="badge badge-success">Active</span>}
                   </td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => setSelectedItemDetail(s)} style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button className="btn btn-primary btn-detail" onClick={() => setSelectedItemDetail(s)}>
                       <Activity size={14} /> Detail
                     </button>
                   </td>

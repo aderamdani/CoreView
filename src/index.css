@@ -221,6 +221,20 @@ body {
 .data-table tbody tr { transition: background 0.15s; }
 .data-table tbody tr:hover { background: var(--bg-hover); }
 
+/* The single-row "nothing here" cell. It was an inline style repeated in 55
+   places, so any change had to be made 55 times. */
+.table-empty-cell {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Compact variant of .btn, used by the per-row "Detail" buttons. Was an inline
+   style repeated in 16 places. */
+.btn-detail {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
 /* Badges */
 .badge {
   display: inline-flex;
