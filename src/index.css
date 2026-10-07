@@ -403,14 +403,6 @@ html.light .react-flow__controls-button {
   fill: var(--text-primary) !important;
 }
 
-/* ─── Search match highlight ─────────────────────────────────── */
-.search-match {
-  background: rgba(234, 179, 8, 0.25);
-  color: var(--text-primary);
-  border-radius: 2px;
-  padding: 0 2px;
-}
-
 /* ─── Search active banner ───────────────────────────────────── */
 .search-active-banner {
   display: flex;
