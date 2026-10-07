@@ -282,6 +282,17 @@ body {
   font-size: 0.75rem;
 }
 
+/* Two inline styles that were repeated across the dashboard. Both are pure
+   duplication: one style pair written out 41 times and one colour written out
+   21 times, so a change had to be made in dozens of places. */
+.text-secondary-sm {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.ink-muted {
+  color: var(--text-muted);
+}
+
 /* Height for the vendored Evilcharts containers.
    The height is set here rather than with a Tailwind utility because Tailwind
    only scans the vendored chart folder; application code stays on the design

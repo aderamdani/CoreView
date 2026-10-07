@@ -2350,11 +2350,9 @@ ${
                   <td>
                     <span className="badge badge-info">{iface.type}</span>
                   </td>
-                  <td>{iface.ip || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{iface.comment || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('interface', iface)}
-                  </td>
+                  <td>{iface.ip || <span className="ink-muted">-</span>}</td>
+                  <td className="ink-muted">{iface.comment || '-'}</td>
+                  <td className="text-secondary-sm">{generateItemExplanation('interface', iface)}</td>
                 </tr>
               ))
             )}
@@ -2432,8 +2430,8 @@ ${
                         <Activity size={14} /> Detail
                       </button>
                     </td>
-                    <td style={{ color: 'var(--text-muted)' }}>{iface.comment || '-'}</td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <td className="ink-muted">{iface.comment || '-'}</td>
+                    <td className="text-secondary-sm">
                       {generateItemExplanation('interfaces-ethernet', iface)}
                     </td>
                   </tr>
@@ -2516,7 +2514,7 @@ ${
                     <td>
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                         {members.length === 0 ? (
-                          <span style={{ color: 'var(--text-muted)' }}>Tidak ada anggota</span>
+                          <span className="ink-muted">Tidak ada anggota</span>
                         ) : (
                           members.map((m, i) => (
                             <span key={i} className="badge badge-info">
@@ -2526,9 +2524,7 @@ ${
                         )}
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('interface-list', list)}
-                    </td>
+                    <td className="text-secondary-sm">{generateItemExplanation('interface-list', list)}</td>
                   </tr>
                 );
               })
@@ -2588,7 +2584,7 @@ ${
                     <td>
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                         {!bridge.ports || bridge.ports.length === 0 ? (
-                          <span style={{ color: 'var(--text-muted)' }}>-</span>
+                          <span className="ink-muted">-</span>
                         ) : (
                           bridge.ports.map((port, i) => (
                             <span key={i} className="badge badge-info">
@@ -2598,9 +2594,7 @@ ${
                         )}
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('bridge', bridge)}
-                    </td>
+                    <td className="text-secondary-sm">{generateItemExplanation('bridge', bridge)}</td>
                   </tr>
                 );
               })
@@ -2652,9 +2646,7 @@ ${
                     <td style={{ fontWeight: 600 }}>{bp.interface}</td>
                     <td>{bp.bridge}</td>
                     <td>{bp.pvid || '1'}</td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('bridge-port', bp)}
-                    </td>
+                    <td className="text-secondary-sm">{generateItemExplanation('bridge-port', bp)}</td>
                   </tr>
                 );
               })
@@ -2750,9 +2742,7 @@ ${
                         </span>
                       )}
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('ip-address', ip)}
-                    </td>
+                    <td className="text-secondary-sm">{generateItemExplanation('ip-address', ip)}</td>
                   </tr>
                 );
               })
@@ -2826,9 +2816,7 @@ ${
                     </td>
                     <td>{server.networkObj?.address || '-'}</td>
                     <td>{server.networkObj?.gateway || '-'}</td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('dhcp-server', server)}
-                    </td>
+                    <td className="text-secondary-sm">{generateItemExplanation('dhcp-server', server)}</td>
                   </tr>
                   {server.poolObj?.ranges && (
                     <tr style={{ background: 'var(--bg-base)' }}>
@@ -2892,9 +2880,7 @@ ${
                     )}
                     {client['use-peer-ntp'] !== 'no' && <span className="badge badge-info">NTP</span>}
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('dhcp-client', client)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('dhcp-client', client)}</td>
                 </tr>
               ))
             )}
@@ -2919,7 +2905,7 @@ ${
         <h3 style={{ marginBottom: '1rem', color: 'var(--accent-secondary)' }}>DNS Servers</h3>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {config.dns.servers.length === 0 ? (
-            <span style={{ color: 'var(--text-muted)' }}>Belum ada DNS server yang diatur.</span>
+            <span className="ink-muted">Belum ada DNS server yang diatur.</span>
           ) : (
             config.dns.servers.map((s, idx) => (
               <span
@@ -2960,9 +2946,7 @@ ${
                   <td style={{ fontWeight: 600 }}>{entry.name}</td>
                   <td>{entry.address}</td>
                   <td>{entry.ttl || 'Default'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('dns-static', entry)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('dns-static', entry)}</td>
                 </tr>
               ))
             )}
@@ -3110,7 +3094,7 @@ ${
                     </td>
                     <td>{rt.gateway || '-'}</td>
                     <td>{rt.distance || '1'}</td>
-                    <td style={{ color: 'var(--text-muted)' }}>
+                    <td className="ink-muted">
                       {rt.disabled === 'yes' && (
                         <span className="badge badge-neutral" style={{ marginRight: '8px' }}>
                           Disabled
@@ -3118,9 +3102,7 @@ ${
                       )}
                       {rt.comment || '-'}
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('route', rt)}
-                    </td>
+                    <td className="text-secondary-sm">{generateItemExplanation('route', rt)}</td>
                   </tr>
                 ))
               );
@@ -3168,9 +3150,7 @@ ${
                       <span className="badge badge-neutral">Unlinked / VPN / Hotspot</span>
                     )}
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('pool', pool)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('pool', pool)}</td>
                 </tr>
               ))
             )}
@@ -3264,9 +3244,7 @@ ${
                     )}
                   </td>
                   <td>{server.profile || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('hotspot-server', server)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('hotspot-server', server)}</td>
                 </tr>
               ))
             )}
@@ -3302,9 +3280,7 @@ ${
                   )}
                 </td>
                 <td>{up['keepalive-timeout'] || '-'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('hotspot-user-profile', up)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('hotspot-user-profile', up)}</td>
               </tr>
             ))}
           </tbody>
@@ -3347,10 +3323,8 @@ ${
                     <span className="badge badge-info">{u.profile || 'default'}</span>
                   </td>
                   <td>{u['mac-address'] || 'Any'}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{u.comment || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('hotspot-user', u)}
-                  </td>
+                  <td className="ink-muted">{u.comment || '-'}</td>
+                  <td className="text-secondary-sm">{generateItemExplanation('hotspot-user', u)}</td>
                 </tr>
               ))
             )}
@@ -3490,9 +3464,7 @@ ${
                   </td>
                   <td style={{ fontWeight: 600 }}>{rt.name}</td>
                   <td>{rt.fib !== undefined ? 'Yes' : 'No'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('routing-table', rt)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('routing-table', rt)}</td>
                 </tr>
               ))
             )}
@@ -3654,8 +3626,8 @@ ${
                         </td>
                         <td>{rule['src-address'] || 'Any'}</td>
                         <td>{rule['dst-address'] || 'Any'}</td>
-                        <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        <td className="ink-muted">{rule.comment || '-'}</td>
+                        <td className="text-secondary-sm">
                           {generateItemExplanation('firewall-filter', rule)}
                         </td>
                       </tr>
@@ -3731,10 +3703,8 @@ ${
                       {rule.protocol && rule['dst-port'] ? `${rule.protocol}:${rule['dst-port']}` : 'Any'}
                     </td>
                     <td>{rule['to-addresses'] || '-'}</td>
-                    <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {generateItemExplanation('firewall-nat', rule)}
-                    </td>
+                    <td className="ink-muted">{rule.comment || '-'}</td>
+                    <td className="text-secondary-sm">{generateItemExplanation('firewall-nat', rule)}</td>
                   </tr>
                 ))
               );
@@ -3789,10 +3759,8 @@ ${
                       rule['new-packet-mark'] ||
                       '-'}
                   </td>
-                  <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('firewall-mangle', rule)}
-                  </td>
+                  <td className="ink-muted">{rule.comment || '-'}</td>
+                  <td className="text-secondary-sm">{generateItemExplanation('firewall-mangle', rule)}</td>
                 </tr>
               ))
             )}
@@ -3845,10 +3813,8 @@ ${
                     {rule.protocol && rule['dst-port'] ? `${rule.protocol}:${rule['dst-port']}` : 'Any'}
                   </td>
                   <td>{rule['src-address'] || rule['dst-address'] || 'Any'}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{rule.comment || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('firewall-raw', rule)}
-                  </td>
+                  <td className="ink-muted">{rule.comment || '-'}</td>
+                  <td className="text-secondary-sm">{generateItemExplanation('firewall-raw', rule)}</td>
                 </tr>
               ))
             )}
@@ -3915,7 +3881,7 @@ ${
                     {group.items.map((item, i) => (
                       <tr key={i}>
                         <td style={{ fontFamily: 'monospace' }}>{item.address}</td>
-                        <td style={{ color: 'var(--text-muted)' }}>{item.comment || '-'}</td>
+                        <td className="ink-muted">{item.comment || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -3981,9 +3947,7 @@ ${
                     {qt['max-limit'] || '-'}
                   </td>
                   <td>{qt.priority || '8'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('queue-tree', qt)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('queue-tree', qt)}</td>
                 </tr>
               ))
             )}
@@ -4028,9 +3992,7 @@ ${
                   </td>
                   <td>{qt['pcq-classifier'] || '-'}</td>
                   <td>{qt['pcq-limit'] || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('queue-type', qt)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('queue-type', qt)}</td>
                 </tr>
               ))
             )}
@@ -4069,9 +4031,7 @@ ${
                 <td style={{ fontWeight: 600 }}>{wg.name}</td>
                 <td>{wg['listen-port']}</td>
                 <td>{wg.mtu}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('vpn-wireguard', wg)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('vpn-wireguard', wg)}</td>
               </tr>
             ))}
             {vpn.wireguard.length === 0 && (
@@ -4109,9 +4069,7 @@ ${
                 </td>
                 <td style={{ fontWeight: 600 }}>{conn.name}</td>
                 <td>{conn.user || conn.profile || '-'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('vpn-legacy', conn)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('vpn-legacy', conn)}</td>
               </tr>
             ))}
             {vpn.ovpn.length + vpn.l2tp.length === 0 && (
@@ -4176,10 +4134,8 @@ ${
                       ? `${peer['endpoint-address']}:${peer['endpoint-port'] || ''}`
                       : 'Dynamic'}
                   </td>
-                  <td style={{ color: 'var(--text-muted)' }}>{peer.comment || '-'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('vpn-wireguard-peer', peer)}
-                  </td>
+                  <td className="ink-muted">{peer.comment || '-'}</td>
+                  <td className="text-secondary-sm">{generateItemExplanation('vpn-wireguard-peer', peer)}</td>
                 </tr>
               ))
             )}
@@ -4222,9 +4178,7 @@ ${
                   <td style={{ fontWeight: 600 }}>{g.interface}</td>
                   <td>{g['allow-address'] || 'Any'}</td>
                   <td>{g['store-on-disk'] === 'no' ? 'No' : 'Yes'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('tool-graphing', g)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('tool-graphing', g)}</td>
                 </tr>
               ))
             )}
@@ -4273,9 +4227,7 @@ ${
                   <td style={{ fontWeight: 600 }}>{svc.name}</td>
                   <td>{svc.port || '-'}</td>
                   <td>{svc.address || 'Any'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('ip-service', svc)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('ip-service', svc)}</td>
                 </tr>
               ))
             )}
@@ -4373,9 +4325,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('log-action', act)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('log-action', act)}</td>
                 </tr>
               ))
             )}
@@ -4411,9 +4361,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('log-rule', log)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('log-rule', log)}</td>
                 </tr>
               ))
             )}
@@ -4449,7 +4397,7 @@ ${
         </div>
         {config.snmp?.contact && (
           <div style={{ marginTop: '1rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Contact: </span>
+            <span className="ink-muted">Contact: </span>
             {config.snmp.contact}
           </div>
         )}
@@ -4486,9 +4434,7 @@ ${
                     <span className="badge badge-success">Yes</span>
                   )}
                 </td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('lte-apn', item)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('lte-apn', item)}</td>
               </tr>
             ))}
             {(!config.lteApns || config.lteApns.length === 0) && (
@@ -4525,9 +4471,7 @@ ${
               <tr key={idx}>
                 <td style={{ fontWeight: 600 }}>{item.name}</td>
                 <td>{item.addresses || '::/0'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('snmp-community', item)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('snmp-community', item)}</td>
               </tr>
             ))}
             {(!config.snmpCommunities || config.snmpCommunities.length === 0) && (
@@ -4569,7 +4513,7 @@ ${
         >
           <h3 style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }}>IP Settings</h3>
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>Max Neighbor Entries: </span>
+            <span className="ink-muted">Max Neighbor Entries: </span>
             {config.settings?.['max-neighbor-entries'] || '-'}
           </div>
         </div>
@@ -4583,7 +4527,7 @@ ${
         >
           <h3 style={{ marginBottom: '1rem', color: 'var(--accent-secondary)' }}>IPv6 Settings</h3>
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>IPv6 Status: </span>
+            <span className="ink-muted">IPv6 Status: </span>
             {config.ipv6Settings?.['disable-ipv6'] === 'yes' ? (
               <span className="badge badge-warning">Disabled</span>
             ) : (
@@ -4591,7 +4535,7 @@ ${
             )}
           </div>
           <div style={{ marginTop: '0.5rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Max Neighbor Entries: </span>
+            <span className="ink-muted">Max Neighbor Entries: </span>
             {config.ipv6Settings?.['max-neighbor-entries'] || '-'}
           </div>
         </div>
@@ -4605,7 +4549,7 @@ ${
         >
           <h3 style={{ marginBottom: '1rem', color: 'var(--status-info)' }}>Detect Internet</h3>
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>Detect Interface List: </span>
+            <span className="ink-muted">Detect Interface List: </span>
             {config.detectInternet?.['detect-interface-list'] || '-'}
           </div>
         </div>
@@ -4634,9 +4578,7 @@ ${
               <tr key={idx}>
                 <td>{item['dpd-interval'] || '-'}</td>
                 <td>{item['dpd-maximum-failures'] || '-'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('ipsec-profile', item)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('ipsec-profile', item)}</td>
               </tr>
             ))}
             {(!config.ipsecProfiles || config.ipsecProfiles.length === 0) && (
@@ -4677,9 +4619,7 @@ ${
                 <td>{item['min-rx'] || '-'}</td>
                 <td>{item['min-tx'] || '-'}</td>
                 <td>{item.multiplier || '-'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('routing-bfd', item)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('routing-bfd', item)}</td>
               </tr>
             ))}
             {(!config.routingBfd || config.routingBfd.length === 0) && (
@@ -4720,9 +4660,7 @@ ${
                 <td>{item['src-address'] || 'Any'}</td>
                 <td>{item['dst-address'] || 'Any'}</td>
                 <td style={{ fontWeight: 600, color: 'var(--accent-secondary)' }}>{item.table || 'main'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('routing-rule', item)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('routing-rule', item)}</td>
               </tr>
             ))}
             {(!config.routingRules || config.routingRules.length === 0) && (
@@ -4790,9 +4728,7 @@ ${
                 <td style={{ fontWeight: 600 }}>{item.name || 'Server'}</td>
                 <td>{item.auth || 'any'}</td>
                 <td>{item['mac-address'] || '-'}</td>
-                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  {generateItemExplanation('vpn-ovpn-server', item)}
-                </td>
+                <td className="text-secondary-sm">{generateItemExplanation('vpn-ovpn-server', item)}</td>
               </tr>
             ))}
             {(!config.vpn?.ovpnServers || config.vpn.ovpnServers.length === 0) && (
@@ -4839,9 +4775,7 @@ ${
                   <td>{p[0] || p.id || idx}</td>
                   <td style={{ fontWeight: 600 }}>{p.name || `serial${idx}`}</td>
                   <td>{p['baud-rate'] || 'auto'}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('port', p)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('port', p)}</td>
                 </tr>
               ))
             )}
@@ -5026,7 +4960,7 @@ ${
                     <span className="badge badge-info">{u.group || 'read'}</span>
                   </td>
                   <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{u.address || 'All'}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{u.comment || '-'}</td>
+                  <td className="ink-muted">{u.comment || '-'}</td>
                 </tr>
               ))
             )}
@@ -5379,9 +5313,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('routing-filter', flt)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('routing-filter', flt)}</td>
                 </tr>
               ))
             )}
@@ -5432,9 +5364,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('routing-bgp-tmpl', bgp)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('routing-bgp-tmpl', bgp)}</td>
                 </tr>
               ))
             )}
@@ -5475,9 +5405,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('routing-bgp-conn', conn)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('routing-bgp-conn', conn)}</td>
                 </tr>
               ))
             )}
@@ -5524,9 +5452,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('pppoe-server', srv)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('pppoe-server', srv)}</td>
                 </tr>
               ))
             )}
@@ -5629,9 +5555,7 @@ ${
                       <Activity size={14} /> Detail
                     </button>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {generateItemExplanation('queue-simple', sq)}
-                  </td>
+                  <td className="text-secondary-sm">{generateItemExplanation('queue-simple', sq)}</td>
                 </tr>
               ))
             )}
@@ -5848,7 +5772,7 @@ ${
                     </span>
                   </td>
                   <td>{item['signal-range'] ? `${item['signal-range']} dBm` : '-'}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{item.comment || '-'}</td>
+                  <td className="ink-muted">{item.comment || '-'}</td>
                 </tr>
               ))
             )}
@@ -6408,7 +6332,7 @@ ${
                   >
                     {key}
                   </kbd>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{label}</span>
+                  <span className="text-secondary-sm">{label}</span>
                 </div>
               ))}
             </div>
