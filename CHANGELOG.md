@@ -12,9 +12,31 @@ versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 - Dashboard gagal dirender di produksi dengan `ReferenceError: Server is not
   defined`. Berkas `src/components/menus.jsx` memakai 18 ikon lucide tanpa
   pernah mengimpornya, sehingga saat runtime nama ikon itu menjadi referensi
-  global yang tidak ada. Kesalahan ini lolos dari lint karena aturan `no-undef`
-  tidak memeriksa nama elemen JSX, dan lolos dari build karena identifier yang
-  belum terdefinisi adalah JavaScript yang sah.
+  global yang tidak ada.
+- Entri changelog di panel catatan rilis terpotong di akhir baris pertama,
+  karena butir yang dibungkus ke baris berikutnya tidak disambung. Panel
+  menampilkan kalimat yang putus di tengah.
+- Kekosongan placeholder `-` pada pembanding konfigurasi dan packet tracer
+  memakai em dash, sehingga terbaca sebagai tanda pisah.
+
+### Ditambahkan
+
+- `tests/render.smoke.jsx`, yang me-render 13 komponen dengan konfigurasi contoh.
+  Kelas kesalahan yang lolos dari lint maupun build akhirnya tertangkap di sini.
+- Aturan `react/jsx-no-undef` pada lint. Aturan bawaan `no-undef` tidak
+  memeriksa nama elemen JSX, dan itulah celah yang meloloskan kesalahan ikon di
+  atas. Ditambah `react/jsx-uses-vars` dan `react/jsx-key`.
+- Pemeriksaan render ikut dijalankan di CI, dan `npm run check` kini mencakup
+  lint, tes, dan pemeriksaan render.
+
+### Diubah
+
+- Prosa antarmuka tidak lagi memakai em dash. Sekitar 190 kemunculan di
+  `itemExplainer.js`, `configHelp.js`, `PacketTracer.jsx`, `GlossaryTip.jsx`,
+  `configAnalyzer.js`, `ConfigComparison.jsx`, dan dua berkas lain diganti
+  dengan titik, koma, atau titik dua sesuai konteks kalimatnya.
+- 254 baris CSS mati di `src/index.css` dihapus, bersama dua selector yang tidak
+  terpakai di `src/App.css`.
 
 ## [1.0.0] - 2026-10-08
 
