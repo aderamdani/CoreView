@@ -10,9 +10,13 @@ function flattenConfig(config, prefix = '') {
     if (Array.isArray(val)) {
       val.forEach((item, i) => {
         if (item && typeof item === 'object') {
-          const itemKey = item.name || item.chain || item.interface || item.comment || `[${i}]`;
-          const subPath = `${path}[${itemKey}]`;
-          Object.assign(result, flattenConfig(item, subPath));
+          // The index is always part of the key. Deriving it from a name field
+          // alone collided: two IPs on one interface, or two rules in one chain
+          // with no comment, shared a key and the later one silently replaced
+          // the earlier, so the diff reported the config as identical.
+          const itemKey = item.name || item.chain || item.interface || item.comment;
+          const label = itemKey ? `${itemKey} #${i}` : `[${i}]`;
+          Object.assign(result, flattenConfig(item, `${path}[${label}]`));
         } else {
           result[`${path}[${i}]`] = String(item ?? '');
         }
@@ -78,7 +82,8 @@ export function ConfigComparison() {
   const [nameB, setNameB]     = useState('');
   const [filter, setFilter]   = useState('all'); // all | added | removed | changed
   const [searchTerm, setSearch] = useState('');
-  const [loading, setLoading] = useState({ a: false, b: false });
+  const [, setLoading] = useState({ a: false, b: false });
+  const [loadError, setLoadError] = useState('');
 
   const loadFile = useCallback((side) => {
     const input = document.createElement('input');
@@ -93,6 +98,11 @@ export function ConfigComparison() {
         const parsed = parseMikroTikConfig(text);
         if (side === 'a') { setConfigA(parsed); setNameA(file.name); }
         else              { setConfigB(parsed); setNameB(file.name); }
+        setLoadError('');
+      } catch (err) {
+        // Without this the rejection escaped as an unhandled promise: the
+        // spinner stopped but the user got no message at all.
+        setLoadError(err?.message || `Gagal membaca ${side === 'a' ? 'file A' : 'file B'}.`);
       } finally {
         setLoading(prev => ({ ...prev, [side]: false }));
       }
@@ -122,8 +132,7 @@ export function ConfigComparison() {
     return { diffs: result, stats: { added, removed, changed, total: result.length } };
   }, [configA, configB]);
 
-  const summaryA = useMemo(() => configA ? summarizeConfig(configA) : null, [configA]);
-  const summaryB = useMemo(() => configB ? summarizeConfig(configB) : null, [configB]);
+
 
   const filtered = useMemo(() => {
     let d = diffs;
@@ -141,6 +150,15 @@ export function ConfigComparison() {
 
   return (
     <div className="animate-fade-in">
+      {loadError && (
+        <div className="parse-error" role="alert" style={{ marginBottom: '1rem' }}>
+          <div>
+            <p className="parse-error-title">Gagal membaca file</p>
+            <p className="parse-error-message">{loadError}</p>
+          </div>
+        </div>
+      )}
+
       {/* File pickers */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '1.5rem' }}>
         {[

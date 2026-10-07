@@ -12,17 +12,39 @@ function ipToInt(ip) {
   return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]) >>> 0;
 }
 
-function cidrContains(cidrA, cidrB) {
-  if (!cidrA || cidrA === '' || cidrA === '0.0.0.0/0') return true;
-  if (!cidrB || cidrB === '' || cidrB === '0.0.0.0/0') return false;
+const singleCidrContains = (cidrA, cidrB) => {
   try {
     const [netA, prefA] = cidrA.includes('/') ? cidrA.split('/') : [cidrA, '32'];
     const [netB, prefB] = cidrB.includes('/') ? cidrB.split('/') : [cidrB, '32'];
     const pA = parseInt(prefA, 10), pB = parseInt(prefB, 10);
+    if (Number.isNaN(pA) || Number.isNaN(pB)) return false;
     if (pA > pB) return false; // A is more specific → can't cover broader B
     const maskA = pA === 0 ? 0 : (~0 << (32 - pA)) >>> 0;
     return (ipToInt(netA) & maskA) >>> 0 === (ipToInt(netB) & maskA) >>> 0;
   } catch { return false; }
+};
+
+/**
+ * True when any address in A covers any address in B.
+ *
+ * Both sides may be comma-separated lists. The previous implementation split
+ * only on '/', so "192.168.0.0/16,10.0.0.0/8" produced a prefix of
+ * "16,10.0.0.0" that parsed to NaN and silently compared as 0: a rule blocking
+ * a two-range list was never reported as shadowing anything. A leading '!'
+ * marks a negated range, which never covers anything on its own.
+ */
+function cidrContains(cidrA, cidrB) {
+  if (!cidrA || cidrA === '' || cidrA === '0.0.0.0/0') return true;
+  if (!cidrB || cidrB === '' || cidrB === '0.0.0.0/0') return false;
+
+  const entriesA = String(cidrA).split(',').map(s => s.trim()).filter(Boolean);
+  const entriesB = String(cidrB).split(',').map(s => s.trim()).filter(Boolean);
+  if (entriesA.length === 0 || entriesB.length === 0) return false;
+
+  return entriesA.some((a) => {
+    if (a.startsWith('!')) return false;
+    return entriesB.some((b) => !b.startsWith('!') && singleCidrContains(a, b));
+  });
 }
 
 function portContains(portSpecA, portSpecB) {
@@ -95,7 +117,6 @@ function ruleAShadowsB(ruleA, ruleB) {
 function describeWhy(ruleA, ruleB) {
   const parts = [];
   const pA = (ruleA.protocol || '').toLowerCase();
-  const pB = (ruleB.protocol || '').toLowerCase();
 
   if (!ruleA['src-address'])  parts.push('src IP: semua');
   else                        parts.push(`src IP: ${ruleA['src-address']} ⊇ ${ruleB['src-address'] || 'semua'}`);
@@ -108,6 +129,19 @@ function describeWhy(ruleA, ruleB) {
 
   if (!ruleA['dst-port'])     parts.push('port: semua');
   else                        parts.push(`port: ${ruleA['dst-port']}`);
+
+  // These three decide whether A shadows B just as much as the fields above do.
+  // Omitting them produced "src IP: semua, dst IP: semua, protokol: semua,
+  // port: semua" for a rule that actually matched a single interface and
+  // connection state, which reads as the exact opposite of the truth.
+  if (!ruleA['in-interface']) parts.push('interface: semua');
+  else                       parts.push(`interface: ${ruleA['in-interface']} ⊇ ${ruleB['in-interface'] || 'semua'}`);
+
+  if (!ruleA['src-port'])    parts.push('src port: semua');
+  else                       parts.push(`src port: ${ruleA['src-port']} ⊇ ${ruleB['src-port'] || 'semua'}`);
+
+  if (!ruleA['connection-state']) parts.push('connection state: semua');
+  else                            parts.push(`connection state: ${ruleA['connection-state']} ⊇ ${ruleB['connection-state'] || 'semua'}`);
 
   return parts.join(', ');
 }
@@ -152,13 +186,16 @@ export function detectDuplicates(filterRules) {
     if (seen.has(key)) {
       dupes.push({
         original: seen.get(key).rule,
-        originalIndex: seen.get(key).idx + 1,
+        // Indexed against filterRules, not against the filtered `active` array:
+        // the old value counted position in `active`, so with a disabled rule
+        // first the UI pointed at the wrong rule ("delete #3, identical to #1").
+        originalIndex: filterRules.indexOf(seen.get(key).rule) + 1,
         duplicate: active[i],
         duplicateIndex: filterRules.indexOf(active[i]) + 1,
         chain: active[i].chain,
       });
     } else {
-      seen.set(key, { rule: active[i], idx: i });
+      seen.set(key, { rule: active[i] });
     }
   }
 

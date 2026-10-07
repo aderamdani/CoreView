@@ -181,25 +181,38 @@ Download file tersebut melalui:
 
 ```
 CoreView/
-├── public/                  # Asset statis
+├── public/
+│   └── demo/                # Contoh konfigurasi untuk tombol "coba demo"
 ├── src/
 │   ├── components/
-│   │   ├── Dashboard.jsx    # Komponen dashboard utama (sidebar & semua panel)
-│   │   ├── MindMap.jsx      # Visualisasi mind map konfigurasi
-│   │   ├── OsiTcpView.jsx   # Panduan visual lapisan OSI & TCP/IP
-│   │   └── Uploader.jsx     # Komponen upload file dengan tutorial
+│   │   ├── Dashboard.jsx      # Dashboard utama: sidebar + semua tab
+│   │   ├── Landing.jsx        # Halaman awal, tempat upload file
+│   │   ├── MindMap.jsx        # Visualisasi mind map konfigurasi
+│   │   ├── OsiTcpView.jsx     # Panduan visual lapisan OSI & TCP/IP
+│   │   ├── NetworkTopology.jsx  # Topologi jaringan dari interface & IP
+│   │   ├── PacketTracer.jsx   # Simulasikan alur paket melewati firewall
+│   │   ├── FirewallConflicts.jsx  # Deteksi rule yang tertutup / duplikat
+│   │   ├── FirewallSwimlane.jsx  # Visualisasi rule firewall per chain
+│   │   ├── ConfigComparison.jsx  # Bandingkan dua file konfigurasi
+│   │   ├── DHCPRangeVisualizer.jsx  # Visualisasi rentang IP DHCP
+│   │   └── GlossaryTip.jsx    # Tooltip istilah jaringan
 │   ├── utils/
-│   │   ├── parser.js        # Parser file .rsc MikroTik → JSON terstruktur
-│   │   └── configHelp.js    # Data bantuan kontekstual untuk setiap seksi
-│   ├── App.jsx              # Root komponen (routing file & theme toggle)
-│   ├── App.css              # Styling komponen utama
-│   ├── index.css            # Design system & CSS variables
-│   └── main.jsx             # Entry point aplikasi
-├── index.html               # HTML template
-├── vite.config.js           # Konfigurasi Vite
-├── eslint.config.js         # Konfigurasi ESLint
-├── vercel.json              # Konfigurasi deployment Vercel (SPA rewrite)
-└── package.json             # Dependency & scripts
+│   │   ├── parser.js            # Parser file .rsc → JSON terstruktur
+│   │   ├── configHelp.js        # Bantuan kontekstual per seksi
+│   │   ├── configAnalyzer.js    # Health check & saran perbaikan
+│   │   ├── detectConflicts.js   # Deteksi konflik & duplikat firewall
+│   │   ├── packetTracer.js      # Logika simulasi packet tracer
+│   │   └── itemExplainer.js     # Penjelasan per item konfigurasi
+│   ├── App.jsx                # Root: state file, pencarian, theme
+│   ├── App.css                # Styling komponen
+│   ├── index.css              # Design system & CSS variables
+│   └── main.jsx               # Entry point
+├── tests/                    # Tes runner (node --test)
+├── index.html                # HTML template
+├── vite.config.js            # Konfigurasi Vite
+├── eslint.config.js          # Konfigurasi ESLint
+├── vercel.json               # Deployment Vercel (SPA rewrite)
+└── package.json              # Dependency & scripts
 ```
 
 ### Alur Data
@@ -209,7 +222,7 @@ File .rsc  →  parser.js  →  Structured JSON  →  Dashboard.jsx  →  UI
               (parsing)      (enrichment)        (rendering)
 ```
 
-- **`parser.js`**: Membaca setiap baris file `.rsc`, mengekstrak context path (`/ip firewall filter`, dll.), dan memetakannya ke objek JSON terstruktur. Setelah parsing, fungsi `enrichDashboardData` menghubungkan relasi antar objek (misalnya: DHCP server → interface → pool).
+- **`parser.js`**: Membaca setiap baris file `.rsc`, mengekstrak context path (`/ip firewall filter`, dll.), dan memetakannya ke objek JSON terstruktur. Setelah parsing, fungsi `enrichDashboardData` menghubungkan relasi antar objek (misalnya: DHCP server → interface → pool). Input yang bukan export MikroTik ditolak dengan pesan yang bisa dibaca pengguna.
 - **`configHelp.js`**: Berisi deskripsi bahasa Indonesia untuk setiap seksi konfigurasi, digunakan oleh `HelpPanel` di dalam Dashboard.
 
 ---
@@ -239,6 +252,15 @@ vercel
 ```
 
 Atau hubungkan repositori GitHub Anda ke [Vercel Dashboard](https://vercel.com/dashboard) untuk deploy otomatis setiap push ke branch `main`.
+
+### Domain Kustom
+
+Domain kustom dikonfigurasi di level project Vercel, bukan di repositori, jadi
+tidak ada yang perlu diubah di kode.
+
+Untuk panduan memindahkan domain ke `coreview.vertexdata.web.id`, termasuk
+endpoint API yang terverifikasi dan runbook langkah demi langkah, lihat
+[`DEPLOYMENT-DOMAIN.md`](DEPLOYMENT-DOMAIN.md).
 
 ---
 

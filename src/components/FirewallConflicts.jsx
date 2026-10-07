@@ -28,7 +28,7 @@ function RuleRef({ rule, idx, dim }) {
   );
 }
 
-export function FirewallConflicts({ rules, onNavigate }) {
+export function FirewallConflicts({ rules }) {
   const [activeChain, setActiveChain] = useState('all');
   const [showDupes, setShowDupes] = useState(true);
 
@@ -120,7 +120,7 @@ export function FirewallConflicts({ rules, onNavigate }) {
                 <strong>Kenapa?</strong> Rule #{c.shadowingIndex} cocok dengan kondisi yang lebih luas: {c.reason} — sehingga paket yang seharusnya ditangani rule #{c.shadowedIndex} sudah diproses lebih dulu.
               </div>
               <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#f97316' }}>
-                <strong>Solusi:</strong> Pindahkan rule #{c.shadowedIndex} ke atas rule #{c.shadowingIndex}, atau perbesar kondisi di rule #{c.shadowedIndex} agar lebih spesifik.
+                <strong>Solusi:</strong> Pindahkan rule #{c.shadowedIndex} ke atas rule #{c.shadowingIndex}, atau persempit kondisi di rule #{c.shadowingIndex} (rule pemblokir) supaya tidak lagi mencakup semua trafik yang ditangani rule #{c.shadowedIndex}.
               </div>
             </div>
           ))}

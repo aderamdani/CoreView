@@ -80,7 +80,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
         tcp: 'Application',
         items: [
           { label: 'DHCP Server', count: config.dhcp.servers?.length, tab: 'ip-dhcp-server' },
-          { label: 'DNS Settings', count: config.ipAddresses.some(i => i.interfaceObj?.dhcpServers) ? 'Active' : null, tab: 'ip-dns' },
+          { label: 'DNS Settings', count: config.dns?.servers?.length ? 'Active' : null, tab: 'ip-dns' },
           { label: 'Hotspot', count: config.hotspot.servers?.length, tab: 'ip-hotspot' },
           { label: 'IP Services (SSH, Winbox)', count: 'Active', tab: 'ip-services' },
         ].filter(i => i.count),
@@ -119,7 +119,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
           { label: 'IP Addresses', count: config.ipAddresses.length, tab: 'ip-addresses' },
           { label: 'IP Routes', count: config.routes.length, tab: 'ip-routes' },
           { label: 'Firewall Rules (IP Based)', count: config.firewall.filter.length, tab: 'firewall-filter' },
-          { label: 'IP Pools', count: config.dhcp.pools?.length, tab: 'ip-pool' },
+          { label: 'IP Pools', count: config.pools?.length, tab: 'ip-pool' },
         ].filter(i => i.count),
       },
       l2: {
@@ -138,7 +138,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
         desc: 'Media, signal, binary transmission.',
         tcp: 'Network Access',
         items: [
-          { label: 'Physical Interfaces (Ethernet)', count: config.interfaces.filter(i => i.type === 'ether').length, tab: 'interfaces-list' },
+          { label: 'Physical Interfaces (Ethernet)', count: config.interfaces.filter(i => i.type === 'ethernet').length, tab: 'interfaces-list' },
           { label: 'Hardware Ports / Serial', count: 'Active', tab: 'system-ports' },
         ].filter(i => i.count),
       },

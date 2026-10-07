@@ -182,8 +182,10 @@ export function analyzeConfig(config) {
   // ─── KONEKTIVITAS ──────────────────────────────────────────────────────────
 
   // Tidak ada default route
+  // parser never sets `active` on routes, so testing it would always pass.
+  // RouterOS marks a disabled route with disabled=yes instead.
   const hasDefaultRoute = routes.some(
-    r => (r['dst-address'] === '0.0.0.0/0' || r['dst-address'] === '::/0') && r.active !== false
+    r => (r['dst-address'] === '0.0.0.0/0' || r['dst-address'] === '::/0') && r.disabled !== 'yes'
   );
   if (!hasDefaultRoute && routes.length > 0) {
     issues.push({
@@ -201,7 +203,9 @@ export function analyzeConfig(config) {
   }
 
   // Tidak ada NAT/masquerade tapi ada DHCP server
-  const hasMasquerade = natRules.some(r => r.action === 'masquerade');
+  // A disabled masquerade rule is not doing anything, so LAN clients still
+  // have no outbound path. Counting it made the summary claim NAT was set up.
+  const hasMasquerade = natRules.some(r => r.action === 'masquerade' && r.disabled !== 'yes');
   if (!hasMasquerade && dhcpServers.length > 0 && hasDefaultRoute) {
     issues.push({
       severity: 'info',

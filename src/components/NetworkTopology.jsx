@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import ReactFlow, {
   Background, Controls, MiniMap,
   useNodesState, useEdgesState,

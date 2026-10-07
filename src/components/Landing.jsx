@@ -52,7 +52,9 @@ export const Landing = ({ onFileParsed }) => {
       const content = await response.text();
       onFileParsed(content);
     } catch (err) {
-      setError('Gagal memuat demo konfigurasi.');
+      // parseMikroTikConfig throws ConfigParseError with a user-facing message,
+      // so surface that instead of hiding the reason behind a generic string.
+      setError(err?.message || 'Gagal memuat demo konfigurasi.');
     } finally {
       setLoading(false);
     }

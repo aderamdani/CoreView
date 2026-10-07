@@ -731,8 +731,8 @@ export const configHelp = {
   },
 
   'routing-bgp': {
-    title: 'BGP',
-    summary: 'Border Gateway Protocol for pertukaran route antar-AS atau multi-uplink tingkat lanjut.',
+    title: 'Border Gateway Protocol (BGP)',
+    summary: 'Protokol routing eksterior standar internet. Digunakan untuk bertukar informasi routing (AS path) antar provider atau dengan IP Transit utama.',
     impact: [
       'Memungkinkan kontrol traffic engineering inbound/outbound skala besar.',
       'Kesalahan policy BGP bisa mengakibatkan route leak yang berdampak luas.',
@@ -1262,16 +1262,6 @@ export const configHelp = {
       'Bergantung pada konfigurasi PPP Profiles dan PPP Secrets.',
     ],
     relations: ['Interfaces → VLAN', 'PPP → Secrets', 'Queue → Simple'],
-  },
-
-  'routing-bgp': {
-    title: 'Border Gateway Protocol (BGP)',
-    summary: 'Protokol routing eksterior standar internet. Digunakan untuk bertukar informasi routing (AS path) antar provider atau dengan IP Transit utama.',
-    impact: [
-      'Kebijakan routing (Template, Connections, Filters) sangat kritis. Kesalahan filter bisa membocorkan rute internal atau membebani router BGP lain.',
-      'Sangat intensif memori jika menerima tabel full-route. Filter yang tepat sangat dibutuhkan.',
-    ],
-    relations: ['Routing → Filters', 'IP → Route'],
   },
 
   'routing-table': {

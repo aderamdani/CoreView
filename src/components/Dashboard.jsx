@@ -5,6 +5,7 @@ import {
   Settings, Clock, Terminal, Monitor, Key, Cloud, Search, BarChart2, HelpCircle, Tag, ArrowLeft, ArrowRight, Layers, FileText, X,
   Heart, AlertTriangle, Info, TrendingUp, BookOpen, Lightbulb, Zap
 } from 'lucide-react';
+import { buildMenus } from './menus.jsx';
 import { configHelp } from '../utils/configHelp';
 import { generateItemExplanation } from '../utils/itemExplainer';
 import { analyzeConfig } from '../utils/configAnalyzer';
@@ -23,10 +24,29 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
 } from 'recharts';
 
+// Escapes a value for interpolation into the exported HTML report. That report
+// is assembled with template literals and opened as a local file, so a comment
+// containing markup would otherwise execute in the reader's browser.
+const escapeHtml = (val) => String(val ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 // Safely converts any value to a renderable string (prevents "Objects are not valid as React children" errors)
+// Objects are never serialised: parser back-references form cycles
+// (ip -> interface -> ipAddresses[] -> ip), so JSON.stringify throws
+// "Converting circular structure to JSON" and took the section down with it.
 const safeStr = (val, fallback = '-') => {
   if (val === null || val === undefined) return fallback;
-  if (typeof val === 'object') return JSON.stringify(val);
+  if (typeof val === 'object') {
+    if (Array.isArray(val)) {
+      const parts = val.map(v => (typeof v === 'object' ? '' : safeStr(v, ''))).filter(Boolean);
+      return parts.length ? parts.join(', ') : fallback;
+    }
+    return val.name || val.defaultName || val.address || fallback;
+  }
   return String(val);
 };
 
@@ -380,7 +400,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const dataCounts = {
     'interfaces-list':       interfaces.length,
     'interfaces-ethernet':   interfaces.filter(i => i.type === 'ethernet').length,
-    'interfaces-lte':        interfaces.filter(i => i.type === 'lte-apn' || i.type === 'lte').length,
+    'interfaces-lte':        config.lteApns?.length || 0,
     'interfaces-lists':      config.interfaceLists?.length || 0,
     'bridge-list':           config.bridges?.length || 0,
     'bridge-ports':          config.bridgePorts?.length || 0,
@@ -389,7 +409,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     'wireless-security':     config.wireless?.securityProfiles?.length || 0,
     'wireless-access-list':  config.wireless?.accessList?.length || 0,
     'vpn':                   totalVpns,
-    'vpn-ipsec':             config.vpn?.ipsec?.length || 0,
+    'vpn-ipsec':             config.ipsecProfiles?.length || 0,
     'ppp-pppoe-server':      config.ppp?.pppoeServers?.length || 0,
     'ppp-profiles':          config.ppp?.profiles?.length || 0,
     'ppp-secrets':           config.ppp?.secrets?.length || 0,
@@ -403,7 +423,7 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     'ip-hotspot':            (config.hotspot?.servers?.length || 0) + (config.hotspot?.users?.length || 0),
     'ip-services':           config.services?.length || 0,
     'routing-tables':        config.routingTables?.length || 0,
-    'routing-bgp':           config.bgp?.connections?.length || 0,
+    'routing-bgp':           config.routingBgpConn?.length || 0,
     'firewall-filter':       firewall.filter?.length || 0,
     'firewall-conflicts':    conflictAnalysis.conflicts.length + conflictAnalysis.duplicates.length,
     'firewall-nat':          firewall.nat?.length || 0,
@@ -469,41 +489,48 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 
     const issueRows = issues.map(iss => `
       <div style="margin-bottom:12px;padding:12px 16px;background:${severityBg[iss.severity]};border-left:4px solid ${severityBorder[iss.severity]};border-radius:6px;">
-        <div style="font-weight:700;font-size:14px;color:${severityBorder[iss.severity]}">${iss.icon} ${iss.title}</div>
-        <div style="color:#374151;margin-top:4px;font-size:13px">${iss.description}</div>
-        <div style="color:#6b7280;margin-top:4px;font-size:12px"><strong>Solusi:</strong> ${iss.fix}</div>
-        ${iss.commands?.length ? `<pre style="background:#1f2937;color:#d1fae5;padding:8px 12px;border-radius:4px;font-size:11px;margin-top:6px;overflow-x:auto">${iss.commands.join('\n')}</pre>` : ''}
+        <div style="font-weight:700;font-size:14px;color:${severityBorder[iss.severity]}">${iss.icon} ${escapeHtml(iss.title)}</div>
+        <div style="color:#374151;margin-top:4px;font-size:13px">${escapeHtml(iss.description)}</div>
+        <div style="color:#6b7280;margin-top:4px;font-size:12px"><strong>Solusi:</strong> ${escapeHtml(iss.fix)}</div>
+        ${iss.commands?.length ? `<pre style="background:#1f2937;color:#d1fae5;padding:8px 12px;border-radius:4px;font-size:11px;margin-top:6px;overflow-x:auto">${escapeHtml(iss.commands.join('\n'))}</pre>` : ''}
       </div>`).join('');
 
+    // Declared before the row builders below: they reference tdStyle inside a
+    // map callback, and a const in the temporal dead zone throws as soon as the
+    // callback runs on the first element. With an empty rule array the callback
+    // never ran, which is why this only surfaced on configs that have rules.
+    const tdStyle = 'padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;';
+    const thStyle = 'padding:8px 12px;background:#f3f4f6;font-size:12px;font-weight:700;text-align:left;border-bottom:2px solid #d1d5db;';
+
+    // Every field below comes straight from the uploaded file, so all of it is
+    // escaped: a comment like <script>...</script> would otherwise run when the
+    // exported report is opened.
     const filterRows = (firewall.filter || []).map((r, i) => `
       <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#fff'}">
         <td style="${tdStyle}">${i + 1}</td>
-        <td style="${tdStyle}"><span style="padding:2px 8px;border-radius:4px;background:${r.action === 'accept' ? '#dcfce7' : r.action === 'drop' ? '#fee2e2' : '#e0e7ff'};color:${r.action === 'accept' ? '#166534' : r.action === 'drop' ? '#991b1b' : '#3730a3'};font-size:12px;font-weight:600">${r.action || 'accept'}</span></td>
-        <td style="${tdStyle}">${r.chain || '-'}</td>
-        <td style="${tdStyle}">${r.protocol || 'any'}</td>
-        <td style="${tdStyle}">${r['src-address'] || 'any'}</td>
-        <td style="${tdStyle}">${r['dst-address'] || 'any'}</td>
-        <td style="${tdStyle}">${r.comment || '-'}</td>
+        <td style="${tdStyle}"><span style="padding:2px 8px;border-radius:4px;background:${r.action === 'accept' ? '#dcfce7' : r.action === 'drop' ? '#fee2e2' : '#e0e7ff'};color:${r.action === 'accept' ? '#166534' : r.action === 'drop' ? '#991b1b' : '#3730a3'};font-size:12px;font-weight:600">${escapeHtml(r.action || 'accept')}</span></td>
+        <td style="${tdStyle}">${escapeHtml(r.chain || '-')}</td>
+        <td style="${tdStyle}">${escapeHtml(r.protocol || 'any')}</td>
+        <td style="${tdStyle}">${escapeHtml(r['src-address'] || 'any')}</td>
+        <td style="${tdStyle}">${escapeHtml(r['dst-address'] || 'any')}</td>
+        <td style="${tdStyle}">${escapeHtml(r.comment || '-')}</td>
       </tr>`).join('');
 
     const natRows = (firewall.nat || []).map((r, i) => `
       <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#fff'}">
-        <td style="${tdStyle}">${r.action || '-'}</td>
-        <td style="${tdStyle}">${r.chain || '-'}</td>
-        <td style="${tdStyle}">${r.protocol || 'any'}</td>
-        <td style="${tdStyle}">${r['to-addresses'] || '-'}</td>
-        <td style="${tdStyle}">${r.comment || '-'}</td>
+        <td style="${tdStyle}">${escapeHtml(r.action || '-')}</td>
+        <td style="${tdStyle}">${escapeHtml(r.chain || '-')}</td>
+        <td style="${tdStyle}">${escapeHtml(r.protocol || 'any')}</td>
+        <td style="${tdStyle}">${escapeHtml(r['to-addresses'] || '-')}</td>
+        <td style="${tdStyle}">${escapeHtml(r.comment || '-')}</td>
       </tr>`).join('');
-
-    const tdStyle = 'padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;';
-    const thStyle = 'padding:8px 12px;background:#f3f4f6;font-size:12px;font-weight:700;text-align:left;border-bottom:2px solid #d1d5db;';
 
     const html = `<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Konfigurasi — ${identity}</title>
+<title>Laporan Konfigurasi — ${escapeHtml(identity)}</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; max-width: 900px; margin: 0 auto; padding: 32px 24px; background: #f9fafb; }
   h1 { font-size: 28px; font-weight: 900; color: #1f2937; margin: 0 0 4px; }
@@ -523,17 +550,17 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 </head>
 <body>
 <h1>📋 Laporan Konfigurasi Router</h1>
-<div class="meta">Router: <strong>${identity}</strong> &nbsp;·&nbsp; Dibuat: ${now} &nbsp;·&nbsp; CoreView</div>
+<div class="meta">Router: <strong>${escapeHtml(identity)}</strong> &nbsp;·&nbsp; Dibuat: ${now} &nbsp;·&nbsp; CoreView</div>
 
 <h2>🏥 Kesehatan Jaringan</h2>
 <div class="score-row">
   <div class="score-card">
     <div class="grade">${grade}</div>
     <div style="font-size:13px;color:${gradeColor};font-weight:600">${score}/100</div>
-    <div style="font-size:12px;color:#6b7280;margin-top:4px">${gradeLabel}</div>
+    <div style="font-size:12px;color:#6b7280;margin-top:4px">${escapeHtml(gradeLabel)}</div>
   </div>
   <div style="flex:1;min-width:200px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e5e7eb;">
-    <div style="font-size:13px;color:#374151;line-height:1.7">${plainSummary}</div>
+    <div style="font-size:13px;color:#374151;line-height:1.7">${escapeHtml(plainSummary)}</div>
   </div>
 </div>
 <div class="stat-row">
@@ -586,250 +613,15 @@ ${(firewall.nat || []).length > 0 ? `
     URL.revokeObjectURL(url);
   }, []);
 
+  // Rebuilt only when the health counts change, not on every render. Declared
+  // here rather than inside renderSidebar because a hook cannot live in a plain
+  // function that is not a component.
+  const menus = useMemo(() => buildMenus({
+    criticalCount: healthAnalysis.criticalCount,
+    warningCount: healthAnalysis.warningCount,
+  }), [healthAnalysis]);
+
   const renderSidebar = () => {
-    const menus = [
-      { id: 'overview', label: 'Overview', icon: <Server size={15} /> },
-      {
-        id: 'health-check',
-        label: 'Cek Kesehatan',
-        icon: <Heart size={15} />,
-        badge: healthAnalysis.criticalCount > 0
-          ? { count: healthAnalysis.criticalCount, color: '#ef4444' }
-          : healthAnalysis.warningCount > 0
-            ? { count: healthAnalysis.warningCount, color: '#f97316' }
-            : null,
-      },
-      { id: 'network-topology', label: 'Topologi Jaringan', icon: <Globe size={15} /> },
-      { id: 'packet-tracer',    label: 'Packet Tracer',    icon: <Zap size={15} /> },
-      { id: 'config-compare',   label: 'Config Comparison', icon: <BarChart2 size={15} /> },
-      { id: 'mindmap', label: 'Mind Map', icon: <Share2 size={15} /> },
-      { id: 'osi-tcp', label: 'OSI & TCP/IP', icon: <Layers size={15} /> },
-      { 
-        id: 'interfaces', 
-        label: 'Interfaces', 
-        icon: <Activity size={15} />,
-        submenus: [
-          { id: 'interfaces-list', label: 'All Interfaces' },
-          { id: 'interfaces-ethernet', label: 'Ethernet' },
-          { id: 'interfaces-lte', label: 'LTE APNs' },
-          { id: 'interfaces-lists', label: 'Interface Lists' }
-        ]
-      },
-      { 
-        id: 'bridge', 
-        label: 'Bridge', 
-        icon: <Share2 size={15} />,
-        submenus: [
-          { id: 'bridge-list', label: 'Bridge' },
-          { id: 'bridge-ports', label: 'Port' },
-          { id: 'bridge-vlans', label: 'VLAN' }
-        ]
-      },
-      { 
-        id: 'wireless', 
-        label: 'Wireless', 
-        icon: <Wifi size={15} />,
-        submenus: [
-          { id: 'wireless-interfaces', label: 'Interfaces' },
-          { id: 'wireless-security', label: 'Security Profiles' },
-          { id: 'wireless-access-list', label: 'Access List' },
-          { id: 'wireless-connect-list', label: 'Connect List' }
-        ]
-      },
-      { 
-        id: 'vpn', 
-        label: 'VPN', 
-        icon: <Shield size={15} />,
-        submenus: [
-          { id: 'vpn', label: 'VPN Interfaces' },
-          { id: 'vpn-ipsec', label: 'IPsec Profiles' },
-          { id: 'vpn-ovpn-server', label: 'OpenVPN Server' }
-        ]
-      },
-      { 
-        id: 'ppp', 
-        label: 'PPP', 
-        icon: <Lock size={15} />,
-        submenus: [
-          { id: 'ppp-pppoe-server', label: 'PPPoE Servers' },
-          { id: 'ppp-profiles', label: 'Profiles' },
-          { id: 'ppp-secrets', label: 'Secrets' },
-          { id: 'ppp-active', label: 'Active Connections' }
-        ]
-      },
-      { 
-        id: 'ip', 
-        label: 'IP', 
-        icon: <Globe size={15} />,
-        submenus: [
-          { id: 'ip-addresses', label: 'Addresses' },
-          { id: 'ip-routes', label: 'Routes' },
-          { id: 'ip-pools', label: 'Pools' },
-          { id: 'ip-dhcp-server', label: 'DHCP Server' },
-          { id: 'ip-dhcp-client', label: 'DHCP Client' },
-          { id: 'ip-dhcp-relay', label: 'DHCP Relay' },
-          { id: 'ip-dns', label: 'DNS' },
-          { id: 'ip-cloud', label: 'Cloud' },
-          { id: 'ip-hotspot', label: 'Hotspot' },
-          { id: 'ip-upnp', label: 'UPnP' },
-          { id: 'ip-services', label: 'Services' },
-          { id: 'ip-socks', label: 'SOCKS' },
-          { id: 'ip-proxy', label: 'Proxy' },
-          { id: 'ip-traffic-flow', label: 'Traffic Flow' },
-          { id: 'ip-accounting', label: 'Accounting' }
-        ]
-      },
-      { 
-        id: 'routing', 
-        label: 'Routing', 
-        icon: <Route size={15} />,
-        submenus: [
-          { id: 'routing-tables', label: 'Tables' },
-          { id: 'routing-rules', label: 'Rules' },
-          { id: 'routing-filters', label: 'Filters' },
-          { id: 'routing-bfd', label: 'BFD' },
-          { id: 'routing-ospf', label: 'OSPF' },
-          { id: 'routing-rip', label: 'RIP' },
-          { id: 'routing-bgp', label: 'BGP' },
-          { id: 'routing-mpls', label: 'MPLS' },
-          { id: 'routing-vrf', label: 'VRF' }
-        ]
-      },
-      {
-        id: 'firewall', 
-        label: 'Firewall', 
-        icon: <Shield size={15} />,
-        submenus: [
-          { id: 'firewall-filter', label: 'Filter Rules' },
-          { id: 'firewall-conflicts', label: 'Conflict Detector' },
-          { id: 'firewall-nat', label: 'NAT' },
-          { id: 'firewall-mangle', label: 'Mangle' },
-          { id: 'firewall-raw', label: 'Raw' },
-          { id: 'firewall-address-lists', label: 'Address Lists' },
-          { id: 'firewall-tracking', label: 'Connection Tracking' },
-          { id: 'firewall-layer7', label: 'Layer7 Protocols' }
-        ]
-      },
-      { 
-        id: 'queues', 
-        label: 'Queues', 
-        icon: <DownloadCloud size={15} />,
-        submenus: [
-          { id: 'queues-tree', label: 'Queue Tree' },
-          { id: 'queues-simple', label: 'Simple Queues' },
-          { id: 'queues-types', label: 'Queue Types' },
-          { id: 'queues-interfaces', label: 'Interface Queues' }
-        ]
-      },
-      { 
-        id: 'system', 
-        label: 'System', 
-        icon: <Settings size={15} />,
-        submenus: [
-          { id: 'system-identity', label: 'Identity' },
-          { id: 'system-clock', label: 'Clock' },
-          { id: 'system-settings', label: 'General Settings' },
-          { id: 'system-ntp-client', label: 'NTP Client' },
-          { id: 'system-ntp-server', label: 'NTP Server' },
-          { id: 'system-logging', label: 'Logging' },
-          { id: 'system-log', label: 'Log' },
-          { id: 'system-users', label: 'Users' },
-          { id: 'system-groups', label: 'Groups' },
-          { id: 'system-passwords', label: 'Passwords' },
-          { id: 'system-ssh', label: 'SSH' },
-          { id: 'system-telnet', label: 'Telnet' },
-          { id: 'system-www', label: 'WebFig' },
-          { id: 'system-api', label: 'API' },
-          { id: 'system-ftp', label: 'FTP' },
-          { id: 'system-snmp', label: 'SNMP' },
-          { id: 'system-snmp-comm', label: 'SNMP Communities' },
-          { id: 'system-ports', label: 'Ports' },
-          { id: 'system-packages', label: 'Packages' },
-          { id: 'system-resources', label: 'Resources' },
-          { id: 'system-routerboard', label: 'RouterBoard' },
-          { id: 'system-health', label: 'Health' },
-          { id: 'system-leds', label: 'LEDs' },
-          { id: 'system-watchdog', label: 'Watchdog' },
-          { id: 'system-scheduler', label: 'Scheduler' },
-          { id: 'system-scripts', label: 'Scripts' },
-          { id: 'system-backup', label: 'Backup' },
-          { id: 'system-reset', label: 'Reset Configuration' }
-        ]
-      },
-      { 
-        id: 'tools', 
-        label: 'Tools', 
-        icon: <BarChart2 size={15} />,
-        submenus: [
-          { id: 'tools-ping', label: 'Ping' },
-          { id: 'tools-traceroute', label: 'Traceroute' },
-          { id: 'tools-bandwidth-test', label: 'Bandwidth Test' },
-          { id: 'tools-torch', label: 'Torch' },
-          { id: 'tools-packet-sniffer', label: 'Packet Sniffer' },
-          { id: 'tools-profile', label: 'Profile' },
-          { id: 'tools-netwatch', label: 'Netwatch' },
-          { id: 'tools-sms', label: 'SMS' },
-          { id: 'tools-email', label: 'Email' },
-          { id: 'tools-graphing', label: 'Graphing' },
-          { id: 'tools-romon', label: 'RoMON' },
-          { id: 'tools-mac-server', label: 'MAC Server' },
-          { id: 'tools-mac-winbox', label: 'MAC Winbox' },
-          { id: 'tools-winbox', label: 'Winbox Settings' }
-        ]
-      },
-      { 
-        id: 'files', 
-        label: 'Files', 
-        icon: <FileText size={15} />,
-        submenus: [
-          { id: 'files-list', label: 'File List' },
-          { id: 'files-backup', label: 'Backup' }
-        ]
-      },
-      { 
-        id: 'user-manager', 
-        label: 'User Manager', 
-        icon: <Key size={15} />,
-        submenus: [
-          { id: 'user-manager-users', label: 'Users' },
-          { id: 'user-manager-profiles', label: 'Profiles' },
-          { id: 'user-manager-sessions', label: 'Active Sessions' }
-        ]
-      },
-      { 
-        id: 'capsman', 
-        label: 'CAPsMAN', 
-        icon: <Wifi size={15} />,
-        submenus: [
-          { id: 'capsman-interfaces', label: 'Interfaces' },
-          { id: 'capsman-provisioning', label: 'Provisioning' },
-          { id: 'capsman-access-list', label: 'Access List' },
-          { id: 'capsman-configuration', label: 'Configuration' }
-        ]
-      },
-      { 
-        id: 'lte', 
-        label: 'LTE', 
-        icon: <Globe size={15} />,
-        submenus: [
-          { id: 'lte-interfaces', label: 'Interfaces' },
-          { id: 'lte-apn', label: 'APN Profiles' },
-          { id: 'lte-info', label: 'LTE Info' }
-        ]
-      },
-      { 
-        id: 'gps', 
-        label: 'GPS', 
-        icon: <Globe size={15} />,
-        submenus: [
-          { id: 'gps-settings', label: 'GPS Settings' },
-          { id: 'gps-monitor', label: 'GPS Monitor' }
-        ]
-      },
-      { id: 'neighbors', label: 'Neighbors', icon: <Share2 size={15} /> },
-      { id: 'log', label: 'Log', icon: <Terminal size={15} /> },
-      { id: 'skin', label: 'Skin', icon: <Monitor size={15} /> }
-    ];
 
     return (
       <aside className={`sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -918,10 +710,14 @@ ${(firewall.nat || []).length > 0 ? `
                         </span>
                       );
                     }
+                    // Shown for parents too. The old guard (`> 0 && !hasSubmenus`)
+                    // computed the subtotal and then threw it away, so a parent
+                    // like "VPN" reported nothing even when its children held
+                    // every item in the config.
                     const parentCount = hasSubmenus
                       ? menu.submenus.reduce((s, sub) => s + (dataCounts[sub.id] || 0), 0)
                       : (dataCounts[menu.id] || 0);
-                    if (parentCount > 0 && !hasSubmenus) {
+                    if (parentCount > 0) {
                       return <span className="sidebar-count-badge">{parentCount}</span>;
                     }
                     return null;
@@ -1770,34 +1566,43 @@ ${(firewall.nat || []).length > 0 ? `
           </table>
         </div>
 
-        {selectedItemDetail && (
-          <div className="modal-overlay" onClick={() => setSelectedItemDetail(null)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Detail: {selectedItemDetail.name || selectedItemDetail.defaultName || 'Interface'}</h3>
-                <button className="btn-close" onClick={() => setSelectedItemDetail(null)}><X size={18} /></button>
-              </div>
-              <div className="modal-body">
-                <table className="detail-table">
-                  <tbody>
-                    {Object.entries(selectedItemDetail).map(([k, v]) => {
-                      if (k === '_implicit' || k === 'ipAddresses' || k === 'dhcpServers') return null;
-                      return (
-                        <tr key={k}>
-                          <td className="detail-key" style={{ textTransform: 'capitalize' }}>{k.replace(/-/g, ' ')}</td>
-                          <td style={{ wordBreak: 'break-all' }}>{String(v)}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
+
+  // Rendered once at the top level rather than inside a single section: 16 other
+  // "Detail" buttons set the same state, and while the markup lived inside
+  // renderEthernet those buttons changed state with nothing on screen to show.
+  const renderDetailModal = () => (
+    selectedItemDetail && (
+      <div className="modal-overlay" onClick={() => setSelectedItemDetail(null)}>
+        <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>Detail: {selectedItemDetail.name || selectedItemDetail.defaultName || 'Item'}</h3>
+            <button className="btn-close" onClick={() => setSelectedItemDetail(null)}><X size={18} /></button>
+          </div>
+          <div className="modal-body">
+            <table className="detail-table">
+              <tbody>
+                {Object.entries(selectedItemDetail).map(([k, v]) => {
+                  // Skip parser bookkeeping and circular back-links; rendering
+                  // them as "[object Object]" or recursing would be noise.
+                  if (k === '_implicit' || k === 'ipAddresses' || k === 'dhcpServers') return null;
+                  if (typeof v === 'object' && v !== null) return null;
+                  return (
+                    <tr key={k}>
+                      <td className="detail-key" style={{ textTransform: 'capitalize' }}>{k.replace(/-/g, ' ')}</td>
+                      <td style={{ wordBreak: 'break-all' }}>{String(v)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
+  );
 
   const renderInterfaceLists = () => (
     <div className="glass-panel config-section animate-fade-in">
@@ -4737,7 +4542,7 @@ ${(firewall.nat || []).length > 0 ? `
             <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.7 }}>
               Alat ini mendeteksi firewall rules yang <strong>tidak akan pernah dieksekusi</strong> karena tertutup oleh rule sebelumnya, dan rules <strong>duplikat</strong> yang perlu dibersihkan.
             </p>
-            <FirewallConflicts rules={firewall.filter || []} onNavigate={setActiveTab} />
+            <FirewallConflicts rules={firewall.filter || []} />
           </div>
         )}
         {activeTab === 'firewall-nat' && renderFirewallNAT()}
@@ -4755,6 +4560,10 @@ ${(firewall.nat || []).length > 0 ? `
         {/* VPN */}
         {activeTab === 'vpn' && renderVPN()}
         </SectionErrorBoundary>
+
+        {/* Shared by every section. Kept outside the error boundary so a
+            crash in one table cannot also hide the modal the user opened. */}
+        {renderDetailModal()}
       </div>
     </div>
 

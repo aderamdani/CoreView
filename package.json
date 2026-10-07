@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/",
+    "check": "npm run lint && npm test"
   },
   "dependencies": {
     "dagre": "^0.8.5",

@@ -4,10 +4,11 @@ import './App.css';
 import { parseMikroTikConfig } from './utils/parser';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
-import { Sun, Moon, Github, Search, X } from 'lucide-react';
+import { Sun, Moon, Github, Search, X, AlertTriangle } from 'lucide-react';
 
 function App() {
   const [config, setConfig] = useState(null);
+  const [parseError, setParseError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const searchRef = useRef(null);
@@ -33,12 +34,19 @@ function App() {
   }, []);
 
   const handleFileParsed = (content) => {
-    const parsedData = parseMikroTikConfig(content);
-    setConfig(parsedData);
+    try {
+      setConfig(parseMikroTikConfig(content));
+      setParseError(null);
+    } catch (error) {
+      // Keep the previous state untouched: a failed upload must not wipe a
+      // dashboard the user is currently reading.
+      setParseError(error.message);
+    }
   };
 
   const handleReset = () => {
     setConfig(null);
+    setParseError(null);
     setSearchTerm('');
   };
 
@@ -106,6 +114,16 @@ function App() {
       </header>
 
       <main className="main-content">
+        {parseError && (
+          <div className="parse-error" role="alert">
+            <AlertTriangle size={18} className="parse-error-icon" />
+            <div>
+              <p className="parse-error-title">Gagal membaca file</p>
+              <p className="parse-error-message">{parseError}</p>
+            </div>
+          </div>
+        )}
+
         {!config ? (
           <Landing onFileParsed={handleFileParsed} />
         ) : (

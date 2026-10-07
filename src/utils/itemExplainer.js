@@ -1,3 +1,27 @@
+const IPV4_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+
+/**
+ * Number of addresses in a RouterOS pool range such as
+ * "10.0.0.2-10.0.0.254". Returns null when the text is not a single IPv4 range.
+ *
+ * The previous regular expression captured the third octet of each side, so a
+ * 253-address pool computed as -1 and every small pool drew a false
+ * "very small pool" warning.
+ */
+function countRangeAddresses(ranges) {
+  if (typeof ranges !== 'string') return null;
+  const first = ranges.split(',')[0].trim();
+  const dashAt = first.indexOf('-');
+  if (dashAt === -1) return null;
+
+  const start = first.slice(0, dashAt).trim();
+  const end = first.slice(dashAt + 1).trim();
+  if (!IPV4_RE.test(start) || !IPV4_RE.test(end)) return null;
+
+  const toInt = (ip) => ip.split('.').reduce((acc, o) => ((acc << 8 >>> 0) + Number(o)) >>> 0, 0);
+  return toInt(end) - toInt(start) + 1;
+}
+
 export const generateItemExplanation = (type, item) => {
   if (!item) return '-';
 
@@ -11,7 +35,7 @@ export const generateItemExplanation = (type, item) => {
       if (t === 'bridge') {
         desc = `Virtual switch bridge '${n}' — menggabungkan beberapa port fisik menjadi satu broadcast domain LAN.`;
       } else if (t === 'vlan') {
-        desc = `VLAN interface ID ${item['vlan-id'] || '?'} di atas '${item['vlan-over'] || item.interface || '?'}'. Memisahkan lalu lintas Layer 2 secara logis tanpa kabel fisik terpisah.`;
+        desc = `VLAN interface ID ${item['vlan-id'] || '?'} di atas '${item['vlan-over'] || item.interface || '?'}'. Memisahkan jalur trafik Layer 2 secara logis tanpa kabel fisik terpisah.`;
       } else if (t === 'wlan' || t === 'wlan2') {
         desc = `Interface wireless '${n}'${item.ssid ? `, SSID: "${item.ssid}"` : ''}. Menangani asosiasi klien nirkabel.`;
       } else if (t === 'wireguard') {
@@ -108,8 +132,7 @@ export const generateItemExplanation = (type, item) => {
       const n = item.name || '?';
       let desc = `DHCP Server '${n}' di interface '${item.interface || '?'}', pool '${item['address-pool'] || '?'}'.`;
       if (item.poolObj?.ranges) {
-        const m = item.poolObj.ranges.match(/\.(\d+)-[^.]*\.(\d+)/);
-        if (m) desc += ` Kapasitas pool: ${parseInt(m[2]) - parseInt(m[1]) + 1} alamat.`;
+        desc += ` Kapasitas pool: ${countRangeAddresses(item.poolObj.ranges)} alamat.`;
       }
       const lt = item.leaseTime || item['lease-time'];
       if (lt) desc += ` Lease time: ${lt}.`;
@@ -165,9 +188,8 @@ export const generateItemExplanation = (type, item) => {
     case 'pool': {
       const ranges = item.ranges || '?';
       let desc = `Pool '${item.name || '?'}': ${ranges}.`;
-      const m = ranges.match(/\.(\d+)-[^.]*\.(\d+)/);
-      if (m) {
-        const size = parseInt(m[2]) - parseInt(m[1]) + 1;
+      const size = countRangeAddresses(ranges);
+      if (size !== null) {
         desc += ` Kapasitas: ${size} alamat.`;
         if (size < 10) desc += ' ⚠ Pool sangat kecil!';
       }
@@ -406,17 +428,22 @@ export const generateItemExplanation = (type, item) => {
     }
 
     case 'vpn-legacy': {
-      const t = item._type || item.type || 'VPN';
+      // The parser writes short forms (type: 'ovpn' / 'l2tp' / 'wireguard'), so
+      // the lookup normalises them back. The old map was keyed only by the
+      // '-client' spelling, so every legacy tunnel rendered "VPN ovpn" and the
+      // PPTP deprecation warning never appeared.
+      const raw = item._type || item.type || 'VPN';
+      const t = String(raw).replace(/-(client|out|server)$/, '');
       const typeDesc = {
-        'ovpn-client': 'OpenVPN client — enkripsi TLS, cross-platform',
-        'ovpn-out': 'OpenVPN client — enkripsi TLS, cross-platform',
-        'l2tp-client': 'L2TP/IPSec — native di Windows/macOS',
-        'l2tp-out': 'L2TP/IPSec — native di Windows/macOS',
-        'pptp-client': '⚠ PPTP — protokol lama dengan kelemahan keamanan diketahui, pertimbangkan migrasi',
-        'pptp-out': '⚠ PPTP — protokol lama dengan kelemahan keamanan diketahui',
-        'sstp-client': 'SSTP (port 443) — menembus firewall korporat yang blokir non-HTTPS',
+        ovpn: 'OpenVPN client — enkripsi TLS, cross-platform',
+        l2tp: 'L2TP/IPSec — native di Windows/macOS',
+        pptp: '⚠ PPTP — protokol lama dengan kelemahan keamanan diketahui, pertimbangkan migrasi',
+        sstp: 'SSTP (port 443) — menembus firewall korporat yang blokir non-HTTPS',
       };
-      return `VPN ${typeDesc[t] || t} '${item.name}'.`;
+      const known = typeDesc[t];
+      return known
+        ? `VPN ${known} '${item.name || '?'}'.`
+        : `VPN ${raw} '${item.name || '?'}'.`;
     }
 
     case 'vpn-wireguard-peer': {
@@ -463,9 +490,12 @@ export const generateItemExplanation = (type, item) => {
       if (disabled) {
         desc += ' (Dinonaktifkan)';
       } else {
-        const af = item['available-from'];
+        // RouterOS /ip service restricts access with the `address` attribute.
+        // The old key was `available-from`, which never exists, so every service
+        // reported the "open to all IPs" warning.
+        const af = item.address;
         if (!af || af === '0.0.0.0/0' || af === '::/0') {
-          desc += ' ⚠ Terbuka dari semua IP — pertimbangkan pembatasan "Available From".';
+          desc += ' ⚠ Terbuka dari semua IP — pertimbangkan pembatasan alamat akses.';
         } else {
           desc += ` Dibatasi dari: ${af} ✅`;
         }
@@ -513,7 +543,10 @@ export const generateItemExplanation = (type, item) => {
     }
 
     case 'ipsec-profile': {
-      const enc = item['enc-algorithm'] || 'aes-128';
+      // RouterOS names these `encryption-algorithm` and `hash-algorithm`. The
+      // old keys were `enc-algorithm`/`hash-algorithm`, so `enc` always fell back
+      // to aes-128 and hid the real setting.
+      const enc = item['encryption-algorithm'] || 'aes-128';
       const hash = item['hash-algorithm'] || 'sha1';
       const dh = item['dh-group'] || 'modp1024';
       let desc = `IPSec: enkripsi ${enc}, hash ${hash}, DH ${dh}.`;

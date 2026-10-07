@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Zap, Play, ChevronDown, RotateCcw, AlertCircle, CheckCircle2, Info, Shield } from 'lucide-react';
 import { tracePacket } from '../utils/packetTracer';
 
@@ -50,7 +50,8 @@ const ActionBadge = ({ action }) => {
     reject:      { bg: 'rgba(249,115,22,0.15)',   color: '#f97316',  border: 'rgba(249,115,22,0.3)'  },
     passthrough: { bg: 'rgba(99,102,241,0.15)',   color: '#818cf8',  border: 'rgba(99,102,241,0.3)'  },
     log:         { bg: 'rgba(100,116,139,0.15)',  color: '#94a3b8',  border: 'rgba(100,116,139,0.3)' },
-    'add-to-list': { bg: 'rgba(234,179,8,0.15)', color: '#eab308',  border: 'rgba(234,179,8,0.3)'   },
+    'add-src-to-address-list': { bg: 'rgba(234,179,8,0.15)', color: '#eab308',  border: 'rgba(234,179,8,0.3)'   },
+    'add-dst-to-address-list': { bg: 'rgba(234,179,8,0.15)', color: '#eab308',  border: 'rgba(234,179,8,0.3)'   },
   };
   const c = map[action] || map.log;
   return (
@@ -71,7 +72,10 @@ const FieldVal = ({ label, value }) => (
 
 /* ── Main component ──────────────────────────────────────────────── */
 export const PacketTracer = ({ config, onNavigate }) => {
-  const filterRules = config.firewall?.filter || [];
+  // Memoised so the useCallback below keeps a stable identity. Without this the
+  // array is a fresh reference on every render, which defeats the memo and trips
+  // react-hooks/preserve-manual-memoization.
+  const filterRules = useMemo(() => config.firewall?.filter || [], [config]);
 
   const [form, setForm] = useState({
     srcIp: '1.2.3.4', dstIp: '192.168.1.1',

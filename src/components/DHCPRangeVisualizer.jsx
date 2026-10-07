@@ -5,10 +5,6 @@ function ipToInt(ip) {
   return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]) >>> 0;
 }
 
-function intToIp(n) {
-  return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
-}
-
 function parseRange(rangeStr) {
   if (!rangeStr) return null;
   const parts = rangeStr.split(',')[0].trim(); // take first range segment

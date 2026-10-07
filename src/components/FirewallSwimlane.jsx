@@ -16,7 +16,8 @@ const ACTION_STYLE = {
   reject:        { border: '#f97316', text: '#f97316', badge: 'rgba(249,115,22,0.15)',  bg: 'rgba(249,115,22,0.05)'  },
   passthrough:   { border: '#6366f1', text: '#818cf8', badge: 'rgba(99,102,241,0.15)',  bg: 'rgba(99,102,241,0.04)'  },
   log:           { border: '#64748b', text: '#94a3b8', badge: 'rgba(100,116,139,0.15)', bg: 'transparent'            },
-  'add-to-list': { border: '#eab308', text: '#eab308', badge: 'rgba(234,179,8,0.15)',   bg: 'rgba(234,179,8,0.04)'   },
+  'add-src-to-address-list': { border: '#eab308', text: '#eab308', badge: 'rgba(234,179,8,0.15)',   bg: 'rgba(234,179,8,0.04)'   },
+  'add-dst-to-address-list': { border: '#eab308', text: '#eab308', badge: 'rgba(234,179,8,0.15)',   bg: 'rgba(234,179,8,0.04)'   },
 };
 
 const CHIP_COLORS = {
@@ -295,11 +296,15 @@ export const FirewallSwimlane = ({ rules, onNavigate }) => {
                       : 'Tidak ada rules cocok dengan filter aktif'}
                   </div>
                 ) : (
-                  chainFiltered.map((rule, i) => {
+                  chainFiltered.map((rule) => {
                     const pos = allChainRules.indexOf(rule) + 1;
                     return (
                       <RuleCard
-                        key={i}
+                        // Position within the unfiltered chain list, not the
+                        // filtered index. RuleCard keeps `open` in state, so an
+                        // index key moved the expanded panel onto whichever rule
+                        // slid into that slot after a filter change.
+                        key={pos}
                         rule={rule}
                         position={pos}
                         onGoTrace={() => onNavigate?.('packet-tracer')}
@@ -333,7 +338,7 @@ export const FirewallSwimlane = ({ rules, onNavigate }) => {
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: 8 }}>{allCr.length} rules</span>
                     </div>
                     <div style={{ border: '1px solid var(--border)', borderRadius: '0 0 8px 8px', padding: 6, background: 'var(--bg-surface, var(--bg-base))', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                      {cr.map((rule, i) => <RuleCard key={i} rule={rule} position={allCr.indexOf(rule) + 1} onGoTrace={() => onNavigate?.('packet-tracer')} />)}
+                      {cr.map((rule) => <RuleCard key={allCr.indexOf(rule) + 1} rule={rule} position={allCr.indexOf(rule) + 1} onGoTrace={() => onNavigate?.('packet-tracer')} />)}
                     </div>
                   </div>
                 );
