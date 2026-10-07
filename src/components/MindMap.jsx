@@ -10,13 +10,15 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
-
 const nodeWidth = 180;
 const nodeHeight = 50;
 
 const getLayoutedElements = (nodes, edges, direction = 'LR') => {
+  // A fresh graph per layout. The previous version kept one module-level graph
+  // and only ever added to it, so nodes and edges from earlier configs stayed
+  // behind and influenced the ranking of the current one.
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: direction });
 
   nodes.forEach((node) => {
