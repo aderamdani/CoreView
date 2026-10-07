@@ -158,18 +158,23 @@ body {
 .animate-fade-in {
   animation: fadeUp 0.3s ease forwards;
 }
-.delay-100 {
+.stagger-1 {
   animation-delay: 60ms;
   opacity: 0;
 }
-.delay-200 {
+.stagger-2 {
   animation-delay: 120ms;
   opacity: 0;
 }
-.delay-300 {
+.stagger-3 {
   animation-delay: 180ms;
   opacity: 0;
 }
+
+/* Staggered entry delay. Named `stagger-*` rather than `delay-*`: Tailwind owns
+   that namespace, and scanning the app files would emit a competing
+   `.delay-100 { transition-delay }` rule for the same class name. The scan is
+   restricted today, so this is precautionary rather than a live conflict. */
 
 /* Text gradient */
 .text-gradient {

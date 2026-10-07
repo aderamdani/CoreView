@@ -1707,7 +1707,7 @@ ${
     });
 
     return (
-      <div className="animate-fade-in delay-100">
+      <div className="animate-fade-in stagger-1">
         <div className="glass-panel config-section" style={{ marginBottom: '1.5rem' }}>
           <div className="section-header" style={{ justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1792,7 +1792,7 @@ ${
             </div>
           </div>
           <div
-            className="glass-panel summary-card card-hover delay-100"
+            className="glass-panel summary-card card-hover stagger-1"
             onClick={() => setActiveTab('vpn')}
             style={{ cursor: 'pointer' }}
           >
@@ -1805,7 +1805,7 @@ ${
             </div>
           </div>
           <div
-            className="glass-panel summary-card card-hover delay-200"
+            className="glass-panel summary-card card-hover stagger-2"
             onClick={() => setActiveTab('routing-tables')}
             style={{ cursor: 'pointer' }}
           >
@@ -1818,7 +1818,7 @@ ${
             </div>
           </div>
           <div
-            className="glass-panel summary-card card-hover delay-300"
+            className="glass-panel summary-card card-hover stagger-3"
             onClick={() => setActiveTab('firewall-filter')}
             style={{ cursor: 'pointer' }}
           >

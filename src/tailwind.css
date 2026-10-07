@@ -1,0 +1,33 @@
+/*
+ * Tailwind, added alongside the existing hand-written design system.
+ *
+ * Preflight is deliberately left out. It resets base element styles (margins,
+ * borders, font sizes, button appearance) and would fight the rules in
+ * index.css and App.css that the whole application is built on. Tailwind is
+ * imported layer by layer so only the theme variables and the utility
+ * generator come in:
+ *
+ *   tailwindcss/theme.css      design tokens as CSS variables
+ *   tailwindcss/utilities.css  on-demand utility classes
+ *   tailwindcss/preflight.css  NOT imported, on purpose
+ *
+ * Automatic source detection is off. Tailwind treats every file as plain text
+ * and generates a utility for any token that looks like a class name, so
+ * scanning the whole project picked up `display: 'flex'` and emitted an unused
+ * `.flex`, and turned the app's own `delay-100` into a Tailwind utility that
+ * added an unwanted transition-delay. Only the directory that actually uses
+ * utility classes is registered.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+
+@source '../src/components/evilcharts';
+
+/*
+ * Class-based dark mode. The app toggles `html.dark` and `html.light` together
+ * (see the theme effect in App.jsx), so this variant agrees with the design
+ * system instead of following the operating system preference.
+ */
+@custom-variant dark (&:where(.dark, .dark *));

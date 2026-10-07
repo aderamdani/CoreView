@@ -15,11 +15,15 @@ function App() {
   const searchRef = useRef(null);
 
   useEffect(() => {
-    if (!isDarkMode) {
-      document.documentElement.classList.add('light');
-    } else {
-      document.documentElement.classList.remove('light');
-    }
+    // Two conventions, one switch.
+    //
+    // index.css keys the design system off `html.light`, with dark as the
+    // default. Tailwind and Evilcharts key their `dark:` variant off a `dark`
+    // class. Both are toggled here so the two systems cannot disagree about
+    // which theme is active.
+    const root = document.documentElement;
+    root.classList.toggle('light', !isDarkMode);
+    root.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
   useEffect(() => {
