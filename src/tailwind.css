@@ -26,6 +26,31 @@
 @source '../src/components/evilcharts';
 
 /*
+ * The vendored chart components are written against shadcn's theme tokens
+ * (`text-border`, `bg-background`, `text-muted-foreground`, and so on). Those
+ * tokens live in a `:root` block that `shadcn init` normally writes; that step
+ * was skipped on purpose so it would not overwrite this project's design system.
+ * They are mapped here instead, onto the variables CoreView already uses.
+ *
+ * `inline` makes Tailwind substitute the variable reference into each utility
+ * rather than declaring a second set of `--color-*` values, so a utility such as
+ * `.text-border` resolves through `--border-strong` and follows the theme swap
+ * with no extra work.
+ *
+ * Without this block every one of those utilities resolved to an undefined
+ * variable, which is invalid at computed-value time, so the colour silently fell
+ * back to whatever the element inherited.
+ */
+@theme inline {
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  --color-border: var(--border-strong);
+  --color-muted: var(--bg-elevated);
+  --color-muted-foreground: var(--text-secondary);
+  --color-primary: var(--accent);
+}
+
+/*
  * Class-based dark mode. The app toggles `html.dark` and `html.light` together
  * (see the theme effect in App.jsx), so this variant agrees with the design
  * system instead of following the operating system preference.
