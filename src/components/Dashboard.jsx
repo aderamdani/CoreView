@@ -1957,7 +1957,19 @@ ${
                         nameKey="key"
                         config={fwConfig}
                       >
-                        <EvilPieChart.Pie innerRadius="55%" outerRadius="80%" paddingAngle={2} />
+                        <EvilPieChart.Pie
+                          innerRadius="55%"
+                          outerRadius="80%"
+                          paddingAngle={2}
+                          // Recharts' own entry animation is turned off here.
+                          // Its Sector returns null while startAngle === endAngle,
+                          // which is the animation's first frame, and the animation
+                          // was observed never advancing past its 400ms delay even
+                          // with requestAnimationFrame running normally. The result
+                          // was an empty pie. Rendering the sectors immediately is
+                          // also the right call for a dashboard panel.
+                          pieProps={{ isAnimationActive: false }}
+                        />
                         <EvilPieChart.Legend />
                         <EvilPieChart.Tooltip />
                       </EvilPieChart>
