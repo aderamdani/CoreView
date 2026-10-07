@@ -44,4 +44,17 @@ export default defineConfig([
       globals: { ...globals.node },
     },
   },
+  {
+    // Evilcharts components are vendored from a shadcn registry and are kept as
+    // close to their published source as possible so they can be re-synced with
+    // `npx shadcn@latest add`. The registry deliberately exports helper functions
+    // next to the components (chart config readers, hooks, colour helpers), which
+    // this rule forbids. Rewriting them would break that re-sync. The only cost of
+    // turning it off here is that Fast Refresh fully reloads these files instead
+    // of hot-swapping them.
+    files: ['src/components/evilcharts/**/*.{js,jsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ]);

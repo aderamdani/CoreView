@@ -17,7 +17,14 @@
     "isolatedModules": true,
 
     // vite/client declares the asset and `?raw` module shapes that Vite provides.
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+
+    // The shadcn CLI places registry components under `@/` and rewrites their
+    // imports to match. This has to agree with the alias in vite.config.js.
+    // `baseUrl` is gone in TypeScript 7; `paths` resolves relative to this file.
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   // Tests are excluded on purpose: they run under node:test and use Node APIs,
   // which would need @types/node just to satisfy the checker. They are already
