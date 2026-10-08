@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { parseMikroTikConfig } from '../src/utils/parser.js';
 import App from '../src/App.jsx';
 import { Dashboard } from '../src/components/Dashboard.jsx';
+import { Sidebar } from '../src/components/Sidebar.jsx';
 import { Landing } from '../src/components/Landing.jsx';
 import { AboutPanel } from '../src/components/AboutPanel.jsx';
 import { MindMap } from '../src/components/MindMap.jsx';
@@ -60,6 +61,20 @@ const barConfig = {
 const cases = [
   ['App', () => <App />],
   ['Dashboard', () => <Dashboard config={config} searchTerm="" />],
+  [
+    'Sidebar',
+    () => (
+      <Sidebar
+        config={config}
+        healthAnalysis={{ criticalCount: 0, warningCount: 0 }}
+        dataCounts={{}}
+        activeTab="overview"
+        setActiveTab={noop}
+        expandedMenus={{}}
+        setExpandedMenus={noop}
+      />
+    ),
+  ],
   ['Landing', () => <Landing onFileParsed={noop} />],
   ['AboutPanel', () => <AboutPanel />],
   ['MindMap', () => <MindMap config={config} onNavigate={noop} />],

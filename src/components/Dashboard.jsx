@@ -3,7 +3,6 @@ import {
   Server,
   Activity,
   Shield,
-  Star,
   Radio,
   RefreshCw,
   Construction,
@@ -42,7 +41,7 @@ import {
   Lightbulb,
   Zap,
 } from 'lucide-react';
-import { buildMenus } from './menus.jsx';
+import { Sidebar } from './Sidebar.jsx';
 import { EvilPieChart } from './evilcharts/charts/recharts-pie-chart';
 import { EvilBarChart } from './evilcharts/charts/recharts-bar-chart';
 import { PLACEHOLDER_TABS } from './placeholderTabs';
@@ -477,7 +476,13 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   // Since 'firewall' expands, let's default the first submenu as active or 'overview'
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedMenus, setExpandedMenus] = useState({ firewall: true });
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('coreview-sidebar-collapsed') || 'false');
+    } catch {
+      return false;
+    }
+  });
   const [selectedItemDetail, setSelectedItemDetail] = useState(null);
   // Rule yang dipilih dari tombol "Uji di Packet Tracer" pada halaman swimlane.
   // Sebelumnya tombol itu hanya berpindah tab dan membuang rule-nya, sehingga
@@ -485,21 +490,6 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   const [traceSeed, setTraceSeed] = useState(null); // { rule, nonce }
   const [firewallViewMode, setFirewallViewMode] = useState('table');
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('coreview-favorites') || '[]');
-    } catch {
-      return [];
-    }
-  });
-  const toggleFavorite = useCallback((id, e) => {
-    e?.stopPropagation();
-    setFavorites((prev) => {
-      const next = prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id];
-      localStorage.setItem('coreview-favorites', JSON.stringify(next));
-      return next;
-    });
-  }, []);
 
   // A helper function to filter arrays based on searchTerm
   const applyFilter = (arr) => {
@@ -522,10 +512,6 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     (firewall.raw?.length || 0);
   const totalRoutes = routes.length;
   const totalVpns = (vpn.wireguard?.length || 0) + (vpn.ovpn?.length || 0) + (vpn.l2tp?.length || 0);
-
-  const toggleMenu = (menu) => {
-    setExpandedMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
-  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -837,236 +823,6 @@ ${
     a.click();
     URL.revokeObjectURL(url);
   }, []);
-
-  // Rebuilt only when the health counts change, not on every render. Declared
-  // here rather than inside renderSidebar because a hook cannot live in a plain
-  // function that is not a component.
-  const menus = useMemo(
-    () =>
-      buildMenus({
-        criticalCount: healthAnalysis.criticalCount,
-        warningCount: healthAnalysis.warningCount,
-      }),
-    [healthAnalysis],
-  );
-
-  const renderSidebar = () => {
-    return (
-      <aside className={`sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-        {/* Sidebar Header with Collapse Toggle */}
-        <div className="sidebar-header">
-          <div className="sidebar-logo">
-            {sidebarCollapsed
-              ? 'CV'
-              : config?.system?.identity?.name || config?.metadata?.identity || 'CoreView'}
-          </div>
-          <button
-            className="sidebar-toggle"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          >
-            {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
-        </div>
-
-        <ul className="sidebar-menu">
-          {/* Favorites section */}
-          {!sidebarCollapsed &&
-            favorites.length > 0 &&
-            (() => {
-              const allItems = menus.flatMap((m) => [
-                { id: m.id, label: m.label, isTop: !m.submenus },
-                ...(m.submenus || []).map((s) => ({ id: s.id, label: s.label, isTop: false })),
-              ]);
-              const favItems = favorites.map((fid) => allItems.find((i) => i.id === fid)).filter(Boolean);
-              return (
-                <li key="__favorites__">
-                  <div
-                    style={{
-                      padding: '6px 12px 2px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      color: 'var(--text-muted)',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Favorit
-                  </div>
-                  <div className="sidebar-submenus" style={{ paddingTop: 0 }}>
-                    {favItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`sidebar-subitem ${activeTab === item.id ? 'active' : ''}`}
-                        onClick={() => setActiveTab(item.id)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                      >
-                        <span>{item.label}</span>
-                        <button
-                          onClick={(e) => toggleFavorite(item.id, e)}
-                          title="Hapus dari favorit"
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#f59e0b',
-                            padding: '0 2px',
-                            lineHeight: 1,
-                            fontSize: '0.78rem',
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ height: '1px', background: 'var(--border)', margin: '4px 12px 6px' }} />
-                </li>
-              );
-            })()}
-
-          {menus.map((menu) => {
-            const hasSubmenus = !!menu.submenus;
-            const isMenuExpanded = expandedMenus[menu.id];
-            const isParentActive = hasSubmenus && menu.submenus.some((s) => s.id === activeTab);
-            const isActive = activeTab === menu.id;
-            const isFav = favorites.includes(menu.id);
-
-            return (
-              <li key={menu.id}>
-                <div
-                  className={`sidebar-item ${
-                    isActive && !hasSubmenus ? 'active' : isParentActive ? 'parent-active' : ''
-                  }`}
-                  onClick={() => {
-                    if (hasSubmenus) {
-                      toggleMenu(menu.id);
-                      if (!isMenuExpanded && !isParentActive) setActiveTab(menu.submenus[0].id);
-                    } else {
-                      setActiveTab(menu.id);
-                    }
-                  }}
-                  title={sidebarCollapsed ? menu.label : ''}
-                >
-                  <div className="sidebar-item-content">
-                    {menu.icon}
-                    {!sidebarCollapsed && <span>{menu.label}</span>}
-                  </div>
-                  {/* Grouped so the indicators sit next to each other. With the
-                      row's space-between they were spread across the remaining
-                      width, and adding the placeholder marker made that worse. */}
-                  <div className="sidebar-item-trailing">
-                    {!sidebarCollapsed && !hasSubmenus && PLACEHOLDER_TABS.has(menu.id) && (
-                      <span className="sidebar-soon" title="Belum ada isinya, masih dalam pengembangan">
-                        Segera
-                      </span>
-                    )}
-                    {!sidebarCollapsed &&
-                      (() => {
-                        if (menu.badge) {
-                          return (
-                            <span
-                              className="sidebar-count-badge"
-                              style={{ background: menu.badge.color, color: '#fff' }}
-                            >
-                              {menu.badge.count}
-                            </span>
-                          );
-                        }
-                        // Shown for parents too. The old guard (`> 0 && !hasSubmenus`)
-                        // computed the subtotal and then threw it away, so a parent
-                        // like "VPN" reported nothing even when its children held
-                        // every item in the config.
-                        const parentCount = hasSubmenus
-                          ? menu.submenus.reduce((s, sub) => s + (dataCounts[sub.id] || 0), 0)
-                          : dataCounts[menu.id] || 0;
-                        if (parentCount > 0) {
-                          return <span className="sidebar-count-badge">{parentCount}</span>;
-                        }
-                        return null;
-                      })()}
-                    {!sidebarCollapsed && !hasSubmenus && (
-                      <button
-                        onClick={(e) => toggleFavorite(menu.id, e)}
-                        title={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: isFav ? '#f59e0b' : 'var(--text-muted)',
-                          padding: '0 2px',
-                          lineHeight: 1,
-                          fontSize: '0.85rem',
-                          opacity: isFav ? 1 : 0.4,
-                          transition: 'opacity 0.2s',
-                        }}
-                      >
-                        {isFav ? <Star size={13} fill="currentColor" /> : <Star size={13} />}
-                      </button>
-                    )}
-                    {hasSubmenus && !sidebarCollapsed && (
-                      <ChevronRight size={13} className={`sidebar-chevron ${isMenuExpanded ? 'open' : ''}`} />
-                    )}
-                  </div>
-                </div>
-
-                {hasSubmenus && isMenuExpanded && !sidebarCollapsed && (
-                  <div className="sidebar-submenus">
-                    {menu.submenus.map((sub) => {
-                      const isSubFav = favorites.includes(sub.id);
-                      return (
-                        <div
-                          key={sub.id}
-                          className={`sidebar-subitem ${activeTab === sub.id ? 'active' : ''}`}
-                          onClick={() => setActiveTab(sub.id)}
-                          title={sub.label}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                        >
-                          <span>{sub.label}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                            {PLACEHOLDER_TABS.has(sub.id) && (
-                              <span
-                                className="sidebar-soon"
-                                title="Belum ada isinya, masih dalam pengembangan"
-                              >
-                                Segera
-                              </span>
-                            )}
-                            {dataCounts[sub.id] > 0 && (
-                              <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>
-                                {dataCounts[sub.id]}
-                              </span>
-                            )}
-                            <button
-                              onClick={(e) => toggleFavorite(sub.id, e)}
-                              title={isSubFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: isSubFav ? '#f59e0b' : 'var(--text-muted)',
-                                padding: '0 2px',
-                                lineHeight: 1,
-                                fontSize: '0.78rem',
-                                opacity: isSubFav ? 1 : 0.35,
-                                transition: 'opacity 0.2s',
-                              }}
-                            >
-                              {isSubFav ? <Star size={12} fill="currentColor" /> : <Star size={12} />}
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </aside>
-    );
-  };
 
   const renderHealthCheck = () => {
     const {
@@ -5910,7 +5666,17 @@ ${
   return (
     <>
       <div className="dashboard-layout">
-        {renderSidebar()}
+        <Sidebar
+          config={config}
+          healthAnalysis={healthAnalysis}
+          dataCounts={dataCounts}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          expandedMenus={expandedMenus}
+          setExpandedMenus={setExpandedMenus}
+          sidebarCollapsed={sidebarCollapsed}
+          onSidebarCollapseChange={setSidebarCollapsed}
+        />
 
         <div className="main-view">
           {searchTerm && (

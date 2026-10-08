@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs';
 import { PLACEHOLDER_TABS } from '../src/components/placeholderTabs.js';
 
 const dashboard = readFileSync(new URL('../src/components/Dashboard.jsx', import.meta.url), 'utf-8');
+const sidebar = readFileSync(new URL('../src/components/Sidebar.jsx', import.meta.url), 'utf-8');
+const menus = readFileSync(new URL('../src/components/menus.jsx', import.meta.url), 'utf-8');
 
 /**
  * Tab ids that Dashboard routes to a placeholder panel, derived from the source
@@ -34,12 +36,11 @@ test('the placeholder list matches what Dashboard actually routes', () => {
 });
 
 test('every placeholder tab exists in the sidebar', () => {
-  const menus = readFileSync(new URL('../src/components/menus.jsx', import.meta.url), 'utf-8');
   const missing = [...PLACEHOLDER_TABS].filter((id) => !menus.includes(`id: '${id}'`)).sort();
   assert.deepEqual(missing, [], 'placeholder tab is not reachable from the sidebar');
 });
 
 test('the sidebar marker is rendered for placeholders', () => {
-  assert.match(dashboard, /PLACEHOLDER_TABS\.has\(/);
-  assert.match(dashboard, /sidebar-soon/);
+  assert.match(sidebar, /PLACEHOLDER_TABS\.has\(/);
+  assert.match(sidebar, /sidebar-soon/);
 });
