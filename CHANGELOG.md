@@ -5,6 +5,63 @@ Semua perubahan penting proyek ini dicatat di berkas ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/), dan
 versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [1.3.0] - 2026-10-08
+
+### Diubah
+
+- Seluruh emoji dihapus dari repositori, 204 di antaranya. Emoji yang menandai
+  konsep atau aksi di antarmuka diganti ikon lucide yang sudah dipakai
+  aplikasi, misalnya glyph node topologi, ikon preset packet tracer, tombol
+  favorit, dan enam kartu ringkasan di dashboard. Emoji di dalam string teks
+  dihapus karena ikon React tidak bisa masuk ke sana, dan emoji dekorasi pada
+  judul ikut dihapus tanpa pengganti.
+- Panah blok Arrows dipertahankan. Itu tipografi penghubung, bukan emoji, dan
+  183 di antaranya adalah bagian dari kunci pencarian navigasi di
+  `configHelp.js`.
+- Emoji dicabut dari 12 heading README, dan 11 link Daftar Isi diperbarui dari
+  `#-xxx` menjadi `#xxx`. Anchor lama memuat tanda hubung di depan karena emoji
+  yang tercabut, sehingga seluruh link akan patah tanpa perubahan ini.
+- Glyph panah pada tombol Upload Baru diganti ikon Upload dari lucide.
+- Dua puluh enam pasang handler `onMouseEnter` dan `onMouseLeave` yang menulis
+  ke `style.color`, `style.background`, dan `style.borderColor` diganti kelas
+  dengan `:hover`. Dua di antaranya juga memindahkan elemen dan menambahkan
+  glow berwarna; keduanya dihapus karena dekorasi, bukan hierarki.
+- Dua puluh satu warna hardcode di `index.css` dan `App.css` diubah menjadi
+  token, masing-masing dengan padanan tema terang. Yang paling nyata: thumb
+  scrollbar memakai putih 10 persen sehingga praktis tak terlihat di tema
+  terang.
+- `.text-gradient` memakai token `accent-light` dan `accent-secondary`, bukan
+  lagi literal `#818cf8` dan `#a78bfa`.
+- Versi pada hero Landing dibaca dari `__APP_VERSION__`, sumber yang sama
+  dengan chip di header. Sebelumnya tertulis `v1.0` sementara aplikasi sudah
+  `v1.2.0`, sehingga ada dua sumber versi yang bisa berbeda.
+- Tooltip berbahasa Inggris di Indonesiakan, termasuk `View on GitHub`,
+  `Toggle Theme`, `Keyboard shortcuts`, dan `alt` pada gambar hero.
+- Kartu Export-Ready memakai penanda `Segera` yang sama dengan sidebar, bukan
+  `opacity: 0.8` yang terbaca sebagai nonaktif alih-alih belum jadi.
+
+### Diperbaiki
+
+- Rotasi 90 derajat pada `.btn-close:hover` dihapus. Perubahan warna sudah cukup
+  sebagai umpan balik, dan memutar ikon tutup tidak melayani apa pun.
+- Field `icon` pada `configAnalyzer.js` dihapus. Ikon severity sudah lama
+  didefinisikan di `severityConfig` Dashboard tetapi tidak pernah dirender,
+  sehingga ikonnya kini diambil dari sana. Laporan HTML memakai label severity
+  dalam kata, supaya maknanya tidak bergantung pada warna saja.
+
+### Ditambahkan
+
+- Guard emoji di `tests/emoji.test.js`, memindai `src/`, seluruh `.md`, dan
+  `.html` untuk rentang emoji, dengan daftar putih satu entri (U+2318, simbol
+  tombol Command) yang wajib punya alasan tertulis.
+- Augmentasi tipe di `src/env.d.ts` untuk properti CSS kustom, supaya satu
+  komponen bisa menyalurkan warna per item lewat variabel tanpa cast ke `any`.
+
+### Catatan
+
+- Seluruh perubahan diverifikasi di browser sungguhan pada kedua tema, dengan
+  nol error konsol saat berpindah panel.
+
 ## [1.2.0] - 2026-10-08
 
 ### Ditambahkan
