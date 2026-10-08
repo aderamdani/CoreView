@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { CheckCircle2, FolderOpen } from 'lucide-react';
 import { parseMikroTikConfig } from '../utils/parser';
 
 function flattenConfig(config, prefix = '') {
@@ -219,7 +220,9 @@ export function ConfigComparison() {
           >
             {cfg ? (
               <>
-                <div style={{ fontSize: '1.5rem', marginBottom: '6px' }}>{side === 'a' ? '📂' : '📂'}</div>
+                <div style={{ marginBottom: '6px' }}>
+                  <FolderOpen size={24} />
+                </div>
                 <div style={{ fontWeight: 700, color, fontSize: '0.9rem' }}>{name}</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                   {label}: klik untuk ganti
@@ -283,7 +286,8 @@ export function ConfigComparison() {
             fontWeight: 600,
           }}
         >
-          ✅ Kedua konfigurasi identik. Tidak ada perbedaan.
+          <CheckCircle2 size={16} style={{ verticalAlign: '-3px', marginRight: '4px' }} />
+          Kedua konfigurasi identik. Tidak ada perbedaan.
         </div>
       ) : (
         <>

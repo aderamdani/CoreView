@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Globe, Router, Radio, Plug, Monitor, Lock } from 'lucide-react';
 import ReactFlow, {
   Background,
   Controls,
@@ -58,7 +59,9 @@ const InternetNode = ({ data }) => (
     })}
   >
     <Handle type="source" position={Position.Bottom} style={{ background: '#2980b9' }} />
-    <div style={{ fontSize: 26, marginBottom: 4 }}>🌐</div>
+    <div style={{ marginBottom: 4 }}>
+      <Globe size={26} />
+    </div>
     <div style={{ fontWeight: 700, fontSize: 13, color: '#aed6f1' }}>Internet / ISP</div>
     {data.wanCount > 1 && (
       <div style={{ fontSize: 10, opacity: 0.6, marginTop: 2 }}>{data.wanCount} uplink</div>
@@ -86,7 +89,9 @@ const RouterNode = ({ data }) => (
     <Handle type="target" position={Position.Top} style={{ background: '#6366f1' }} />
     <Handle type="source" position={Position.Bottom} style={{ background: '#6366f1' }} />
     <Handle type="source" position={Position.Right} id="right" style={{ background: '#6366f1' }} />
-    <div style={{ fontSize: 22, marginBottom: 4 }}>🔀</div>
+    <div style={{ marginBottom: 4 }}>
+      <Router size={22} />
+    </div>
     <div style={{ fontWeight: 800, fontSize: 14, color: '#e0e7ff' }}>{data.label}</div>
     {data.model && <div style={{ fontSize: 10, opacity: 0.55, marginTop: 2 }}>{data.model}</div>}
     {data.lanTruncated && (
@@ -111,7 +116,7 @@ const IfaceNode = ({ data }) => {
     >
       <Handle type="target" position={Position.Top} style={{ background: col.border }} />
       <Handle type="source" position={Position.Bottom} style={{ background: col.border }} />
-      <div style={{ fontSize: 16, marginBottom: 3 }}>{wan ? '📡' : '🔌'}</div>
+      <div style={{ marginBottom: 3 }}>{wan ? <Radio size={16} /> : <Plug size={16} />}</div>
       <div style={{ fontWeight: 700, fontSize: 12 }}>{data.label}</div>
       {data.ips?.slice(0, 2).map((ip, i) => (
         <div key={i} style={{ fontSize: 10, opacity: 0.75, marginTop: 1, fontFamily: 'monospace' }}>
@@ -139,7 +144,9 @@ const SubnetNode = ({ data }) => (
     title="Klik untuk lihat DHCP Server"
   >
     <Handle type="target" position={Position.Top} style={{ background: '#1e8449' }} />
-    <div style={{ fontSize: 16, marginBottom: 2 }}>🖥️</div>
+    <div style={{ marginBottom: 2 }}>
+      <Monitor size={16} />
+    </div>
     <div style={{ fontWeight: 600, fontSize: 11 }}>Jaringan Lokal</div>
     <div style={{ fontSize: 10, opacity: 0.75, fontFamily: 'monospace', marginTop: 2 }}>{data.subnet}</div>
     {data.pool && <div style={{ fontSize: 9, opacity: 0.55, marginTop: 1 }}>Pool: {data.pool}</div>}
@@ -160,7 +167,9 @@ const VpnNode = ({ data }) => (
     title="Klik untuk lihat VPN"
   >
     <Handle type="target" position={Position.Left} style={{ background: '#9b59b6' }} />
-    <div style={{ fontSize: 16, marginBottom: 2 }}>🔒</div>
+    <div style={{ marginBottom: 2 }}>
+      <Lock size={16} />
+    </div>
     <div style={{ fontWeight: 700, fontSize: 11 }}>{data.label}</div>
     <div style={{ fontSize: 9, opacity: 0.65, marginTop: 1 }}>{data.type}</div>
     {data.peers > 0 && chip(`${data.peers} peer`, 'rgba(155,89,182,0.25)', '#d7bde2')}
@@ -422,7 +431,6 @@ export const NetworkTopology = ({ config, onNavigate }) => {
     <div className="animate-fade-in">
       <div className="glass-panel config-section" style={{ marginBottom: '1rem' }}>
         <div className="section-header">
-          <span style={{ fontSize: 20 }}>🗺️</span>
           <h2 className="section-title">Topologi Jaringan</h2>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.7 }}>

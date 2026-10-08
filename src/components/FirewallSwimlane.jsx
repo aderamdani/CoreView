@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronDown, Filter, RotateCcw, Zap } from 'lucide-react';
+import { Check, ChevronDown, Filter, RotateCcw, X, Zap } from 'lucide-react';
 
 /* ── Constants ───────────────────────────────────────────────────── */
 const CHAINS = ['input', 'forward', 'output'];
@@ -483,8 +483,12 @@ export const FirewallSwimlane = ({ rules, onNavigate, onTraceRule }) => {
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, fontSize: '0.68rem', marginBottom: 5 }}>
-                  <span style={{ color: '#22c55e' }}>✓ {s.accept} accept</span>
-                  <span style={{ color: '#ef4444' }}>✕ {s.drop} drop/reject</span>
+                  <span style={{ color: '#22c55e' }}>
+                    <Check size={12} /> {s.accept} accept
+                  </span>
+                  <span style={{ color: '#ef4444' }}>
+                    <X size={12} /> {s.drop} drop/reject
+                  </span>
                   {s.disabled > 0 && <span style={{ color: 'var(--text-muted)' }}>⊘ {s.disabled} off</span>}
                 </div>
                 <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>

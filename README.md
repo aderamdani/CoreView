@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  🌐 CoreView
+ CoreView
   <br>
 </h1>
 
@@ -18,23 +18,23 @@
 
 ---
 
-## 📋 Daftar Isi
+## Daftar Isi
 
-- [Tentang CoreView](#-tentang-coreview)
-- [Fitur Utama](#-fitur-utama)
-- [Tech Stack](#-tech-stack)
-- [Cara Memulai](#-cara-memulai)
-- [Cara Menggunakan](#-cara-menggunakan)
-- [Struktur Proyek](#-struktur-proyek)
-- [Versi dan Changelog](#-versi-dan-changelog)
-- [Deployment](#-deployment)
-- [Privasi & Keamanan](#-privasi--keamanan)
-- [Kontribusi](#-kontribusi)
-- [Lisensi](#-lisensi)
+- [Tentang CoreView](#tentang-coreview)
+- [Fitur Utama](#fitur-utama)
+- [Tech Stack](#tech-stack)
+- [Cara Memulai](#cara-memulai)
+- [Cara Menggunakan](#cara-menggunakan)
+- [Struktur Proyek](#struktur-proyek)
+- [Versi dan Changelog](#versi-dan-changelog)
+- [Deployment](#deployment)
+- [Privasi & Keamanan](#privasi--keamanan)
+- [Kontribusi](#kontribusi)
+- [Lisensi](#lisensi)
 
 ---
 
-## 🚀 Tentang CoreView
+## Tentang CoreView
 
 **CoreView** adalah aplikasi web berbasis browser yang membantu network engineer dan administrator jaringan untuk **memahami dan memvisualisasikan konfigurasi MikroTik RouterOS** secara cepat dan intuitif.
 
@@ -46,20 +46,20 @@ Cukup upload file export konfigurasi (`.rsc` atau `.txt`) dari router MikroTik A
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
-### 📊 Overview Dashboard
+### Overview Dashboard
 Ringkasan lengkap kondisi router: identitas perangkat, model, serial number, jumlah interface aktif, total aturan firewall, dan ringkasan konfigurasi dalam 8 langkah naratif yang mudah dipahami.
 
-### 🗺️ Mind Map
+### Mind Map
 Visualisasi hubungan antar komponen konfigurasi router dalam bentuk peta pikiran interaktif menggunakan **ReactFlow + Dagre**, sehingga mudah melihat ketergantungan antar bagian.
 
-### 🔌 Network Interfaces
+### Network Interfaces
 Tabel detail seluruh interface jaringan:
 - **All Interfaces** – Ethernet, Bridge, VLAN, WireGuard, OVPN
 - **Interface Lists** – Pengelompokan interface untuk firewall & routing
 
-### 🌐 IP & Layanan Jaringan
+### IP & Layanan Jaringan
 - **Addresses** – Semua IP statis yang dikonfigurasi
 - **Routes** – Tabel routing (statis & dinamis)
 - **DHCP Server / Client** – Konfigurasi pembagian IP otomatis
@@ -68,7 +68,7 @@ Tabel detail seluruh interface jaringan:
 - **Hotspot** – Server, profil, user, dan walled garden
 - **IP Cloud, Services, UPnP, SOCKS, Proxy, Traffic Flow**
 
-### 🛡️ Firewall
+### Firewall
 Visualisasi lengkap semua lapisan keamanan:
 - **Filter Rules** – Aturan allow/drop/reject traffic
 - **NAT** – Port forwarding & masquerade
@@ -76,34 +76,34 @@ Visualisasi lengkap semua lapisan keamanan:
 - **Raw** – Filtering awal sebelum connection tracking
 - **Address Lists** – Daftar IP untuk kebijakan keamanan
 
-### 🔒 VPN & Remote Access
+### VPN & Remote Access
 Ringkasan semua konfigurasi VPN: **PPTP, L2TP, SSTP, OpenVPN, WireGuard** beserta peer dan konfigurasi terkait.
 
-### 📶 QoS & Bandwidth Management
+### QoS & Bandwidth Management
 - **Queue Tree** – Hierarki kontrol bandwidth (HTB)
 - **Simple Queues** – Limit per IP/interface
 - **Queue Types** – Algoritma PCQ, RED, SFQ
 
-### 🖥️ System & Tools
+### System & Tools
 - **Identity, Clock, NTP, Logging, Users, SSH, SNMP**
 - **Graphing, Netwatch, Bandwidth Test, RoMON**
 
-### 🌍 OSI & TCP/IP View
+### OSI & TCP/IP View
 Panduan visual lapisan OSI dan TCP/IP yang dipetakan dengan komponen konfigurasi router yang relevan.
 
-### 💡 Help Panel Kontekstual
+### Help Panel Kontekstual
 Setiap bagian dilengkapi panel bantuan yang dapat diklik untuk memahami:
 - Apa fungsinya
 - Dampak & pertimbangan konfigurasi
 - Bagian terkait (navigasi langsung)
 - Prerequisites & langkah selanjutnya
 
-### 🎨 Dark / Light Mode
+### Dark / Light Mode
 Toggle tema gelap dan terang sesuai preferensi.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Kategori | Teknologi |
 |---|---|
@@ -117,7 +117,7 @@ Toggle tema gelap dan terang sesuai preferensi.
 
 ---
 
-## 🏁 Cara Memulai
+## Cara Memulai
 
 ### Prasyarat
 
@@ -152,7 +152,7 @@ Buka browser dan akses `http://localhost:5173` (atau port yang ditampilkan di te
 
 ---
 
-## 📖 Cara Menggunakan
+## Cara Menggunakan
 
 ### Langkah 1: Export Konfigurasi dari MikroTik
 
@@ -177,11 +177,11 @@ Download file tersebut melalui:
 2. Drag & drop file `.rsc` ke area upload, atau klik untuk browse
 3. Konfigurasi akan langsung di-parse dan ditampilkan sebagai dashboard
 
-> **💡 Tips:** Klik tombol **"Cara Export Konfigurasi MikroTik"** di halaman upload untuk panduan lengkap dengan ilustrasi langkah demi langkah.
+> ** Tips:** Klik tombol **"Cara Export Konfigurasi MikroTik"** di halaman upload untuk panduan lengkap dengan ilustrasi langkah demi langkah.
 
 ---
 
-## 📁 Struktur Proyek
+## Struktur Proyek
 
 ```
 CoreView/
@@ -236,7 +236,7 @@ File .rsc  →  parser.js  →  Structured JSON  →  Dashboard.jsx  →  UI
 
 ---
 
-## 🔖 Versi dan Changelog
+## Versi dan Changelog
 
 Versi proyek disimpan di satu tempat saja, yaitu field `version` pada
 `package.json`. Nilai itu diteruskan ke aplikasi lewat `define` di
@@ -277,7 +277,7 @@ tersedia, bukan panel kosong.
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 Proyek ini dikonfigurasi untuk deploy otomatis ke **Vercel**.
 
@@ -314,7 +314,7 @@ endpoint API yang terverifikasi dan runbook langkah demi langkah, lihat
 
 ---
 
-## 🔒 Privasi & Keamanan
+## Privasi & Keamanan
 
 > **File konfigurasi Anda tidak pernah dikirim ke server manapun.**
 
@@ -322,7 +322,7 @@ Semua parsing dan pemrosesan dilakukan **sepenuhnya di browser** menggunakan Jav
 
 ---
 
-## 🤝 Kontribusi
+## Kontribusi
 
 Kontribusi sangat disambut! Silakan:
 
@@ -334,12 +334,12 @@ Kontribusi sangat disambut! Silakan:
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 Proyek ini menggunakan lisensi **MIT**. Lihat file `LICENSE` untuk detail lebih lanjut.
 
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk komunitas jaringan Indonesia
+  Dibuat untuk komunitas jaringan Indonesia
 </p>

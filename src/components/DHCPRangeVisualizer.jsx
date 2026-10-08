@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Lightbulb } from 'lucide-react';
 
 function ipToInt(ip) {
   const p = ip.split('.').map(Number);
@@ -204,7 +205,8 @@ export function DHCPRangeVisualizer({ server }) {
           borderLeft: '3px solid #22c55e',
         }}
       >
-        💡 Router ini bisa memberikan IP secara otomatis ke maksimal <strong>{data.poolSize}</strong> device
+        <Lightbulb size={14} style={{ verticalAlign: '-2px', marginRight: '4px' }} />
+        Router ini bisa memberikan IP secara otomatis ke maksimal <strong>{data.poolSize}</strong> device
         {data.network && (
           <>
             {' '}

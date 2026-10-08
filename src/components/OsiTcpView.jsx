@@ -276,7 +276,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1.5rem' }}
           >
             <div>
-              <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>🔍 OSI 7-Layer Model</h4>
+              <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>OSI 7-Layer Model</h4>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
                 Model referensi yang dikembangkan oleh ISO untuk memahami bagaimana protokol jaringan
                 berinteraksi. Setiap layer memiliki fungsi spesifik dan berkomunikasi dengan layer di atas dan
@@ -297,7 +297,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
               </div>
             </div>
             <div>
-              <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>🌐 TCP/IP Model</h4>
+              <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>TCP/IP Model</h4>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
                 Model praktis yang digunakan oleh internet. Lebih sederhana dari OSI dengan 4 layer utama.
                 TCP/IP adalah dasar dari semua komunikasi internet modern.
@@ -613,7 +613,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                          🔧 Fungsi Utama
+                          Fungsi Utama
                         </h5>
                         <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                           {layerDetail.function}
@@ -622,7 +622,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
 
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                          📋 Protokol & Teknologi
+                          Protokol & Teknologi
                         </h5>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                           {layerDetail.protocols.map((protocol, idx) => (
@@ -645,7 +645,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
 
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                          💡 Contoh Penggunaan
+                          Contoh Penggunaan
                         </h5>
                         <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                           {layerDetail.example}
@@ -654,7 +654,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
 
                       <div>
                         <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                          🔗 Relasi MikroTik
+                          Relasi MikroTik
                         </h5>
                         <p style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                           {layerDetail.mikrotikRelation}
@@ -664,7 +664,7 @@ export const OsiTcpView = ({ config, onNavigate }) => {
 
                     <div style={{ marginTop: '1.5rem' }}>
                       <h5 style={{ color: 'var(--accent)', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                        ⚙️ Konfigurasi MikroTik
+                        Konfigurasi MikroTik
                       </h5>
                       <div
                         style={{

@@ -1,5 +1,23 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Zap, Play, ChevronDown, RotateCcw, AlertCircle, CheckCircle2, Info, Shield } from 'lucide-react';
+import {
+  Zap,
+  Play,
+  ChevronDown,
+  RotateCcw,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Shield,
+  Key,
+  Radio,
+  Monitor,
+  Globe,
+  Search,
+  Ban,
+  OctagonX,
+  Check,
+  X,
+} from 'lucide-react';
 import { tracePacket } from '../utils/packetTracer';
 import { formFromRule } from '../utils/traceForm';
 
@@ -21,7 +39,7 @@ const DEFAULT_FORM = {
 const PRESETS = [
   {
     label: 'SSH dari Internet',
-    icon: '🔑',
+    icon: <Key size={14} />,
     f: {
       srcIp: '1.2.3.4',
       dstIp: '192.168.1.1',
@@ -34,7 +52,7 @@ const PRESETS = [
   },
   {
     label: 'Ping dari WAN',
-    icon: '📡',
+    icon: <Radio size={14} />,
     f: {
       srcIp: '1.2.3.4',
       dstIp: '192.168.1.1',
@@ -47,7 +65,7 @@ const PRESETS = [
   },
   {
     label: 'Winbox (8291)',
-    icon: '🖥️',
+    icon: <Monitor size={14} />,
     f: {
       srcIp: '1.2.3.4',
       dstIp: '192.168.1.1',
@@ -60,7 +78,7 @@ const PRESETS = [
   },
   {
     label: 'HTTP dari LAN',
-    icon: '🌐',
+    icon: <Globe size={14} />,
     f: {
       srcIp: '192.168.1.100',
       dstIp: '8.8.8.8',
@@ -73,7 +91,7 @@ const PRESETS = [
   },
   {
     label: 'DNS dari LAN',
-    icon: '🔍',
+    icon: <Search size={14} />,
     f: {
       srcIp: '192.168.1.100',
       dstIp: '8.8.8.8',
@@ -86,7 +104,7 @@ const PRESETS = [
   },
   {
     label: 'Return traffic (established)',
-    icon: '↩️',
+    icon: '↩',
     f: {
       srcIp: '8.8.8.8',
       dstIp: '192.168.1.100',
@@ -99,7 +117,7 @@ const PRESETS = [
   },
   {
     label: 'Telnet (port 23)',
-    icon: '⚠️',
+    icon: <AlertCircle size={14} />,
     f: {
       srcIp: '1.2.3.4',
       dstIp: '192.168.1.1',
@@ -112,7 +130,7 @@ const PRESETS = [
   },
   {
     label: 'HTTPS ke internet',
-    icon: '🔐',
+    icon: <Shield size={14} />,
     f: {
       srcIp: '192.168.1.100',
       dstIp: '1.1.1.1',
@@ -128,7 +146,7 @@ const PRESETS = [
 /* ── Verdict config ──────────────────────────────────────────────── */
 const VERDICT = {
   accept: {
-    icon: '✅',
+    icon: <CheckCircle2 size={40} />,
     label: 'DITERIMA (ACCEPT)',
     color: '#22c55e',
     bg: 'rgba(34,197,94,0.08)',
@@ -137,7 +155,7 @@ const VERDICT = {
       `Paket DITERIMA oleh firewall chain "${chain}".${rule?.comment ? ` Rule yang cocok: "${rule.comment}".` : ''} Koneksi ini diizinkan masuk/lewat router.`,
   },
   drop: {
-    icon: '🚫',
+    icon: <Ban size={40} />,
     label: 'DIBUANG (DROP)',
     color: '#ef4444',
     bg: 'rgba(239,68,68,0.08)',
@@ -146,7 +164,7 @@ const VERDICT = {
       `Paket DIBUANG secara diam-diam oleh chain "${chain}".${rule?.comment ? ` Rule: "${rule.comment}".` : ''} Pengirim tidak mendapat respons apapun. Koneksi langsung "mati" tanpa pemberitahuan. Ini pilihan paling aman untuk memblokir traffic berbahaya.`,
   },
   reject: {
-    icon: '⛔',
+    icon: <OctagonX size={40} />,
     label: 'DITOLAK (REJECT)',
     color: '#f97316',
     bg: 'rgba(249,115,22,0.08)',
@@ -155,7 +173,7 @@ const VERDICT = {
       `Paket DITOLAK oleh chain "${chain}".${rule?.comment ? ` Rule: "${rule.comment}".` : ''} Berbeda dengan DROP, pengirim mendapat pesan "connection refused" atau "host unreachable". Berguna untuk jaringan internal agar tidak menunggu timeout.`,
   },
   'no-match': {
-    icon: '⚠️',
+    icon: <AlertCircle size={40} />,
     label: 'TIDAK ADA RULE YANG COCOK',
     color: '#eab308',
     bg: 'rgba(234,179,8,0.08)',
@@ -307,10 +325,10 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
           }}
         >
           <span>
-            📋 Rules aktif: <strong style={{ color: 'var(--text-primary)' }}>{activeRules.length}</strong>
+            Rules aktif: <strong style={{ color: 'var(--text-primary)' }}>{activeRules.length}</strong>
           </span>
           <span>
-            🔍 Rules di chain{' '}
+            Rules di chain{' '}
             <code style={{ background: 'var(--bg-elevated)', padding: '1px 6px', borderRadius: 4 }}>
               {form.chain}
             </code>
@@ -318,7 +336,7 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
           </span>
           {filterRules.length === 0 && (
             <span style={{ color: '#f97316', fontWeight: 600 }}>
-              ⚠️ Tidak ada firewall rules. Semua traffic akan diterima default
+              Tidak ada firewall rules. Semua traffic akan diterima default
             </span>
           )}
         </div>
@@ -665,8 +683,12 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
                   <div
                     style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem' }}
                   >
-                    <span style={{ color: '#22c55e' }}>✅ = cocok</span>
-                    <span style={{ color: '#ef4444' }}>❌ = kondisi gagal</span>
+                    <span style={{ color: '#22c55e' }}>
+                      <Check size={13} style={{ verticalAlign: 'middle' }} /> = cocok
+                    </span>
+                    <span style={{ color: '#ef4444' }}>
+                      <X size={13} style={{ verticalAlign: 'middle' }} /> = kondisi gagal
+                    </span>
                     <span style={{ opacity: 0.5 }}>↷ = dilewati</span>
                   </div>
                 </div>
@@ -777,7 +799,7 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
                               }}
                             >
                               {isFinalMatch
-                                ? `★ ${result.verdict.toUpperCase()}`
+                                ? result.verdict.toUpperCase()
                                 : step.matched
                                   ? '● PASS'
                                   : '↷ SKIP'}
@@ -825,7 +847,13 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
                                         fontSize: '0.82rem',
                                       }}
                                     >
-                                      <span style={{ flexShrink: 0 }}>{c.matched ? '✅' : '❌'}</span>
+                                      <span style={{ flexShrink: 0 }}>
+                                        {c.matched ? (
+                                          <Check size={14} style={{ color: '#22c55e' }} />
+                                        ) : (
+                                          <X size={14} style={{ color: '#ef4444' }} />
+                                        )}
+                                      </span>
                                       <span
                                         style={{
                                           fontFamily: 'monospace',
@@ -892,7 +920,9 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
                                         marginTop: 4,
                                       }}
                                     >
-                                      <span>❓</span>
+                                      <span>
+                                        <Info size={14} />
+                                      </span>
                                       <span
                                         style={{
                                           fontFamily: 'monospace',

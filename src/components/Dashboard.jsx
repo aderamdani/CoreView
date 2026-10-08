@@ -3,6 +3,10 @@ import {
   Server,
   Activity,
   Shield,
+  Star,
+  Radio,
+  RefreshCw,
+  Construction,
   Wifi,
   Share2,
   Route,
@@ -118,7 +122,7 @@ class SectionErrorBoundary extends React.Component {
           role="alert"
         >
           <div>
-            <strong>⚠ Panel ini gagal dirender:</strong> {this.state.error?.message}
+            <strong>Panel ini gagal dirender:</strong> {this.state.error?.message}
           </div>
           <p style={{ margin: '0.6rem 0 0', color: 'var(--text-secondary)' }}>
             Panel lain tetap bisa dibuka. Kembali ke panel ini akan mencobanya lagi.
@@ -813,10 +817,10 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
 </style>
 </head>
 <body>
-<h1>📋 Laporan Konfigurasi Router</h1>
+<h1>Laporan Konfigurasi Router</h1>
 <div class="meta">Router: <strong>${escapeHtml(identity)}</strong> &nbsp;·&nbsp; Dibuat: ${now} &nbsp;·&nbsp; CoreView</div>
 
-<h2>🏥 Kesehatan Jaringan</h2>
+<h2>Kesehatan Jaringan</h2>
 <div class="score-row">
   <div class="score-card">
     <div class="grade">${grade}</div>
@@ -837,9 +841,9 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
   <div class="stat"><div class="stat-val">${dhcp.servers.length}</div><div class="stat-lbl">DHCP Servers</div></div>
 </div>
 
-${issues.length > 0 ? `<h2>⚠️ Temuan (${issues.length})</h2>${issueRows}` : '<div style="color:#22c55e;font-weight:600;margin-bottom:20px">✅ Tidak ada masalah terdeteksi!</div>'}
+${issues.length > 0 ? `<h2>Temuan (${issues.length})</h2>${issueRows}` : '<div style="color:#22c55e;font-weight:600;margin-bottom:20px">Tidak ada masalah terdeteksi!</div>'}
 
-<h2>🛡️ Firewall Filter Rules (${(firewall.filter || []).length})</h2>
+<h2>Firewall Filter Rules (${(firewall.filter || []).length})</h2>
 ${
   (firewall.filter || []).length > 0
     ? `
@@ -850,7 +854,7 @@ ${
     : '<p style="color:#9ca3af">Tidak ada filter rules.</p>'
 }
 
-<h2>🔄 NAT Rules (${(firewall.nat || []).length})</h2>
+<h2>NAT Rules (${(firewall.nat || []).length})</h2>
 ${
   (firewall.nat || []).length > 0
     ? `
@@ -940,7 +944,7 @@ ${
                       textTransform: 'uppercase',
                     }}
                   >
-                    ⭐ Favorit
+                    Favorit
                   </div>
                   <div className="sidebar-submenus" style={{ paddingTop: 0 }}>
                     {favItems.map((item) => (
@@ -950,7 +954,7 @@ ${
                         onClick={() => setActiveTab(item.id)}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                       >
-                        <span>⭐ {item.label}</span>
+                        <span>{item.label}</span>
                         <button
                           onClick={(e) => toggleFavorite(item.id, e)}
                           title="Hapus dari favorit"
@@ -1050,7 +1054,7 @@ ${
                           transition: 'opacity 0.2s',
                         }}
                       >
-                        {isFav ? '⭐' : '☆'}
+                        {isFav ? <Star size={13} fill="currentColor" /> : <Star size={13} />}
                       </button>
                     )}
                     {hasSubmenus && !sidebarCollapsed && (
@@ -1101,7 +1105,7 @@ ${
                                 transition: 'opacity 0.2s',
                               }}
                             >
-                              {isSubFav ? '⭐' : '☆'}
+                              {isSubFav ? <Star size={12} fill="currentColor" /> : <Star size={12} />}
                             </button>
                           </div>
                         </div>
@@ -1285,32 +1289,32 @@ ${
             >
               {[
                 {
-                  icon: '🛡️',
+                  icon: <Shield size={20} />,
                   term: 'Firewall Rules',
                   desc: 'Aturan penjaga yang memutuskan traffic mana yang boleh masuk/keluar, seperti satpam yang memeriksa tamu.',
                 },
                 {
-                  icon: '📡',
+                  icon: <Radio size={20} />,
                   term: 'DHCP Server',
                   desc: 'Layanan pembagi alamat IP otomatis ke perangkat, seperti resepsionis yang memberi nomor kamar.',
                 },
                 {
-                  icon: '🗺️',
+                  icon: <Route size={20} />,
                   term: 'Routes',
                   desc: 'Peta jalan untuk data. Memberitahu router harus kirim paket ke mana.',
                 },
                 {
-                  icon: '🔒',
+                  icon: <Lock size={20} />,
                   term: 'VPN Tunnel',
                   desc: 'Terowongan terenkripsi untuk koneksi aman dari jauh, seperti lorong rahasia antara dua gedung.',
                 },
                 {
-                  icon: '🔄',
+                  icon: <RefreshCw size={20} />,
                   term: 'NAT / Masquerade',
                   desc: 'Menerjemahkan IP lokal ke IP publik agar semua perangkat bisa berbagi satu koneksi internet.',
                 },
                 {
-                  icon: '📝',
+                  icon: <FileText size={20} />,
                   term: 'Logging',
                   desc: 'Buku catatan aktivitas router: siapa login, traffic apa, error apa. Penting untuk investigasi insiden.',
                 },
@@ -1753,7 +1757,7 @@ ${
               onClick={exportHTMLReport}
               title="Ekspor laporan lengkap sebagai HTML"
             >
-              📄 Export Laporan HTML
+              Export Laporan HTML
             </button>
           </div>
           <div
@@ -2235,7 +2239,7 @@ ${
                           marginBottom: '0.75rem',
                         }}
                       >
-                        📋 Detail Konfigurasi:
+                        Detail Konfigurasi:
                       </h4>
                       <div
                         style={{
@@ -3506,7 +3510,7 @@ ${
                 transition: 'all 0.2s',
               }}
             >
-              ☰ Tabel
+              Tabel
             </button>
             <button
               onClick={() => setFirewallViewMode('swimlane')}
@@ -3522,7 +3526,7 @@ ${
                 transition: 'all 0.2s',
               }}
             >
-              🏊 Swimlane
+              Swimlane
             </button>
           </div>
           <button
@@ -4794,7 +4798,9 @@ ${
       </div>
       {helpId && <HelpPanel id={helpId} onNavigate={setActiveTab} />}
       <div style={{ textAlign: 'center', padding: '3rem 2rem', color: 'var(--text-muted)' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>🚧</div>
+        <div style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
+          <Construction size={44} />
+        </div>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Fitur Dalam Pengembangan</h3>
         <p style={{ fontSize: '0.9rem', lineHeight: 1.6, maxWidth: '400px', margin: '0 auto' }}>
           Menu <strong>{title}</strong> sedang dalam tahap pengembangan. Fitur ini akan segera tersedia dalam
@@ -4810,7 +4816,7 @@ ${
           }}
         >
           <p style={{ fontSize: '0.8rem', margin: 0 }}>
-            💡 <strong>Catatan:</strong> Semua menu Winbox telah ditambahkan ke sidebar untuk kelengkapan.
+            <strong>Catatan:</strong> Semua menu Winbox telah ditambahkan ke sidebar untuk kelengkapan.
             Fitur-fitur ini akan diimplementasikan secara bertahap.
           </p>
         </div>
@@ -4915,7 +4921,9 @@ ${
         <h2 className="section-title">{title}</h2>
       </div>
       <div style={{ textAlign: 'center', padding: '3rem 2rem', color: 'var(--text-muted)' }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.5 }}>📡</div>
+        <div style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
+          <Radio size={36} />
+        </div>
         <h3 style={{ color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Data Live Router</h3>
         <p style={{ fontSize: '0.9rem', lineHeight: 1.6, maxWidth: '400px', margin: '0 auto' }}>
           <strong>{title}</strong> menampilkan data real-time dari router yang sedang aktif. Informasi ini
@@ -6273,7 +6281,7 @@ ${
                 marginBottom: '20px',
               }}
             >
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>⌨️ Keyboard Shortcuts</h3>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>Pintasan Papan Ketik</h3>
               <button
                 onClick={() => setShowShortcuts(false)}
                 style={{

@@ -27,7 +27,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'critical',
       category: 'Keamanan',
-      icon: '🛡️',
       title: 'Tidak ada aturan Firewall sama sekali',
       description:
         'Router tidak memiliki satu pun aturan firewall. Artinya semua koneksi dari mana saja (termasuk internet) ' +
@@ -57,7 +56,6 @@ export function analyzeConfig(config) {
       issues.push({
         severity: 'warning',
         category: 'Keamanan',
-        icon: '⚠️',
         title: 'Pintu masuk router tidak dikunci (INPUT chain)',
         description:
           'Tidak ada aturan pemblokiran (drop/reject) untuk traffic yang masuk langsung ke router. ' +
@@ -82,7 +80,6 @@ export function analyzeConfig(config) {
       issues.push({
         severity: 'warning',
         category: 'Keamanan',
-        icon: '⚠️',
         title: 'Traffic antar jaringan tidak dikontrol (FORWARD chain)',
         description:
           'Tidak ada aturan blokir pada FORWARD chain. Artinya perangkat di jaringan Anda bisa saling mengakses ' +
@@ -107,7 +104,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'warning',
       category: 'Keamanan',
-      icon: '🔓',
       title: 'Telnet aktif: komunikasi tidak terenkripsi',
       description:
         'Telnet mengirimkan username, password, dan semua perintah dalam teks biasa yang bisa dibaca siapapun. ' +
@@ -126,7 +122,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'warning',
       category: 'Keamanan',
-      icon: '📁',
       title: 'FTP aktif: transfer file tidak aman',
       description:
         'FTP mengirimkan file dan kredensial tanpa enkripsi. Sangat rentan terhadap penyadapan di jaringan yang sama.',
@@ -147,7 +142,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'info',
       category: 'Keamanan',
-      icon: '🌐',
       title: `${openServices.length} layanan manajemen bisa diakses dari semua IP`,
       description:
         `Layanan ${openServices.map((s) => s.name).join(', ')} dapat diakses dari IP manapun di internet. ` +
@@ -168,7 +162,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'warning',
       category: 'Keamanan',
-      icon: '🔑',
       title: 'SNMP menggunakan community string default "public"',
       description:
         '"public" adalah community string bawaan yang diketahui semua orang. Siapapun bisa membaca ' +
@@ -198,7 +191,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'warning',
       category: 'Konektivitas',
-      icon: '🛣️',
       title: 'Tidak ada jalur internet (default route)',
       description:
         'Default route (0.0.0.0/0) adalah "jalan utama" ke internet. Tanpanya, router tidak tahu ' +
@@ -220,7 +212,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'info',
       category: 'Konektivitas',
-      icon: '🔄',
       title: 'NAT Masquerade belum dikonfigurasi',
       description:
         'Router Anda melayani perangkat lewat DHCP, tetapi tidak ada aturan NAT Masquerade. ' +
@@ -241,7 +232,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'info',
       category: 'Konektivitas',
-      icon: '🔍',
       title: 'DNS server belum dikonfigurasi',
       description:
         'Router punya DHCP Server (membagi IP ke perangkat) tapi DNS belum diset. ' +
@@ -267,7 +257,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'info',
       category: 'Monitoring',
-      icon: '🕐',
       title: 'Sinkronisasi waktu (NTP) belum aktif',
       description:
         'Jam router yang tidak akurat membuat semua log menjadi tidak bisa dipercaya. ' +
@@ -290,7 +279,6 @@ export function analyzeConfig(config) {
     issues.push({
       severity: 'info',
       category: 'Monitoring',
-      icon: '📝',
       title: 'Tidak ada aturan logging (pencatatan aktivitas)',
       description:
         'Tanpa logging, semua aktivitas di router tidak tercatat: login gagal, perubahan konfigurasi, ' +

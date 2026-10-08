@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { detectConflicts, detectDuplicates } from '../utils/detectConflicts';
 
 const CHAIN_COLOR = {
@@ -140,7 +141,8 @@ export function FirewallConflicts({ rules }) {
             fontWeight: 600,
           }}
         >
-          ✅ Tidak ada konflik atau rule yang terbayang-bayangi ditemukan pada chain{' '}
+          <CheckCircle2 size={16} style={{ verticalAlign: '-3px', marginRight: '4px' }} />
+          Tidak ada konflik atau rule yang terbayang-bayangi ditemukan pada chain{' '}
           {activeChain === 'all' ? 'manapun' : activeChain}!
         </div>
       ) : (
@@ -155,8 +157,9 @@ export function FirewallConflicts({ rules }) {
             color: '#f97316',
           }}
         >
-          ⚠️ Ditemukan <strong>{total}</strong> masalah: {filteredConflicts.length} rule tersembunyi
-          (shadowed) + {filteredDupes.length} duplikat
+          <AlertTriangle size={16} style={{ verticalAlign: '-3px', marginRight: '4px' }} />
+          Ditemukan <strong>{total}</strong> masalah: {filteredConflicts.length} rule tersembunyi (shadowed) +{' '}
+          {filteredDupes.length} duplikat
         </div>
       )}
 
