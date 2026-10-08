@@ -5,6 +5,7 @@ import { parseMikroTikConfig } from './utils/parser';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
 import { AboutPanel } from './components/AboutPanel';
+import { Logo } from './components/Logo';
 import { Sun, Moon, Github, Search, X, AlertTriangle, Upload } from 'lucide-react';
 
 function App() {
@@ -58,11 +59,14 @@ function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <h1 className="header-title text-gradient">CoreView</h1>
+        <div className="header-brand">
+          <Logo size={26} className="header-logo" />
+          <h1 className="header-title text-gradient">CoreView</h1>
+        </div>
 
         {config && (
           <div className="header-search-wrapper">
-            <Search size={14} className="header-search-icon" />
+            <Search size={18} className="header-search-icon" />
             <input
               ref={searchRef}
               type="text"
@@ -77,7 +81,7 @@ function App() {
                 onClick={() => setSearchTerm('')}
                 title="Hapus pencarian"
               >
-                <X size={12} />
+                <X size={14} />
               </button>
             )}
           </div>
@@ -105,7 +109,7 @@ function App() {
 
           {config && (
             <button className="btn btn-primary animate-fade-in" onClick={handleReset}>
-              <Upload size={15} /> Upload Baru
+              <Upload size={18} /> Upload Baru
             </button>
           )}
         </div>
