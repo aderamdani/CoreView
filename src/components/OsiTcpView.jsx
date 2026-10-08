@@ -349,23 +349,12 @@ export const OsiTcpView = ({ config, onNavigate }) => {
               cursor: 'pointer',
               fontSize: '0.9rem',
               fontWeight: 500,
-              transition: 'all 0.3s ease',
+              transition: 'background 0.2s ease, color 0.2s ease',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--accent)';
-              e.currentTarget.style.color = 'white';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(99,102,241,0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--bg-active)';
-              e.currentTarget.style.color = 'var(--accent)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="guide-button"
           >
             <BookOpen size={16} />
             Tampilkan Panduan Lengkap
@@ -396,19 +385,10 @@ export const OsiTcpView = ({ config, onNavigate }) => {
                 color: tcp.border,
                 minHeight: '80px',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'border-left-width 0.2s ease',
                 position: 'relative',
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateX(8px) scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.2), 0 0 20px rgba(99,102,241,0.1)';
-                e.currentTarget.style.borderLeftWidth = '6px';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateX(0) scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderLeftWidth = '4px';
-              }}
+              className="tcp-layer-card"
               onClick={() => setExpandedLayer(expandedLayer === `tcp-${tcp.name}` ? null : `tcp-${tcp.name}`)}
             >
               {tcp.name}
@@ -490,18 +470,6 @@ export const OsiTcpView = ({ config, onNavigate }) => {
                   }}
                   className="card-hover"
                   onClick={() => setExpandedLayer(isExpanded ? null : layerInfo.id)}
-                  onMouseEnter={(e) => {
-                    if (!isExpanded) {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isExpanded) {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.1)';
-                    }
-                  }}
                 >
                   <div
                     style={{
@@ -565,16 +533,9 @@ export const OsiTcpView = ({ config, onNavigate }) => {
                               fontSize: '0.78rem',
                               cursor: 'pointer',
                               color: 'var(--text-primary)',
-                              transition: 'all 0.2s ease',
+                              transition: 'background 0.2s ease, border-color 0.2s ease',
                             }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = 'var(--badge-bg-hover)';
-                              e.currentTarget.style.borderColor = 'var(--accent)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = 'var(--badge-bg)';
-                              e.currentTarget.style.borderColor = 'var(--border)';
-                            }}
+                            className="filter-badge"
                           >
                             {item.label}
                             <span

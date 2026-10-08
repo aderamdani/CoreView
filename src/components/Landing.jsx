@@ -90,7 +90,7 @@ export const Landing = ({ onFileParsed }) => {
         <div className="hero-content">
           <div className="hero-badge">
             <Zap size={14} className="hero-badge-icon" />
-            <span>v1.0 - Transformasi Visual MikroTik</span>
+            <span>{`v${__APP_VERSION__} - Transformasi Visual MikroTik`}</span>
           </div>
           <h1 className="hero-title">
             Visualisasikan Konfigurasi <span className="text-gradient">MikroTik</span> Anda
@@ -124,7 +124,7 @@ export const Landing = ({ onFileParsed }) => {
 
         <div className="hero-visual">
           <div className="hero-image-container">
-            <img src={heroImage} alt="CoreView Hero" className="hero-image" />
+            <img src={heroImage} alt="Pratinjau antarmuka CoreView" className="hero-image" />
             <div className="hero-glow"></div>
           </div>
         </div>
@@ -171,9 +171,12 @@ export const Landing = ({ onFileParsed }) => {
             <h4>Visualisasi Instan</h4>
             <p>Ubah script mentah menjadi mind map, tabel routing, dan ringkasan langkah-demi-langkah.</p>
           </div>
-          <div className="feature-card" style={{ opacity: 0.8 }}>
+          <div className="feature-card feature-card-pending">
             <FileText size={24} className="feature-icon blue" />
-            <h4>Export-Ready</h4>
+            <h4>
+              Export-Ready
+              <span className="soon-badge">Segera</span>
+            </h4>
             <p>Fitur untuk mengunduh hasil analisis sebagai resume konfigurasi masih dalam pengembangan.</p>
           </div>
         </div>
@@ -227,9 +230,7 @@ export const Landing = ({ onFileParsed }) => {
             href="https://linkedin.com/in/aderamdani"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: 'inherit', textDecoration: 'none' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent-light)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'inherit')}
+            className="footer-link"
           >
             Dibuat untuk Network Engineer Indonesia
           </a>

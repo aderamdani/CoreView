@@ -27,6 +27,39 @@
 }
 
 /* ─── Header Search ──────────────────────────────────────────── */
+/* Header controls. These were inline styles with manual onMouseEnter and
+   onMouseLeave handlers writing to style.color, which a plain :hover rule does
+   without JavaScript and without re-rendering. */
+.header-controls {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.header-icon-link,
+.header-icon-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+.header-icon-link:hover,
+.header-icon-button:hover,
+.header-icon-link:focus-visible,
+.header-icon-button:focus-visible {
+  color: var(--text-primary);
+}
+.header-icon-link:focus-visible,
+.header-icon-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 .header-search-wrapper {
   position: relative;
   display: flex;
@@ -115,7 +148,7 @@
 .uploader-container:hover,
 .uploader-container.drag-active {
   border-color: var(--accent);
-  background: rgba(99, 102, 241, 0.04);
+  background: var(--accent-faint);
 }
 .uploader-icon {
   color: var(--accent);
@@ -263,6 +296,7 @@
 .hero-image {
   width: 100%;
   height: auto;
+  /* Black-based shadow, reads the same on both themes. */
   filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.3));
   animation: float 6s ease-in-out infinite;
 }
@@ -466,7 +500,7 @@
 .btn-export:hover {
   border-color: var(--accent);
   color: var(--accent-light);
-  background: rgba(99, 102, 241, 0.08);
+  background: var(--accent-subtle);
 }
 
 /* ─── Sidebar count badge ────────────────────────────────────── */
@@ -478,7 +512,7 @@
   height: 16px;
   padding: 0 5px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--surface-chip);
   color: var(--text-muted);
   font-size: 0.65rem;
   font-weight: 700;
@@ -487,7 +521,7 @@
 }
 .sidebar-subitem.active .sidebar-count-badge,
 .sidebar-item.active .sidebar-count-badge {
-  background: rgba(99, 102, 241, 0.2);
+  background: var(--accent-border);
   color: var(--accent-light);
 }
 
@@ -624,6 +658,7 @@
   white-space: nowrap;
   z-index: 1000;
   border: 1px solid var(--border);
+  /* Black-based shadows read the same on both themes, so they stay literal. */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-left: 8px;
 }
@@ -751,4 +786,132 @@
   border-radius: var(--r-sm);
   padding: 1px 5px;
   flex-shrink: 0;
+}
+
+/* Footer link in the landing page. Replaces an inline style plus a manual hover
+   handler. */
+.footer-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--accent-light);
+}
+
+/* A feature card whose feature is not built yet. The card used to signal that
+   with opacity alone, which reads as "disabled" rather than "not yet", so it now
+   carries the same "Segera" marker the sidebar uses. */
+.feature-card-pending {
+  opacity: 0.8;
+}
+
+.soon-badge {
+  margin-left: 8px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1px 5px;
+  vertical-align: middle;
+}
+
+/* Hover states that used to be written as onMouseEnter and onMouseLeave handlers
+   mutating style.color and style.borderColor. */
+.preset-button:hover,
+.preset-button:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+.trace-button:hover,
+.trace-button:focus-visible {
+  opacity: 0.85;
+}
+
+/* The ring colour comes from the rule's action through --card-ring, so the hover
+   itself needs no JavaScript. */
+.swimlane-card {
+  transition: box-shadow 0.15s;
+}
+.swimlane-card:hover {
+  box-shadow: 0 0 0 1px var(--card-ring);
+}
+
+/* Hover states that used to be JavaScript handlers. The previous versions also
+   moved the element (translateY, translateX with scale) and added a coloured
+   glow; both were removed as decoration, leaving a plain colour or size change. */
+.guide-button:hover,
+.guide-button:focus-visible {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.tcp-layer-card:hover,
+.tcp-layer-card:focus-visible {
+  border-left-width: 6px;
+}
+
+.filter-badge:hover,
+.filter-badge:focus-visible {
+  background: var(--badge-bg-hover);
+  border-color: var(--accent);
+}
+
+/* Relation chip in the help panel. The whole appearance lives here because the
+   hover used to be a pair of JavaScript handlers, and only the navigable variant
+   gets one. */
+.relation-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--neutral-tint);
+  color: var(--text-secondary);
+  border: 1px solid var(--neutral-border);
+  cursor: default;
+  user-select: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.relation-chip-link {
+  background: var(--accent-muted);
+  color: var(--accent-light);
+  border-color: var(--accent-ring);
+  cursor: pointer;
+}
+.relation-chip-link:hover,
+.relation-chip-link:focus-visible {
+  background: var(--accent-strong);
+  border-color: var(--accent-ring-hover);
+}
+
+/* Flow chips in the help panel: a prerequisite points back, a next step points
+   forward, and only the navigable variant reacts to hover. */
+.flow-chip-warning-link:hover,
+.flow-chip-warning-link:focus-visible {
+  background: var(--bg-warning-subtle-hover);
+}
+.flow-chip-success-link:hover,
+.flow-chip-success-link:focus-visible {
+  background: var(--bg-success-subtle-hover);
+}
+
+/* A copyable command line. Only lines that are actually commands react. */
+.cmd-line:hover {
+  color: var(--text-primary);
+}
+
+/* The step card's hover border takes the step's own colour, passed in as
+   --step-color. The previous version also slid the card sideways, which was
+   decoration and has been removed. */
+.step-card-color:hover,
+.step-card-color:focus-visible {
+  border-color: var(--step-color);
 }

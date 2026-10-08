@@ -102,16 +102,17 @@ const RuleCard = ({ rule, position, onGoTrace }) => {
 
   return (
     <div
+      // The ring colour depends on the rule's action, so it is passed in as a
+      // custom property and the hover itself lives in CSS.
       style={{
         borderRadius: 7,
         border: `1px solid ${off ? 'var(--border)' : sty.border + '44'}`,
         borderLeft: `3px solid ${off ? 'var(--border)' : sty.border}`,
         background: off ? 'transparent' : sty.bg,
         opacity: off ? 0.45 : 1,
-        transition: 'box-shadow 0.15s',
+        '--card-ring': `${sty.border}55`,
       }}
-      onMouseEnter={(e) => !off && (e.currentTarget.style.boxShadow = `0 0 0 1px ${sty.border}55`)}
-      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
+      className="swimlane-card"
     >
       {/* Card header */}
       <div

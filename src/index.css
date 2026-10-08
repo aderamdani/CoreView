@@ -51,6 +51,27 @@
   --layer-trans-border: #60a5fa;
   --layer-net-border: #34d399;
   --layer-link-border: #fbbf24;
+  /* Alpha tints built from the palette. They are tokens because a literal
+     rgba() cannot be swapped per theme, and several of them were invisible or
+     wrong in the light theme. */
+  --accent-faint: rgba(99, 102, 241, 0.04);
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+  --accent-muted: rgba(99, 102, 241, 0.15);
+  --accent-border: rgba(99, 102, 241, 0.2);
+  --accent-strong: rgba(99, 102, 241, 0.22);
+  --accent-ring: rgba(99, 102, 241, 0.3);
+  --accent-ring-hover: rgba(99, 102, 241, 0.6);
+  --neutral-border: rgba(75, 85, 99, 0.4);
+  --danger-subtle: rgba(239, 68, 68, 0.08);
+  --danger-tint: rgba(239, 68, 68, 0.1);
+  --info-tint: rgba(56, 189, 248, 0.1);
+  --neutral-tint: rgba(75, 85, 99, 0.25);
+  --surface-hairline: rgba(255, 255, 255, 0.02);
+  --surface-chip: rgba(255, 255, 255, 0.07);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+  --overlay-scrim: rgba(0, 0, 0, 0.5);
+  --on-accent: #ffffff;
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
@@ -88,6 +109,28 @@ html.light {
   --status-info: var(--blue);
 
   --accent-secondary: #7c3aed;
+
+  /* Light counterparts of the alpha tints. The dark values are built from white
+     at low alpha, which disappears on a light background; the scrollbar was the
+     visible symptom. */
+  --accent-faint: rgba(79, 70, 229, 0.05);
+  --accent-subtle: rgba(79, 70, 229, 0.08);
+  --accent-muted: rgba(79, 70, 229, 0.14);
+  --accent-border: rgba(79, 70, 229, 0.22);
+  --accent-strong: rgba(79, 70, 229, 0.24);
+  --accent-ring: rgba(79, 70, 229, 0.32);
+  --accent-ring-hover: rgba(79, 70, 229, 0.6);
+  --neutral-border: rgba(71, 85, 105, 0.35);
+  --danger-subtle: rgba(220, 38, 38, 0.07);
+  --danger-tint: rgba(220, 38, 38, 0.1);
+  --info-tint: rgba(2, 132, 199, 0.1);
+  --neutral-tint: rgba(71, 85, 105, 0.14);
+  --surface-hairline: rgba(15, 23, 42, 0.03);
+  --surface-chip: rgba(15, 23, 42, 0.06);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.25);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.4);
+  --overlay-scrim: rgba(15, 23, 42, 0.45);
+  --on-accent: #ffffff;
 
   --radius-sm: var(--r-sm);
   --radius-md: var(--r-md);
@@ -137,11 +180,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--scrollbar-thumb);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Animations */
@@ -178,7 +221,7 @@ body {
 
 /* Text gradient */
 .text-gradient {
-  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -200,7 +243,7 @@ body {
 }
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn-primary:hover {
   background: var(--accent-light);
@@ -342,19 +385,19 @@ body {
   color: var(--yellow);
 }
 .badge-error {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--danger-tint);
   color: var(--red);
 }
 .badge-info {
-  background: rgba(56, 189, 248, 0.1);
+  background: var(--info-tint);
   color: var(--blue);
 }
 .badge-neutral {
-  background: rgba(75, 85, 99, 0.25);
+  background: var(--neutral-tint);
   color: var(--text-secondary);
 }
 .badge-primary {
-  background: rgba(99, 102, 241, 0.15);
+  background: var(--accent-muted);
   color: var(--accent-light);
 }
 
@@ -369,7 +412,7 @@ body {
   border: 1px solid var(--red);
   border-left-width: 3px;
   border-radius: var(--r-md);
-  background: rgba(239, 68, 68, 0.08);
+  background: var(--danger-subtle);
 }
 .parse-error-icon {
   color: var(--red);
@@ -391,6 +434,7 @@ body {
 
 /* ─── React Flow Controls ────────────────────────────────────── */
 .react-flow__controls {
+  /* Black-based shadow, reads the same on both themes. */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border-radius: var(--r-md);
   overflow: hidden;
@@ -431,8 +475,8 @@ html.light .react-flow__controls-button {
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: rgba(99, 102, 241, 0.08);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  background: var(--accent-subtle);
+  border-bottom: 1px solid var(--accent-border);
   font-size: 0.78rem;
   color: var(--accent-light);
 }
@@ -455,7 +499,7 @@ html.light .react-flow__controls-button {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* slightly lighter dark */
+  background: var(--overlay-scrim);
   backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
@@ -494,6 +538,7 @@ html.light .react-flow__controls-button {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Black-based shadow, reads the same on both themes. */
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -533,7 +578,6 @@ html.light .react-flow__controls-button {
   background: var(--red);
   color: white;
   border-color: var(--red);
-  transform: rotate(90deg);
 }
 
 .modal-body {
@@ -685,6 +729,6 @@ html.light .about-link {
   font-weight: 600;
   color: var(--text-primary);
   width: 35%;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-hairline);
   border-right: 1px solid var(--border);
 }

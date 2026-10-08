@@ -5,7 +5,7 @@ import { parseMikroTikConfig } from './utils/parser';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
 import { AboutPanel } from './components/AboutPanel';
-import { Sun, Moon, Github, Search, X, AlertTriangle } from 'lucide-react';
+import { Sun, Moon, Github, Search, X, AlertTriangle, Upload } from 'lucide-react';
 
 function App() {
   const [config, setConfig] = useState(null);
@@ -83,37 +83,20 @@ function App() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+        <div className="header-controls">
           <a
             href="https://github.com/aderamdani/CoreView"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              color: 'var(--text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-            title="View on GitHub"
+            className="header-icon-link"
+            title="Lihat di GitHub"
           >
             <Github size={20} />
           </a>
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-            title="Toggle Theme"
+            className="header-icon-button"
+            title="Ganti tema"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -122,7 +105,7 @@ function App() {
 
           {config && (
             <button className="btn btn-primary animate-fade-in" onClick={handleReset}>
-              ↑ Upload Baru
+              <Upload size={15} /> Upload Baru
             </button>
           )}
         </div>

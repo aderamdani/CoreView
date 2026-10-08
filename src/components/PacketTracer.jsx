@@ -350,6 +350,7 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
             <button
               key={i}
               onClick={() => applyPreset(p)}
+              className="preset-button"
               style={{
                 padding: '6px 13px',
                 borderRadius: 'var(--r-sm)',
@@ -362,14 +363,6 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
                 alignItems: 'center',
                 gap: 6,
                 transition: 'all 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--accent)';
-                e.currentTarget.style.color = 'var(--accent-light)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.color = 'var(--text-secondary)';
               }}
             >
               {p.icon} {p.label}
@@ -479,7 +472,7 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
               style={inp}
               value={form.inInterface}
               onChange={(e) => update('inInterface', e.target.value)}
-              placeholder="ether1 (kosong = skip)"
+              placeholder="ether1 (kosong = lewati)"
             />
           </div>
 
@@ -527,13 +520,14 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
         <div style={{ display: 'flex', gap: 10 }}>
           <button
             onClick={handleTrace}
+            className="trace-button"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
               padding: '10px 24px',
               background: 'var(--accent)',
-              color: '#fff',
+              color: 'var(--on-accent)',
               border: 'none',
               borderRadius: 'var(--r-sm)',
               cursor: 'pointer',
@@ -542,8 +536,6 @@ export const PacketTracer = ({ config, onNavigate, seedRule = null }) => {
               fontFamily: 'inherit',
               transition: 'opacity 0.15s',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
             <Play size={15} /> Trace Packet
           </button>

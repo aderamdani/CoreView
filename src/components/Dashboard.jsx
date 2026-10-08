@@ -343,37 +343,7 @@ const HelpPanel = ({ id, onNavigate }) => {
                           : undefined
                       }
                       title={isNavigable ? `Navigasi ke ${rel}` : rel}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '3px 10px',
-                        borderRadius: '99px',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        background: isNavigable ? 'rgba(99,102,241,0.12)' : 'rgba(75,85,99,0.2)',
-                        color: isNavigable ? 'var(--accent-light, #818cf8)' : 'var(--text-secondary)',
-                        border: `1px solid ${isNavigable ? 'rgba(99,102,241,0.3)' : 'rgba(75,85,99,0.4)'}`,
-                        cursor: isNavigable ? 'pointer' : 'default',
-                        transition: 'background 0.15s, border-color 0.15s',
-                        userSelect: 'none',
-                      }}
-                      onMouseEnter={
-                        isNavigable
-                          ? (e) => {
-                              e.currentTarget.style.background = 'rgba(99,102,241,0.22)';
-                              e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)';
-                            }
-                          : undefined
-                      }
-                      onMouseLeave={
-                        isNavigable
-                          ? (e) => {
-                              e.currentTarget.style.background = 'rgba(99,102,241,0.12)';
-                              e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
-                            }
-                          : undefined
-                      }
+                      className={`relation-chip${isNavigable ? ' relation-chip-link' : ''}`}
                     >
                       <Tag size={10} />
                       {rel}
@@ -430,20 +400,7 @@ const HelpPanel = ({ id, onNavigate }) => {
                         transition: 'background 0.15s, border-color 0.15s',
                         userSelect: 'none',
                       }}
-                      onMouseEnter={
-                        isNavigable
-                          ? (e) => {
-                              e.currentTarget.style.background = 'var(--bg-warning-subtle-hover)';
-                            }
-                          : undefined
-                      }
-                      onMouseLeave={
-                        isNavigable
-                          ? (e) => {
-                              e.currentTarget.style.background = 'var(--bg-warning-subtle)';
-                            }
-                          : undefined
-                      }
+                      className={`flow-chip${isNavigable ? ' flow-chip-warning-link' : ''}`}
                     >
                       <ArrowLeft size={10} />
                       {rel}
@@ -500,20 +457,7 @@ const HelpPanel = ({ id, onNavigate }) => {
                         transition: 'background 0.15s, border-color 0.15s',
                         userSelect: 'none',
                       }}
-                      onMouseEnter={
-                        isNavigable
-                          ? (e) => {
-                              e.currentTarget.style.background = 'var(--bg-success-subtle-hover)';
-                            }
-                          : undefined
-                      }
-                      onMouseLeave={
-                        isNavigable
-                          ? (e) => {
-                              e.currentTarget.style.background = 'var(--bg-success-subtle)';
-                            }
-                          : undefined
-                      }
+                      className={`flow-chip${isNavigable ? ' flow-chip-success-link' : ''}`}
                     >
                       {rel}
                       <ArrowRight size={10} />
@@ -740,13 +684,16 @@ export const Dashboard = ({ config, searchTerm = '' }) => {
     const now = new Date().toLocaleString('id-ID');
 
     const severityBg = { critical: '#fef2f2', warning: '#fff7ed', info: '#eef2ff' };
+    // Severity is stated in words in the report as well as by colour, so the
+    // meaning does not depend on colour alone.
+    const severityLabel = { critical: 'Kritis', warning: 'Peringatan', info: 'Saran' };
     const severityBorder = { critical: '#ef4444', warning: '#f97316', info: '#6366f1' };
 
     const issueRows = issues
       .map(
         (iss) => `
       <div style="margin-bottom:12px;padding:12px 16px;background:${severityBg[iss.severity]};border-left:4px solid ${severityBorder[iss.severity]};border-radius:6px;">
-        <div style="font-weight:700;font-size:14px;color:${severityBorder[iss.severity]}">${iss.icon} ${escapeHtml(iss.title)}</div>
+        <div style="font-weight:700;font-size:14px;color:${severityBorder[iss.severity]}">${severityLabel[iss.severity] ?? ''}: ${escapeHtml(iss.title)}</div>
         <div style="color:#374151;margin-top:4px;font-size:13px">${escapeHtml(iss.description)}</div>
         <div style="color:#6b7280;margin-top:4px;font-size:12px"><strong>Solusi:</strong> ${escapeHtml(iss.fix)}</div>
         ${iss.commands?.length ? `<pre style="background:#1f2937;color:#d1fae5;padding:8px 12px;border-radius:4px;font-size:11px;margin-top:6px;overflow-x:auto">${escapeHtml(iss.commands.join('\n'))}</pre>` : ''}
@@ -1397,7 +1344,7 @@ ${
                       <div
                         style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}
                       >
-                        <div style={{ fontSize: '1.5rem', flexShrink: 0 }}>{issue.icon}</div>
+                        <div style={{ flexShrink: 0, color: cfg.color }}>{cfg.icon}</div>
                         <div style={{ flex: 1, minWidth: 200 }}>
                           <div
                             style={{
@@ -1416,7 +1363,7 @@ ${
                                 padding: '2px 8px',
                                 borderRadius: '99px',
                                 background: cfg.color,
-                                color: '#fff',
+                                color: 'var(--on-accent)',
                               }}
                             >
                               {cfg.label}
@@ -1516,19 +1463,14 @@ ${
                                     onClick={() => cmd && !cmd.startsWith('#') && copyCell(cmd)}
                                     title={!cmd.startsWith('#') ? 'Klik untuk salin baris ini' : ''}
                                     style={{
-                                      color: cmd.startsWith('#') ? '#6b7280' : '#a5b4fc',
+                                      color: cmd.startsWith('#')
+                                        ? 'var(--text-muted)'
+                                        : 'var(--accent-light)',
                                       cursor: cmd && !cmd.startsWith('#') ? 'copy' : 'default',
                                       padding: '1px 0',
                                       transition: 'color 0.1s',
                                     }}
-                                    onMouseEnter={(e) => {
-                                      if (!cmd.startsWith('#') && cmd)
-                                        e.currentTarget.style.color = '#e0e7ff';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      if (!cmd.startsWith('#') && cmd)
-                                        e.currentTarget.style.color = '#a5b4fc';
-                                    }}
+                                    className="cmd-line"
                                   >
                                     {cmd || <>&nbsp;</>}
                                   </div>
@@ -1545,7 +1487,7 @@ ${
                               padding: '6px 14px',
                               borderRadius: 'var(--r-sm)',
                               background: cfg.color,
-                              color: '#fff',
+                              color: 'var(--on-accent)',
                               border: 'none',
                               cursor: 'pointer',
                               fontSize: '0.78rem',
@@ -2162,7 +2104,7 @@ ${
 
                 {/* Content Box */}
                 <div
-                  className="card-hover"
+                  className="card-hover step-card-color"
                   onClick={() => setActiveTab(step.detailType)}
                   style={{
                     background: 'var(--badge-bg)',
@@ -2170,16 +2112,9 @@ ${
                     borderRadius: 'var(--r-md)',
                     padding: '1.5rem',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    transition: 'border-color 0.2s',
                     marginLeft: '1rem',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = step.color;
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                    e.currentTarget.style.transform = 'none';
+                    '--step-color': step.color,
                   }}
                 >
                   <h3
@@ -3012,7 +2947,7 @@ ${
             style={{
               ...selectStyle,
               background: 'var(--accent)',
-              color: '#fff',
+              color: 'var(--on-accent)',
               border: 'none',
               cursor: 'pointer',
             }}
