@@ -11,21 +11,35 @@ import { Sun, Moon, Github, Search, X, AlertTriangle, Upload } from 'lucide-reac
 function App() {
   const [config, setConfig] = useState(null);
   const [parseError, setParseError] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('coreview-theme');
+      if (stored !== null) return stored === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return true;
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const searchRef = useRef(null);
 
   useEffect(() => {
-    // Two conventions, one switch.
-    //
-    // index.css keys the design system off `html.light`, with dark as the
-    // default. Tailwind and Evilcharts key their `dark:` variant off a `dark`
-    // class. Both are toggled here so the two systems cannot disagree about
-    // which theme is active.
     const root = document.documentElement;
     root.classList.toggle('light', !isDarkMode);
     root.classList.toggle('dark', isDarkMode);
+    localStorage.setItem('coreview-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => {
+      const stored = localStorage.getItem('coreview-theme');
+      if (stored === null) {
+        setIsDarkMode(e.matches);
+      }
+    };
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const handler = (e) => {
