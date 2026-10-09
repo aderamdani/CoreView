@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run check && npm run build",
+  "buildCommand": "echo DIAG_START && cat -A vercel.json && echo DIAG_END && npx prettier --check vercel.json; exit 1",
   "rewrites": [
     {
       "source": "/(.*)",
