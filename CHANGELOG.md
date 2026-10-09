@@ -305,7 +305,8 @@ catatan di bawah merangkum kondisi awal sekaligus perbaikan yang menyertainya.
 - Tombol salin laporan: ekspor HTML dan ekspor CSV.
 - Berkas `LICENSE` (MIT), yang sebelumnya dirujuk README tetapi tidak ada.
 - Tes otomatis di `tests/parser.test.js`, dijalankan dengan `node --test`.
-- Alur CI di `.github/workflows/ci.yml`: lint, tes, dan build.
+- Alur CI di `.github/workflows/ci.yml`: lint, tes, dan build. (Sejak v1.4.0
+  workflow ini dihapus dan gerbang mutunya berjalan di build Vercel.)
 - Panduan migrasi domain di `DEPLOYMENT-DOMAIN.md`.
 - Chip versi di header dan panel catatan rilis. Isinya dibaca dari
   `CHANGELOG.md` saat build, bukan disalin ke berkas terpisah, sehingga panel

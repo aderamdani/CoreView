@@ -1269,7 +1269,7 @@ ${
     // Interactive Config Story Logic - Detailed Step by Step
     const storySteps = [];
 
-    // Step 1: System Identity & Basic Setup
+    // Langkah 1: Identitas Sistem dan Setup Dasar
     const identity = metadata.identity || 'MikroTik';
     const systemClock = config?.system?.clock;
     const systemLogging = config?.system?.logging;
