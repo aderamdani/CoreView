@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  ChevronLeft,
   Settings,
   Clock,
   Terminal,
@@ -36,15 +35,12 @@ import {
   Heart,
   AlertTriangle,
   Info,
-  TrendingUp,
   BookOpen,
   Lightbulb,
-  Zap,
 } from 'lucide-react';
 import { Sidebar } from './Sidebar.jsx';
 import { EvilPieChart } from './evilcharts/charts/recharts-pie-chart';
 import { EvilBarChart } from './evilcharts/charts/recharts-bar-chart';
-import { PLACEHOLDER_TABS } from './placeholderTabs';
 import { configHelp } from '../utils/configHelp';
 import { generateItemExplanation } from '../utils/itemExplainer';
 import { analyzeConfig } from '../utils/configAnalyzer';

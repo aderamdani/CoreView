@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, PanelLeft, PanelLeftClose } from 'lucide-react';
+import { ChevronRight, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { buildMenus } from './menus.jsx';
 import { PLACEHOLDER_TABS } from './placeholderTabs';
 

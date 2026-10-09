@@ -25,7 +25,16 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // `React` is allowed to be imported without being referenced: React 19
+      // uses the automatic JSX runtime, so the import is conventional rather
+      // than required. Underscore-prefixed names stay allowed as the usual
+      // "intentionally unused" marker.
+      //
+      // This used to ignore every identifier starting with a capital letter,
+      // which silently hid unused icon imports. That is the same class of defect
+      // as the missing lucide imports that once shipped a broken build, so the
+      // loophole is closed.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^React$|^_' }],
       // `no-undef` does not inspect JSX element names, so a component used
       // without an import passed lint and then threw ReferenceError at runtime.
       // This rule is the one that catches it, statically.
