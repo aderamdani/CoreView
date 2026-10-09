@@ -55,6 +55,11 @@ versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
   lint tanpa suara. Dua belas identifier mati dihapus setelah celah ditutup.
 - Komentar menyesatkan di `loadDemo` yang menyebut pemanggilan parser yang
   sebenarnya terjadi di komponen induk.
+- `vercel.json` dikecualikan dari pemeriksaan format lewat `.prettierignore`.
+  Vercel menulis ulang berkas itu menjadi JSON satu baris di direktori build
+  sebelum menjalankan `buildCommand`, sehingga bentuk yang diperiksa prettier di
+  sana selalu berbeda dari yang di-commit dan gerbangnya gagal tanpa alasan yang
+  benar. Penyebabnya terbukti dari log build, bukan dugaan.
 - Loading palsu berupa `setTimeout` 50 ms. `processFileWithLoading` digabung ke
   `processFile`, dan status loading kini mengikuti `FileReader` yang memang
   asinkron, lengkap dengan penanganan galat baca.
