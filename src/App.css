@@ -89,6 +89,14 @@
   height: var(--icon-size);
 }
 
+/* Tombol Upload Baru adalah kontrol header, jadi tingginya disamakan dengan
+   kontrol lain lewat token yang sama. Sebelumnya 34px dari padding .btn. */
+.header-controls .btn {
+  height: var(--control-height);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .header-search-wrapper {
   position: relative;
   display: flex;
