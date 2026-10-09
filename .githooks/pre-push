@@ -1,0 +1,7 @@
+#!/bin/sh
+# Menjalankan gerbang yang sama dengan build Vercel sebelum push meninggalkan
+# mesin ini, supaya push yang rusak gagal di lokal, bukan hanya saat deploy.
+# Lewati dengan `git push --no-verify` bila sudah tahu gerbangnya hijau.
+set -e
+echo "pre-push: menjalankan npm run check"
+npm run check

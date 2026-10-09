@@ -271,6 +271,17 @@ git push && git push --tags
 #    versi itu sebagai keterangan rilis.
 ```
 
+Langkah 2 tetap dijalankan di lokal sebelum push. Selain itu, hook `pre-push`
+di `.githooks/pre-push` menjalankan `npm run check` otomatis dan menahan push
+bila ada yang merah, dan build Vercel menjalankan gerbang yang sama, jadi push
+yang lolos ke `main` tetap tidak bisa men-deploy kode yang rusak.
+
+Hook-nya tidak aktif sendiri di klon baru. Sekali saja setelah clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 Kalau langkah 1 terlewat dan `CHANGELOG.md` belum punya bagian untuk versi yang
 baru, panel catatan rilis akan menampilkan kalimat bahwa catatan belum
 tersedia, bukan panel kosong.
@@ -279,17 +290,31 @@ tersedia, bukan panel kosong.
 
 ## Deployment
 
-Proyek ini dikonfigurasi untuk deploy otomatis ke **Vercel**.
+Proyek ini dikonfigurasi untuk deploy otomatis ke **Vercel** lewat integrasi Git
+native, yaitu setiap push ke branch `main`.
 
-File `vercel.json` sudah dikonfigurasi dengan SPA rewrite agar routing React bekerja dengan benar:
+### Gerbang mutu di build Vercel
+
+Deploy tidak dijalankan langsung dari kode mentah. `vercel.json` menetapkan
+Build Command berikut:
 
 ```json
 {
+  "buildCommand": "npm run check && npm run build",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
 ```
+
+`npm run check` menjalankan lint, pemeriksaan format, typecheck, tes unit, dan
+render smoke test, termasuk guard em dash dan guard emoji. Karena `&&`
+menghubungkannya dengan `npm run build`, build Vercel **gagal** bila guard mana
+pun merah, dan kode yang rusak tidak sampai ter-deploy. Gerbang ini tidak
+bergantung pada GitHub Actions.
+
+`rewrites` adalah SPA rewrite agar routing React bekerja dengan benar, dan
+bagian itu tidak diubah.
 
 ### Deploy Manual ke Vercel
 
