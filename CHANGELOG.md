@@ -5,6 +5,70 @@ Semua perubahan penting proyek ini dicatat di berkas ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/), dan
 versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
+## [1.4.0] - 2026-10-09
+
+### Ditambahkan
+
+- Komponen `Logo.jsx` berisi mark inline SVG yang digambar ulang secara minimal
+  dari `public/favicon.svg`, dipasang sebagai lockup logo di samping wordmark
+  header. Logo adalah elemen brand tanpa aksi apa pun, supaya tidak ada kontrol
+  yang menghapus dashboard secara tidak sengaja.
+- `Sidebar.jsx` sebagai komponen tersendiri. Render dan state navigasi pindah
+  keluar dari `Dashboard.jsx`, dan komponen barunya masuk ke render smoke test.
+- Sidebar bisa di-collapse menjadi rail ikon, dengan flyout submenu dan
+  preferensi yang disimpan di `localStorage`.
+- Deteksi preferensi tema dari sistem operasi saat pertama dibuka, dengan
+  override manual yang tetap disimpan.
+- Guard em dash diperluas ke seluruh repo, tidak lagi hanya `CHANGELOG.md`.
+- Hook `pre-push` di `.githooks/pre-push` yang menjalankan `npm run check`.
+
+### Diubah
+
+- Gerbang mutu pindah pemicu. GitHub Actions dihapus, dan `npm run check` kini
+  berjalan di build Vercel lewat `buildCommand` pada `vercel.json`, sehingga
+  deploy gagal bila guard mana pun merah.
+- Seluruh kontrol header diseragamkan: tinggi, ukuran ikon, radius, dan jarak
+  memakai satu set token, dengan perlakuan hover dan focus yang sama.
+- Landing memakai satu jalur upload. Kotak drag-and-drop menjadi satu-satunya
+  surface, dan tombol hero menggulir ke sana alih-alih membuka pemilih berkas
+  kedua. Akses DOM `getElementById` diganti `useRef`.
+- Footer landing disederhanakan menjadi `CoreView (c) 2026`. Teks dan link
+  LinkedIn dicabut karena teks itu satu-satunya label link tersebut.
+- Label demo diIndonesiakan: Full Config menjadi Konfigurasi Lengkap, dan Basic
+  Setup menjadi Setup Dasar.
+- Lebar rail sidebar menjadi token CSS, dan flyout submenu diposisikan fixed
+  memakai koordinat viewport yang diukur dari trigger.
+
+### Diperbaiki
+
+- Persistensi sidebar yang collapsed. Efek penyimpanannya hanya menulis saat
+  sidebar terbuka, sehingga men-collapse lalu reload selalu kembali terbuka.
+- Tooltip sidebar saat collapsed tampil kosong karena CSS membaca `attr(title)`
+  yang tidak pernah dipasang komponen.
+- Badge temuan di sidebar kini tetap terlihat saat collapsed, sebagai titik di
+  sudut ikon, dengan jumlahnya ikut masuk ke `aria-label`.
+- Flyout submenu yang sebelumnya tanpa CSS, salah posisi, dan tidak bisa
+  dijangkau keyboard. Kini fokus pindah ke item pertama saat terbuka, panah
+  menelusuri item, dan Escape menutup lalu mengembalikan fokus ke trigger.
+- Celah `varsIgnorePattern` pada `no-unused-vars` yang mengabaikan semua
+  identifier berhuruf kapital, sehingga impor ikon yang tidak terpakai lolos
+  lint tanpa suara. Dua belas identifier mati dihapus setelah celah ditutup.
+- Komentar menyesatkan di `loadDemo` yang menyebut pemanggilan parser yang
+  sebenarnya terjadi di komponen induk.
+- Loading palsu berupa `setTimeout` 50 ms. `processFileWithLoading` digabung ke
+  `processFile`, dan status loading kini mengikuti `FileReader` yang memang
+  asinkron, lengkap dengan penanganan galat baca.
+
+### Dihapus
+
+- `.github/workflows/ci.yml` beserta folder `.github` yang menjadi kosong.
+- Elemen `.hero-glow` dan token `--accent-glow`, melanjutkan pencabutan glow.
+- Kelas `.footer-link` yang menjadi tak terpakai.
+
+### Catatan
+
+- Diverifikasi di browser sungguhan pada tema gelap dan terang.
+
 ## [1.3.0] - 2026-10-08
 
 ### Diubah
