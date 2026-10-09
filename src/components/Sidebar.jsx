@@ -1,51 +1,48 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ChevronRight, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { buildMenus } from './menus.jsx';
 import { PLACEHOLDER_TABS } from './placeholderTabs';
 
-const SIDEBAR_WIDTH_EXPANDED = 220;
-const SIDEBAR_WIDTH_COLLAPSED = 60;
 const STORAGE_KEY = 'coreview-sidebar-collapsed';
 
-const Flyout = ({ flyoutOpen, menus, activeTab, dataCounts, handleSubItemClick, flyoutTop }) => {
-  if (!flyoutOpen || flyoutTop === null) return null;
-
-  const menu = menus.find((m) => m.id === flyoutOpen);
-  if (!menu || !menu.submenus) return null;
+/**
+ * Submenu yang muncul di samping rail saat sidebar dalam keadaan collapsed.
+ * Ditempatkan fixed memakai koordinat viewport karena sidebar bersifat sticky
+ * dan scrollable, sehingga elemen absolute bersaudara dengannya akan mengacu ke
+ * kotak yang salah dan terpotong oleh overflow sidebar itu sendiri.
+ */
+const Flyout = ({ menu, activeTab, dataCounts, position, onItemClick, onItemKeyDown, itemRef }) => {
+  if (!menu || !position) return null;
 
   return (
     <div
       className="sidebar-flyout"
       role="menu"
-      aria-label={`${menu.label} submenu`}
-      style={{
-        position: 'absolute',
-        top: flyoutTop,
-        left: SIDEBAR_WIDTH_COLLAPSED,
-      }}
+      aria-label={`Submenu ${menu.label}`}
+      // Posisi diukur dari trigger saat runtime, jadi tidak bisa ditaruh di CSS.
+      style={{ top: position.top, left: position.left }}
     >
-      {menu.submenus.map((sub) => (
+      {menu.submenus.map((sub, index) => (
         <div
           key={sub.id}
+          ref={(el) => {
+            itemRef.current[index] = el;
+          }}
           className={`sidebar-flyout-item ${activeTab === sub.id ? 'active' : ''}`}
-          onClick={() => handleSubItemClick(sub.id)}
+          onClick={() => onItemClick(sub.id)}
           role="menuitem"
-          tabIndex={-1}
-          title={sub.label}
+          tabIndex={0}
+          onKeyDown={(e) => onItemKeyDown(e, index)}
         >
           <span>{sub.label}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+          <span className="sidebar-flyout-trailing">
             {PLACEHOLDER_TABS.has(sub.id) && (
               <span className="sidebar-soon" title="Belum ada isinya, masih dalam pengembangan">
                 Segera
               </span>
             )}
-            {dataCounts[sub.id] > 0 && (
-              <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>
-                {dataCounts[sub.id]}
-              </span>
-            )}
-          </div>
+            {dataCounts[sub.id] > 0 && <span className="sidebar-count-badge">{dataCounts[sub.id]}</span>}
+          </span>
         </div>
       ))}
     </div>
@@ -75,11 +72,11 @@ export const Sidebar = ({
   const setSidebarCollapsed = onSidebarCollapseChange ?? setInternalCollapsed;
 
   const [flyoutOpen, setFlyoutOpen] = useState(null);
-  const [flyoutTop, setFlyoutTop] = useState(null);
-  const sidebarRef = useRef(null);
+  const [flyoutPosition, setFlyoutPosition] = useState(null);
   const flyoutTriggerRef = useRef(null);
+  const flyoutItemRefs = useRef([]);
 
-  const menus = React.useMemo(
+  const menus = useMemo(
     () =>
       buildMenus({
         criticalCount: healthAnalysis.criticalCount,
@@ -88,11 +85,55 @@ export const Sidebar = ({
     [healthAnalysis],
   );
 
-  useEffect(() => {
-    if (!controlledCollapsed) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sidebarCollapsed));
+  const flyoutMenu = useMemo(() => menus.find((m) => m.id === flyoutOpen) || null, [menus, flyoutOpen]);
+  const flyoutCount = flyoutMenu?.submenus?.length ?? 0;
+
+  const persistCollapsed = useCallback((value) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+    } catch {
+      // Storage bisa tidak tersedia, misalnya di mode privat. Sidebar tetap
+      // berfungsi, hanya tidak mengingat pilihannya.
     }
-  }, [sidebarCollapsed, controlledCollapsed]);
+  }, []);
+
+  const closeFlyout = useCallback((restoreFocus) => {
+    setFlyoutOpen(null);
+    if (restoreFocus) flyoutTriggerRef.current?.focus();
+  }, []);
+
+  const openFlyout = useCallback(
+    (menuId, triggerEl) => {
+      if (triggerEl) flyoutTriggerRef.current = triggerEl;
+      if (flyoutOpen === menuId) {
+        setFlyoutOpen(null);
+        return;
+      }
+      // Posisi diukur dari trigger di sini, bukan di efek, supaya tidak ada
+      // setState di dalam effect yang memicu render berantai.
+      if (triggerEl) {
+        const rect = triggerEl.getBoundingClientRect();
+        setFlyoutPosition({ top: rect.top, left: rect.right + 8 });
+      }
+      setFlyoutOpen(menuId);
+    },
+    [flyoutOpen],
+  );
+
+  const handleToggleCollapse = useCallback(() => {
+    const next = !sidebarCollapsed;
+    setSidebarCollapsed(next);
+    // Hanya pilihan eksplisit pengguna yang disimpan. Auto-collapse di layar
+    // sempit sengaja tidak menyimpan, supaya mengubah ukuran jendela tidak
+    // menimpa preferensi yang diset di layar lebar.
+    persistCollapsed(next);
+    setFlyoutOpen(null);
+  }, [sidebarCollapsed, setSidebarCollapsed, persistCollapsed]);
+
+  // Pindahkan fokus ke item pertama supaya flyout bisa dijangkau keyboard.
+  useEffect(() => {
+    if (flyoutOpen) flyoutItemRefs.current[0]?.focus();
+  }, [flyoutOpen]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,38 +146,42 @@ export const Sidebar = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [sidebarCollapsed, setSidebarCollapsed]);
 
+  // Escape menutup flyout dan mengembalikan fokus ke trigger.
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setFlyoutOpen(null);
-      }
+      if (e.key === 'Escape' && flyoutOpen) closeFlyout(true);
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [flyoutOpen, closeFlyout]);
 
+  // Menu fixed akan tertinggal dari triggernya kalau halaman digulir.
   useEffect(() => {
-    if (flyoutOpen && flyoutTriggerRef.current && sidebarRef.current) {
-      const triggerRect = flyoutTriggerRef.current.getBoundingClientRect();
-      const sidebarRect = sidebarRef.current.getBoundingClientRect();
-      setFlyoutTop(triggerRect.top - sidebarRect.top);
-    } else {
-      setFlyoutTop(null);
-    }
+    if (!flyoutOpen) return undefined;
+    const close = () => setFlyoutOpen(null);
+    window.addEventListener('scroll', close, true);
+    return () => window.removeEventListener('scroll', close, true);
   }, [flyoutOpen]);
 
-  const handleToggleCollapse = useCallback(() => {
-    setSidebarCollapsed((prev) => !prev);
-    setFlyoutOpen(null);
-  }, [setSidebarCollapsed]);
-
-  const handleFlyoutTrigger = useCallback(
-    (menuId, triggerRef) => {
-      if (!sidebarCollapsed) return;
-      setFlyoutOpen((prev) => (prev === menuId ? null : menuId));
-      flyoutTriggerRef.current = triggerRef;
+  const handleFlyoutItemKeyDown = useCallback(
+    (e, index) => {
+      if (flyoutCount === 0) return;
+      const focusAt = (i) => flyoutItemRefs.current[i]?.focus();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        focusAt((index + 1) % flyoutCount);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusAt((index - 1 + flyoutCount) % flyoutCount);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        focusAt(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        focusAt(flyoutCount - 1);
+      }
     },
-    [sidebarCollapsed, setFlyoutOpen],
+    [flyoutCount],
   );
 
   const toggleMenu = useCallback(
@@ -147,7 +192,18 @@ export const Sidebar = ({
   );
 
   const handleItemClick = useCallback(
-    (menu) => {
+    (menu, triggerEl) => {
+      if (sidebarCollapsed) {
+        if (menu.submenus) {
+          // Di rail tidak ada ruang untuk label, jadi parent membuka flyout,
+          // bukan mengembangkan submenu inline.
+          openFlyout(menu.id, triggerEl);
+        } else {
+          setActiveTab(menu.id);
+          setFlyoutOpen(null);
+        }
+        return;
+      }
       if (menu.submenus) {
         toggleMenu(menu.id);
         if (!expandedMenus[menu.id] && !menu.submenus.some((s) => s.id === activeTab)) {
@@ -156,19 +212,14 @@ export const Sidebar = ({
       } else {
         setActiveTab(menu.id);
       }
-      if (sidebarCollapsed) {
-        setFlyoutOpen(null);
-      }
     },
-    [toggleMenu, expandedMenus, activeTab, setActiveTab, sidebarCollapsed],
+    [sidebarCollapsed, openFlyout, toggleMenu, expandedMenus, activeTab, setActiveTab],
   );
 
   const handleSubItemClick = useCallback(
     (subId) => {
       setActiveTab(subId);
-      if (sidebarCollapsed) {
-        setFlyoutOpen(null);
-      }
+      if (sidebarCollapsed) setFlyoutOpen(null);
     },
     [setActiveTab, sidebarCollapsed],
   );
@@ -185,11 +236,7 @@ export const Sidebar = ({
   return (
     <>
       <aside
-        ref={sidebarRef}
         className={`sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
-        style={{
-          width: sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED,
-        }}
         aria-label="Navigasi sidebar"
       >
         <div className="sidebar-header">
@@ -202,8 +249,8 @@ export const Sidebar = ({
             className="sidebar-toggle"
             onClick={handleToggleCollapse}
             aria-expanded={!sidebarCollapsed}
-            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={sidebarCollapsed ? 'Buka sidebar' : 'Tutup sidebar'}
+            title={sidebarCollapsed ? 'Buka sidebar' : 'Tutup sidebar'}
           >
             {sidebarCollapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
           </button>
@@ -216,24 +263,24 @@ export const Sidebar = ({
             const isActive = activeTab === menu.id;
             const parentActive = isParentActive(menu);
             const parentCount = getParentCount(menu);
-            const showBadge = menu.badge || (parentCount > 0 && (hasSubmenus || !hasSubmenus));
+            const showBadge = menu.badge || parentCount > 0;
+            const badgeLevel = menu.badge ? ` sidebar-count-badge-${menu.badge.level}` : '';
 
             return (
               <li key={menu.id} role="none">
                 <div
-                  ref={flyoutOpen === menu.id ? flyoutTriggerRef : null}
                   className={`sidebar-item ${isActive && !hasSubmenus ? 'active' : parentActive ? 'parent-active' : ''}`}
-                  onClick={() => handleItemClick(menu)}
+                  onClick={(e) => handleItemClick(menu, e.currentTarget)}
                   role="menuitem"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleItemClick(menu);
+                      handleItemClick(menu, e.currentTarget);
                     }
                     if (e.key === 'ArrowRight' && hasSubmenus && sidebarCollapsed) {
                       e.preventDefault();
-                      handleFlyoutTrigger(menu.id, e.currentTarget);
+                      openFlyout(menu.id, e.currentTarget);
                     }
                   }}
                   aria-expanded={hasSubmenus ? isMenuExpanded : undefined}
@@ -250,12 +297,15 @@ export const Sidebar = ({
                       </span>
                     )}
                     {!sidebarCollapsed && showBadge && (
-                      <span
-                        className="sidebar-count-badge"
-                        style={menu.badge ? { background: menu.badge.color, color: '#fff' } : undefined}
-                      >
+                      <span className={`sidebar-count-badge${badgeLevel}`}>
                         {menu.badge ? menu.badge.count : parentCount}
                       </span>
+                    )}
+                    {sidebarCollapsed && showBadge && (
+                      <span
+                        className={`sidebar-dot${badgeLevel ? ` sidebar-dot-${menu.badge.level}` : ''}`}
+                        aria-hidden="true"
+                      />
                     )}
                     {hasSubmenus && !sidebarCollapsed && (
                       <ChevronRight size={13} className={`sidebar-chevron ${isMenuExpanded ? 'open' : ''}`} />
@@ -279,21 +329,18 @@ export const Sidebar = ({
                           }
                         }}
                         title={sub.label}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                       >
                         <span>{sub.label}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span className="sidebar-subitem-trailing">
                           {PLACEHOLDER_TABS.has(sub.id) && (
                             <span className="sidebar-soon" title="Belum ada isinya, masih dalam pengembangan">
                               Segera
                             </span>
                           )}
                           {dataCounts[sub.id] > 0 && (
-                            <span className="sidebar-count-badge" style={{ marginLeft: '4px' }}>
-                              {dataCounts[sub.id]}
-                            </span>
+                            <span className="sidebar-count-badge">{dataCounts[sub.id]}</span>
                           )}
-                        </div>
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -303,16 +350,16 @@ export const Sidebar = ({
           })}
         </ul>
       </aside>
+
       <Flyout
-        flyoutOpen={flyoutOpen}
-        menus={menus}
+        menu={sidebarCollapsed ? flyoutMenu : null}
         activeTab={activeTab}
         dataCounts={dataCounts}
-        handleSubItemClick={handleSubItemClick}
-        flyoutTop={flyoutTop}
+        position={flyoutPosition}
+        onItemClick={handleSubItemClick}
+        onItemKeyDown={handleFlyoutItemKeyDown}
+        itemRef={flyoutItemRefs}
       />
     </>
   );
 };
-
-export default Sidebar;

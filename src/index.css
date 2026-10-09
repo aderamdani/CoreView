@@ -71,6 +71,11 @@
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
   --overlay-scrim: rgba(0, 0, 0, 0.5);
   --on-accent: #ffffff;
+  /* Lebar rail sidebar. CSS yang memilikinya supaya rail yang collapsed,
+     offset flyout, dan padding main view tidak bisa saling menyimpang. */
+  --sidebar-width-expanded: 220px;
+  --sidebar-width-collapsed: 60px;
+
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;

@@ -30,9 +30,9 @@ export const buildMenus = ({ criticalCount, warningCount }) => [
     icon: <Heart size={15} />,
     badge:
       criticalCount > 0
-        ? { count: criticalCount, color: '#ef4444' }
+        ? { count: criticalCount, level: 'critical' }
         : warningCount > 0
-          ? { count: warningCount, color: '#f97316' }
+          ? { count: warningCount, level: 'warning' }
           : null,
   },
   { id: 'network-topology', label: 'Topologi Jaringan', icon: <Globe size={15} /> },
