@@ -11,7 +11,6 @@
   /* Accent - Indigo / Violet */
   --accent: #6366f1;
   --accent-light: #818cf8;
-  --accent-glow: rgba(99, 102, 241, 0.25);
 
   /* Text */
   --text-primary: #ffffff;
@@ -90,7 +89,6 @@ html.light {
 
   --accent: #4f46e5;
   --accent-light: #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.2);
 
   --text-primary: #0f172a;
   --text-secondary: #475569;

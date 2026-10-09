@@ -255,7 +255,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   margin-bottom: 2rem;
-  border: 1px solid var(--accent-glow);
+  border: 1px solid var(--accent-ring);
 }
 
 .hero-title {
@@ -307,8 +307,8 @@
   background: var(--bg-surface);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  padding: 8px 16px;
-  border-radius: var(--r-md);
+  padding: 8px 18px;
+  border-radius: var(--r-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -317,9 +317,18 @@
   transition: all 0.2s;
 }
 
-.demo-btn:hover {
+.demo-btn:hover,
+.demo-btn:focus-visible {
   border-color: var(--accent);
   background: var(--bg-hover);
+}
+
+/* Same focus ring as the header controls, so every control in the app signals
+   keyboard focus the same way. */
+.demo-btn:focus-visible,
+.uploader-container:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Hero Visual */
@@ -338,18 +347,6 @@
   /* Black-based shadow, reads the same on both themes. */
   filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.3));
   animation: float 6s ease-in-out infinite;
-}
-
-.hero-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 140%;
-  height: 140%;
-  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-  z-index: -1;
-  filter: blur(40px);
 }
 
 @keyframes float {
@@ -825,18 +822,6 @@
   border-radius: var(--r-sm);
   padding: 1px 5px;
   flex-shrink: 0;
-}
-
-/* Footer link in the landing page. Replaces an inline style plus a manual hover
-   handler. */
-.footer-link {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.footer-link:hover,
-.footer-link:focus-visible {
-  color: var(--accent-light);
 }
 
 /* A feature card whose feature is not built yet. The card used to signal that

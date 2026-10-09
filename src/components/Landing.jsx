@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   UploadCloud,
   FileText,
-  CheckCircle,
   Terminal,
-  Download,
   Shield,
   BarChart2,
   Zap,
@@ -20,6 +18,11 @@ export const Landing = ({ onFileParsed }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  // The drop zone is the single upload surface. The hero button and the drop
+  // zone both reach the one input through these refs, instead of querying the
+  // DOM with getElementById.
+  const fileInputRef = useRef(null);
+  const uploaderRef = useRef(null);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -41,9 +44,17 @@ export const Landing = ({ onFileParsed }) => {
     }
 
     setError('');
+    // FileReader is genuinely asynchronous, so the loading state follows real
+    // work rather than a delay added to make the spinner appear.
+    setLoading(true);
     const reader = new FileReader();
     reader.onload = (e) => {
+      setLoading(false);
       onFileParsed(e.target.result);
+    };
+    reader.onerror = () => {
+      setLoading(false);
+      setError('Gagal membaca file. Coba pilih ulang.');
     };
     reader.readAsText(file);
   };
@@ -53,8 +64,19 @@ export const Landing = ({ onFileParsed }) => {
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFileWithLoading(e.dataTransfer.files[0]);
+      processFile(e.dataTransfer.files[0]);
     }
+  };
+
+  const openFilePicker = () => {
+    if (!loading) fileInputRef.current?.click();
+  };
+
+  // Brings the upload surface into view and focuses it. The hero button must
+  // not open a second file picker for the same input.
+  const focusUploader = () => {
+    uploaderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    uploaderRef.current?.focus({ preventScroll: true });
   };
 
   const loadDemo = async (filename) => {
@@ -62,25 +84,15 @@ export const Landing = ({ onFileParsed }) => {
     setError('');
     try {
       const response = await fetch(`/demo/${filename}`);
-      if (!response.ok) throw new Error('Gagal mengambil file demo');
-      const content = await response.text();
-      onFileParsed(content);
-    } catch (err) {
-      // parseMikroTikConfig throws ConfigParseError with a user-facing message,
-      // so surface that instead of hiding the reason behind a generic string.
-      setError(err?.message || 'Gagal memuat demo konfigurasi.');
+      if (!response.ok) throw new Error(`demo ${filename} tidak tersedia`);
+      onFileParsed(await response.text());
+    } catch {
+      // Parsing happens in the parent, which reports its own error. This catch
+      // only covers fetching the demo file, so the message stays about loading.
+      setError('Gagal memuat demo konfigurasi. Periksa koneksi lalu coba lagi.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const processFileWithLoading = (file) => {
-    if (!file) return;
-    setLoading(true);
-    setTimeout(() => {
-      processFile(file);
-      setLoading(false);
-    }, 50);
   };
 
   return (
@@ -101,21 +113,17 @@ export const Landing = ({ onFileParsed }) => {
           </p>
 
           <div className="hero-actions">
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={() => document.getElementById('file-upload').click()}
-              disabled={loading}
-            >
+            <button className="btn btn-primary btn-lg" onClick={focusUploader} disabled={loading}>
               <UploadCloud size={18} /> {loading ? 'Memproses...' : 'Mulai Sekarang'}
             </button>
             <div className="demo-group">
               <span className="demo-label">Atau coba demo:</span>
               <div className="demo-buttons">
                 <button className="demo-btn" onClick={() => loadDemo('test-mikrotik.rsc')} disabled={loading}>
-                  <Play size={14} /> Full Config
+                  <Play size={14} /> Konfigurasi Lengkap
                 </button>
                 <button className="demo-btn" onClick={() => loadDemo('script.rsc')} disabled={loading}>
-                  <Play size={14} /> Basic Setup
+                  <Play size={14} /> Setup Dasar
                 </button>
               </div>
             </div>
@@ -125,7 +133,6 @@ export const Landing = ({ onFileParsed }) => {
         <div className="hero-visual">
           <div className="hero-image-container">
             <img src={heroImage} alt="Pratinjau antarmuka CoreView" className="hero-image" />
-            <div className="hero-glow"></div>
           </div>
         </div>
       </section>
@@ -133,12 +140,22 @@ export const Landing = ({ onFileParsed }) => {
       {/* Upload & Info Section */}
       <section className="info-section">
         <div
+          ref={uploaderRef}
           className={`uploader-container ${isDragging ? 'drag-active' : ''}`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          onClick={() => !loading && document.getElementById('file-upload').click()}
+          onClick={openFilePicker}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openFilePicker();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Pilih atau seret file konfigurasi MikroTik"
         >
           {loading ? <div className="uploader-spinner" /> : <UploadCloud className="uploader-icon" />}
           <h3 className="uploader-title">
@@ -147,11 +164,11 @@ export const Landing = ({ onFileParsed }) => {
           <p className="uploader-sub">Mendukung format .rsc atau .txt hasil dari /export</p>
 
           <input
-            id="file-upload"
+            ref={fileInputRef}
             type="file"
             className="file-input"
             accept=".rsc,.txt,text/plain"
-            onChange={(e) => processFileWithLoading(e.target.files[0])}
+            onChange={(e) => processFile(e.target.files[0])}
           />
 
           {error && <div className="uploader-error">{error}</div>}
@@ -224,17 +241,7 @@ export const Landing = ({ onFileParsed }) => {
       </section>
 
       <footer className="landing-footer">
-        <p>
-          CoreView &copy; 2026 •{' '}
-          <a
-            href="https://linkedin.com/in/aderamdani"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            Dibuat untuk Network Engineer Indonesia
-          </a>
-        </p>
+        <p>CoreView &copy; 2026</p>
       </footer>
     </div>
   );
