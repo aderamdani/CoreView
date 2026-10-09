@@ -44,7 +44,7 @@ export function AboutPanel() {
         title={`Lihat catatan rilis ${version}`}
         aria-haspopup="dialog"
       >
-        <Info size={13} />
+        <Info size={18} />
         {`v${version}`}
       </button>
 

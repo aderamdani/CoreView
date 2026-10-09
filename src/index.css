@@ -595,12 +595,18 @@ html.light .react-flow__controls-button {
 
 /* Lives in the header so it is available on every screen without taking a
    dashboard tab. Radius matches the other small chips instead of going pill. */
+/* Chip versi adalah salah satu kontrol header, jadi tingginya, radiusnya, dan
+   ukuran ikonnya memakai token yang sama dengan tautan GitHub dan tombol tema.
+   Sebelumnya chip ini 23px dengan ikon 13px, berbeda dari kontrol lain yang
+   36px dengan ikon 18px. */
 .version-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 9px;
-  border-radius: var(--r-sm);
+  justify-content: center;
+  gap: 6px;
+  height: var(--control-height);
+  padding: 0 12px;
+  border-radius: var(--r-md);
   border: 1px solid var(--border);
   background: var(--bg-elevated);
   /* --text-muted reads at 3.49:1 here, under the 4.5:1 floor for text this
@@ -614,9 +620,14 @@ html.light .react-flow__controls-button {
     color 0.2s ease,
     border-color 0.2s ease;
 }
+.version-chip svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
 .version-chip:hover {
   color: var(--text-primary);
   border-color: var(--border-strong);
+  background: var(--bg-hover);
 }
 .version-chip:focus-visible {
   outline: 2px solid var(--accent);
