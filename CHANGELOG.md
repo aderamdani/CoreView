@@ -55,6 +55,11 @@ versi mengikuti [Semantic Versioning](https://semver.org/lang/id/).
   lint tanpa suara. Dua belas identifier mati dihapus setelah celah ditutup.
 - Komentar menyesatkan di `loadDemo` yang menyebut pemanggilan parser yang
   sebenarnya terjadi di komponen induk.
+- Perintah tes dibuat portabel antar versi Node. `node --test tests/` berjalan di
+  Node 26 lokal tetapi gagal di Node 24 milik Vercel dengan `Cannot find module
+  '/vercel/path0/tests'`, karena perlakuan terhadap argumen direktori berbeda.
+  Perintahnya kini menyerahkan daftar berkas tes eksplisit lewat glob shell,
+  bentuk yang didukung semua versi Node.
 - `vercel.json` dikecualikan dari pemeriksaan format lewat `.prettierignore`.
   Vercel menulis ulang berkas itu menjadi JSON satu baris di direktori build
   sebelum menjalankan `buildCommand`, sehingga bentuk yang diperiksa prettier di
