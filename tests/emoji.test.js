@@ -1,10 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { relative } from 'node:path';
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url));
+import { ROOT, collectTextFiles } from './helpers/textFiles.js';
 
 /**
  * Unicode blocks that hold emoji. A character in any of these is an emoji for
@@ -33,22 +32,6 @@ const isEmoji = (codePoint) => {
   return EMOJI_BLOCKS.some(([from, to]) => codePoint >= from && codePoint <= to);
 };
 
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'coverage']);
-const TEXT_EXT = new Set(['.js', '.jsx', '.css', '.md', '.html']);
-
-const collect = (dir, found = []) => {
-  for (const entry of readdirSync(dir)) {
-    if (SKIP_DIRS.has(entry)) continue;
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
-      collect(full, found);
-    } else if (TEXT_EXT.has(entry.slice(entry.lastIndexOf('.')))) {
-      found.push(full);
-    }
-  }
-  return found;
-};
-
 const offendersIn = (file) => {
   const text = readFileSync(file, 'utf8');
   const hits = [];
@@ -69,7 +52,7 @@ const offendersIn = (file) => {
 
 test('no emoji anywhere in the repository', () => {
   const failures = [];
-  for (const file of collect(ROOT)) {
+  for (const file of collectTextFiles()) {
     const hits = offendersIn(file);
     if (hits.length === 0) continue;
     const shown = hits
